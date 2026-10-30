@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<defs>
+<linearGradient id="band" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef6ff"/><stop offset=".45" stop-color="#8fa8c8"/><stop offset="1" stop-color="#33445e"/></linearGradient>
+<linearGradient id="inner" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#8fa8c8"/><stop offset="1" stop-color="#33445e"/></linearGradient>
+<radialGradient id="gem" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#ffffff"/><stop offset=".25" stop-color="#cfe9ff"/><stop offset=".7" stop-color="#2f7fe0"/><stop offset="1" stop-color="#0f2e6e"/></radialGradient>
+<radialGradient id="aura"><stop offset="0" stop-color="#5eaeff" stop-opacity="0.4"/><stop offset="1" stop-color="#5eaeff" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="64" cy="60" r="62" fill="url(#aura)"/>
+<path fill-rule="evenodd" fill="url(#band)" stroke="#33445e" stroke-width="2" d="M64 46c24 0 42 15 42 34s-18 34-42 34-42-15-42-34 18-34 42-34Zm0 11c-17 0-29 10-29 23s12 23 29 23 29-10 29-23-12-23-29-23Z"/>
+<path d="M35 80c0-13 12-23 29-23s29 10 29 23c-6-8-17-13-29-13s-23 5-29 13Z" fill="url(#inner)" opacity=".85"/>
+<path d="M29 72c5-12 18-20 35-21" stroke="#fff" stroke-opacity=".6" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M41 106c7 4 15 6 23 6" stroke="#fff" stroke-opacity=".25" stroke-width="2" fill="none" stroke-linecap="round"/>
+<path d="M49 30l-5-6M79 30l5-6M47 44l-6 2M81 44l6 2" stroke="#dfeaf6" stroke-width="3.5" stroke-linecap="round"/>
+<path d="M45 52 51 36h26l6 16Z" fill="url(#band)" stroke="#33445e" stroke-width="2" stroke-linejoin="round"/>
+<path d="M48 32 56 19h16l8 13-16 17Z" fill="url(#gem)" stroke="#0f2e6e" stroke-width="1.5" stroke-linejoin="round"/><path d="M48 32h32M56 19l8 30 8-30M56 19l-2 13M72 19l2 13" stroke="#fff" stroke-opacity=".35" stroke-width="1" fill="none"/><path d="M57 23l4-2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity=".9"/>
+</svg>
