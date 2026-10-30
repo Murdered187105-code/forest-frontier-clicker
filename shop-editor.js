@@ -1,6 +1,7 @@
 // Редактор магазина: вкладки, товары, цены, скидки, остатки и эффекты покупки. F3 или кнопка в админ-панели.
 // Каждая правка сразу действует в игре (черновик в localStorage); «Сохранить в файл» записывает shop-catalog.js через dev-server.py.
 (()=>{
+if(window.IS_PUBLIC_SITE)return; // на опубликованном сайте редактор недоступен
 const api=window.shopApi;if(!api)return;
 const clone=value=>JSON.parse(JSON.stringify(value));
 const uid=prefix=>prefix+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
