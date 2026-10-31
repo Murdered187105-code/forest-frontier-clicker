@@ -1,4 +1,4 @@
-"""Локальный сервер игры: раздаёт файлы папки и принимает сохранения из редакторов магазина и древа героя.
+"""Локальный сервер игры: раздаёт файлы папки и принимает сохранения из редакторов магазина, древа героя и анимации удара.
 
 Запуск: python dev-server.py  →  http://127.0.0.1:8765
 """
@@ -8,12 +8,16 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 MAX_BODY = 1_000_000
-# Куда редакторы сохраняют данные: путь API → (файл, глобальная переменная, обязательный список, заголовок).
+# Куда редакторы сохраняют данные: путь API → (файл, глобальная переменная, схема проверки, заголовок).
+# Схема — либо имя ключа, который должен быть списком (старые редакторы), либо {ключ: тип/типы} для плоских объектов.
 TARGETS = {
     "/api/shop-catalog": ("shop-catalog.js", "SHOP_CATALOG", "tabs",
                           "// Каталог магазина. Этот файл перезаписывает редактор магазина (F3 или кнопка в админ-панели).\n"),
     "/api/hero-tree": ("hero-tree-data.js", "HERO_TREE", "nodes",
                        "// Древо прокачки героя. Этот файл перезаписывает редактор древа (кнопка ✎ в окне героя или F4).\n"),
+    "/api/power-strike": ("power-strike-data.js", "POWER_STRIKE",
+                          {"durationScale": (int, float), "swordScale": (int, float), "trailColor": str, "shakeScale": (int, float)},
+                          "// Настройки анимации «Мощного удара». Этот файл перезаписывает редактор анимации (F5 или кнопка в админ-панели).\n"),
 }
 
 
@@ -38,8 +42,15 @@ class GameHandler(SimpleHTTPRequestHandler):
             return
         try:
             data = json.loads(self.rfile.read(length).decode("utf-8"))
-            if not isinstance(data, dict) or not isinstance(data.get(required), list):
-                raise ValueError(required)
+            if not isinstance(data, dict):
+                raise ValueError("not an object")
+            if isinstance(required, str):
+                if not isinstance(data.get(required), list):
+                    raise ValueError(required)
+            else:
+                for key, types in required.items():
+                    if not isinstance(data.get(key), types):
+                        raise ValueError(key)
         except (ValueError, UnicodeDecodeError):
             self.send_error(400, "Bad data")
             return

@@ -42,7 +42,7 @@ function learnState(node){
  const rank=rankOf(node);
  if(rank>=node.maxRank)return {ok:false,reason:'Максимальный уровень'};
  if(!requirementState(node).met)return {ok:false,reason:'Сначала изучи требуемые ячейки'};
- if(talentPoints<node.cost)return {ok:false,reason:'Нужно очков талантов: '+node.cost};
+ if(heroPoints<node.cost)return {ok:false,reason:'Нужно очков прокачки: '+node.cost};
  return {ok:true,reason:'Изучить · '+node.cost+' '+(node.cost===1?'очко':'очка')};
 }
 // Сумма бонусов древа: игра добавляет её к характеристикам как ещё один источник, наравне с экипировкой.
@@ -151,7 +151,7 @@ function draw(){
   const cls=['ht-node',rank?'on':'',!req.met&&!rank?'locked':'',state.ok&&!editing?'ready':'',node.id===selected?'selected':''].join(' ');
   return `<button type="button" class="${cls}" data-id="${esc(node.id)}" style="left:${p.x}px;top:${p.y}px;--c:${color}" aria-label="${esc(node.name)} ${rank} из ${node.maxRank}">${ring(node,rank,color)}<span class="ht-icon">${iconHtml(node.icon)}</span><span class="ht-lbl">${esc(node.name)}<i>${rank} / ${node.maxRank}</i></span>${!req.met&&!rank?'<span class="ht-lock">🔒</span>':''}</button>`;
  }).join('');
- $q('.ht-points').innerHTML=`Очки талантов: ${talentPoints}<small>вложено в героя: ${spent()}</small>`;
+ $q('.ht-points').innerHTML=`Очки прокачки: ${heroPoints}<small>вложено в героя: ${spent()}</small>`;
  viewport.classList.toggle('editing',editing);
  $q('.ht-editbar').hidden=!editing;$q('[data-a=edit]')?.classList.toggle('on',editing);
  if(editing)showState();
@@ -179,11 +179,11 @@ function renderPanel(){
 
 function learn(node){
  if(!learnState(node).ok)return;
- talentPoints-=node.cost;ranks[node.id]=rankOf(node)+1;saveRanks();render();draw();renderPanel();
+ heroPoints-=node.cost;ranks[node.id]=rankOf(node)+1;saveRanks();render();draw();renderPanel();
 }
 function resetHero(){
  const refund=spent();if(!refund||!confirm(`Сбросить прокачку героя? Вернётся очков талантов: ${refund}.`))return;
- talentPoints+=refund;ranks={};saveRanks();render();draw();renderPanel();
+ heroPoints+=refund;ranks={};saveRanks();render();draw();renderPanel();
 }
 
 // ---------- Перемещение и масштаб ----------
@@ -301,7 +301,7 @@ panel.addEventListener('click',event=>{
  if(b.dataset.statDel&&node){delete node.stats[b.dataset.statDel];commit();renderEditor();return;}
  if(b.dataset.a2==='addStat'&&node){const key=Object.keys(STATS).find(k=>node.stats[k]===undefined);if(key){node.stats[key]=1;commit();renderEditor();}return;}
  if(b.dataset.a2==='deselect'){selected=null;draw();renderPanel();return;}
- if(b.dataset.a2==='delete'&&node){if(!confirm(`Удалить ячейку «${node.name}»?`))return;tree.nodes=tree.nodes.filter(n=>n.id!==node.id);tree.nodes.forEach(n=>n.requires=n.requires.filter(id=>id!==node.id));if(ranks[node.id]){talentPoints+=ranks[node.id]*node.cost;delete ranks[node.id];saveRanks();}selected=null;commit();renderPanel();}
+ if(b.dataset.a2==='delete'&&node){if(!confirm(`Удалить ячейку «${node.name}»?`))return;tree.nodes=tree.nodes.filter(n=>n.id!==node.id);tree.nodes.forEach(n=>n.requires=n.requires.filter(id=>id!==node.id));if(ranks[node.id]){heroPoints+=ranks[node.id]*node.cost;delete ranks[node.id];saveRanks();}selected=null;commit();renderPanel();}
 });
 $q('input[type=file]').addEventListener('change',async event=>{
  const file=event.target.files[0];event.target.value='';if(!file)return;
@@ -332,5 +332,5 @@ if(editable){
  const admin=document.getElementById('adminPanel');
  if(admin){const b=document.createElement('button');b.type='button';b.textContent='🌳 Редактор древа героя (F4)';b.style.cssText='width:100%;margin-top:10px';b.addEventListener('click',()=>{admin.close();open(true);});admin.append(b);}
 }
-window.heroTree={open,ranks:()=>({...ranks}),setRanks:value=>{ranks={...value};saveRanks();if(dialog.open){draw();renderPanel();}},spent};
+window.heroTree={open,ranks:()=>({...ranks}),setRanks:value=>{ranks={...value};saveRanks();if(dialog.open){draw();renderPanel();}},spent,refresh:()=>{if(dialog.open){draw();renderPanel();}}};
 })();

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs>
+<linearGradient id="kuGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff2c0"/><stop offset=".45" stop-color="#e8b44a"/><stop offset="1" stop-color="#8a5a14"/></linearGradient>
+<radialGradient id="kuGem" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#d9a8ff"/><stop offset="1" stop-color="#5a1aa8"/></radialGradient>
+<filter id="kuGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="1.8" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<circle cx="22" cy="22" r="19" fill="#a86cff" opacity=".22"/>
+<g transform="rotate(-45 32 32)">
+<path d="M32 30v26" stroke="#4a2d08" stroke-width="8" stroke-linecap="round"/>
+<path d="M32 30v26" stroke="url(#kuGold)" stroke-width="5" stroke-linecap="round"/>
+<path d="M32 44h8v4h-4v4h5v4h-9Z" fill="url(#kuGold)" stroke="#4a2d08" stroke-width="1.6" stroke-linejoin="round"/>
+<circle cx="32" cy="18" r="13" fill="url(#kuGold)" stroke="#4a2d08" stroke-width="2.2"/>
+<circle cx="32" cy="18" r="9" fill="#2a1240" stroke="#4a2d08" stroke-width="1.4"/>
+<path d="M32 9l2.5 6.5L41 18l-6.5 2.5L32 27l-2.5-6.5L23 18l6.5-2.5Z" fill="url(#kuGem)" filter="url(#kuGlow)"/>
+<path d="M20 12l-3-3M44 12l3-3M20 24l-3 3M44 24l3 3" stroke="#e8b44a" stroke-width="2" stroke-linecap="round"/>
+</g>
+</svg>

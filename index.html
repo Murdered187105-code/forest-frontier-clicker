@@ -304,7 +304,7 @@ body #adminPanel{border-right:0!important;border-radius:3px 0 0 3px!important}
 .power-sword-view svg{width:100%;height:100%;filter:drop-shadow(0 0 9px #e5f7ff44)}
 @keyframes power-first-person{0%{opacity:0;transform:translateX(65%) translateY(50%) rotate(40deg) scale(.7)}25%{opacity:1;transform:translateX(45%) translateY(0) rotate(30deg) scale(.95)}50%{opacity:1;transform:translateX(15%) translateY(-30%) rotate(15deg) scale(1.08)}65%{opacity:1;transform:translateX(-60%) translateY(10%) rotate(-65deg) scale(1.2)}85%,100%{opacity:0;transform:translateX(-90%) translateY(60%) rotate(-90deg) scale(1.1)}}
 #monster.power-shaken{animation:power-enemy-shake .32s ease-out!important}
-@keyframes power-enemy-shake{0%,100%{rotate:0deg}15%{rotate:1deg}30%{rotate:-1deg}45%{rotate:.7deg}65%{rotate:-.5deg}82%{rotate:.3deg}}
+@keyframes power-enemy-shake{0%,100%{rotate:0deg}15%{rotate:calc(var(--power-shake-scale,1) * 1deg)}30%{rotate:calc(var(--power-shake-scale,1) * -1deg)}45%{rotate:calc(var(--power-shake-scale,1) * .7deg)}65%{rotate:calc(var(--power-shake-scale,1) * -.5deg)}82%{rotate:calc(var(--power-shake-scale,1) * .3deg)}}
 
 .power-sword-view{perspective:650px;transform-style:preserve-3d;animation:power-first-person-v2 .9s cubic-bezier(.22,.05,.35,1) forwards}
 .power-sword-view>svg{position:absolute;inset:0;filter:drop-shadow(6px 10px 5px #0009) drop-shadow(-2px -1px 2px #e4f6ff55);transform:rotateY(-22deg) rotateX(8deg)}
@@ -314,7 +314,9 @@ body #adminPanel{border-right:0!important;border-radius:3px 0 0 3px!important}
 .power-impact-trail{position:absolute;left:50%;top:42%;width:310px;height:170px;border-top:13px solid #eefaff99;border-radius:50%;filter:blur(2px) drop-shadow(0 0 8px #c5e6ff88);pointer-events:none;z-index:9;opacity:0;transform:translate(-50%,-50%) rotate(-45deg);animation:power-cut-trail .9s linear forwards}
 @keyframes power-cut-trail{0%,48%{opacity:0;transform:translate(-35%,-75%) rotate(-55deg) scale(.4)}60%{opacity:.75;transform:translate(-50%,-50%) rotate(-35deg) scale(1)}80%{opacity:0;transform:translate(-60%,-25%) rotate(-15deg) scale(1.2)}100%{opacity:0}}
 
-.custom-power-swing{position:absolute;left:50%;top:58%;transform:translate(-50%,-50%);z-index:10;pointer-events:none;max-width:100%;max-height:100%}
+/* «Мощный удар»: ледяной меч с замахом рубит моба, оставляя след-полумесяц */
+.power-strike-fx{position:absolute;z-index:11;pointer-events:none;overflow:visible}
+.no-animations .power-strike-fx{display:none}
 
 /* Подгонка под разрешение: fitHud() масштабирует main через zoom и задаёт ему логический размер окна */
 html.hud-fit,html.hud-fit body{height:100%;overflow:hidden}
@@ -403,6 +405,8 @@ html body dialog .character-stat,html body dialog .character-effect{background:#
 .settings-button{border-radius:10px}
 .attack{color:#062018;border:0;border-radius:14px;background:var(--night-glow);box-shadow:0 0 10px #9ff28f44,0 4px 0 #1e5c48}
 .attack:active{box-shadow:0 0 6px #9ff28f33,0 1px 0 #1e5c48}
+/* Значок свободных очков прокачки героя — на левом верхнем крае аватара, рядом с уровнем снизу-справа */
+.hero-points-badge{position:absolute;left:-4px;top:-2px;min-width:22px;height:22px;display:flex;align-items:center;justify-content:center;padding:0 5px;border-radius:12px;background:linear-gradient(135deg,#d4ff7a,#5fe6b6);border:3px solid #0c1d22;color:#062018;font-size:11px;font-weight:800;line-height:1;box-shadow:0 2px 7px #0007;z-index:4}
 /* Профиль игрока: круглый аватар, опыт заполняет кольцо вокруг портрета, уровень — значок в углу */
 @property --hero-xp{syntax:'<percentage>';inherits:true;initial-value:0%}
 #arena .hero-panel{width:auto;max-width:300px;gap:12px;padding:6px 20px 6px 6px;background:linear-gradient(90deg,#0c1d22ee,#0c1d2299 75%,transparent);border:0;border-radius:50px;box-shadow:none}
@@ -483,10 +487,31 @@ html.hud-mobile #arena .gold-wallet-icon,html.hud-mobile #arena .gold-wallet-ico
 #talentsDialog .talent-category .talent-skill-icon{width:96px;height:96px;font-size:38px}
 #talentsDialog .talent-category #rapidTreeIcon .rapid-slashes-icon,#talentsDialog .talent-category #aimTreeIcon .aim-icon{width:50px;height:50px}
 @media(max-width:540px){.talent-category-head small{display:none}.talent-category-row{justify-content:center}}
+/* Души: счётчик под золотом и вылет душ из монстра */
+.soul-wallet{position:absolute;right:24px;top:84px;z-index:3;display:flex;align-items:center;gap:10px;padding:7px 18px 7px 9px;min-width:105px;border-radius:30px;background:linear-gradient(135deg,#0c1d22ee,#07120fee);border:1px solid #6fd8ff66;box-shadow:0 0 14px #4fd8ff33,0 4px 14px #0006}
+.soul-wallet-icon{display:grid;place-items:center;width:38px;height:38px}.soul-wallet-icon img{width:38px;height:38px}
+.soul-wallet>div{display:flex;flex-direction:column;gap:2px}
+.soul-wallet-label{font-size:9px;letter-spacing:1.5px;font-weight:800;color:#9fe4ff}
+.soul-wallet b{font-size:19px;color:#bfefff;font-variant-numeric:tabular-nums;text-shadow:0 0 10px #4fd8ff88}
+.soul-wallet.soul-pulse .soul-wallet-icon{animation:soul-pulse .45s ease-out}
+@keyframes soul-pulse{40%{scale:1.35;filter:brightness(1.5)}}
+html.hud-mobile .soul-wallet{padding:5px 12px 5px 6px;min-width:85px}html.hud-mobile .soul-wallet-icon,html.hud-mobile .soul-wallet-icon img{width:28px;height:28px}html.hud-mobile .soul-wallet b{font-size:16px}
+/* Плашки валют справа сверху: одна ширина, высота, иконка и шрифт — ровная колонка */
+#arena .gold-wallet,#arena .soul-wallet{box-sizing:border-box;width:172px;min-width:0;height:58px;padding:0 16px 0 9px;gap:10px}
+#arena .gold-wallet-icon,#arena .gold-wallet-icon .gold-coin,#arena .soul-wallet-icon,#arena .soul-wallet-icon img{width:40px;height:40px}
+#arena .gold-wallet-label,#arena .soul-wallet-label{font-size:9px;letter-spacing:1.5px}
+#arena .gold-wallet b,#arena .soul-wallet b{font-size:20px}
+html.hud-mobile #arena .gold-wallet,html.hud-mobile #arena .soul-wallet{width:148px;height:46px;padding:0 12px 0 6px;gap:8px}
+html.hud-mobile #arena .gold-wallet-icon,html.hud-mobile #arena .gold-wallet-icon .gold-coin,html.hud-mobile #arena .soul-wallet-icon,html.hud-mobile #arena .soul-wallet-icon img{width:30px;height:30px}
+html.hud-mobile #arena .gold-wallet b,html.hud-mobile #arena .soul-wallet b{font-size:16px}
+.soul-fly{position:absolute;left:0;top:0;z-index:8;width:48px;height:48px;pointer-events:none;filter:drop-shadow(0 0 8px #4fd8ffcc)}
+.soul-pop{position:absolute;z-index:8;translate:-50% 0;font:900 22px 'Russo One',Manrope,sans-serif;color:#bfefff;text-shadow:0 0 10px #4fd8ff,0 2px 3px #000;pointer-events:none;animation:soul-pop 1.1s ease-out forwards}
+@keyframes soul-pop{0%{opacity:0;transform:translateY(8px) scale(.7)}15%{opacity:1;transform:scale(1.15)}100%{opacity:0;transform:translateY(-40px)}}
 /* Магазин */
 #shopDialog{width:min(640px,calc(100% - 24px));max-height:88dvh;overflow:auto}
 .shop-wallet{display:flex;align-items:center;gap:10px;padding:12px 16px;border:1px solid #edc77b44;border-radius:12px;background:#061214;color:#cdbf8c;font-size:13px}
 .shop-wallet b{margin-left:auto;font-size:20px;color:#edc77b}
+.shop-wallet-souls{display:flex;align-items:center;gap:6px;margin-left:16px}.shop-wallet-souls img{width:26px;height:26px}.shop-wallet .shop-wallet-souls b{margin-left:0;color:#bfefff;text-shadow:0 0 8px #4fd8ff88}
 .shop-coin{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe2a0,#d6a744 60%,#8a6220);color:#6d4c1c;font-size:15px}
 /* Вкладки-таблетки: при большом числе разделов переносятся на следующую строку */
 .shop-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;margin:14px 0;border-radius:22px;background:#061214;border:1px solid #7fe6c222}
@@ -534,9 +559,9 @@ html body #shopDialog .shop-tab.active{color:#062018;background:linear-gradient(
 
 <section class="game" aria-label="Поле боя">
 <div class="topbar"><div class="zone">✦ &nbsp; Сумрачный лес<small>Твой первый шаг навстречу приключениям</small></div><div class="wave"><span class="stage-heading">ЭТАП</span><div class="stage-circles" aria-label="Этапы"><span id="previousStage" class="stage-circle stage-neighbor" aria-label="Предыдущий этап">—</span><span id="previousStageDot" class="stage-dot" aria-hidden="true">•</span><span id="wave" class="stage-circle stage-current" aria-current="step">1</span><span class="stage-dot" aria-hidden="true">•</span><span id="nextStage" class="stage-circle stage-neighbor" aria-label="Следующий этап">2</span></div></div></div>
-<div class="arena" id="arena"><section class="hero-panel" aria-label="Персонаж"><div class="hero-xp-ring" id="heroXpBar" role="progressbar" aria-label="Опыт персонажа" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="hero-avatar"><svg viewBox="0 0 64 64" aria-label="Аватар героя" role="img"><defs><linearGradient id="heroArmor" x2="0" y2="1"><stop stop-color="#abb8b8"/><stop offset="1" stop-color="#4b6065"/></linearGradient></defs><path d="M7 64V49l16-8h18l16 8v15" fill="url(#heroArmor)"/><path d="m22 43 10 15 10-15-10 5Z" fill="#c2a56a"/><path d="M17 27C16 9 48 9 47 27l-3 13-12 9-12-9Z" fill="#ba9273"/><path d="M15 28V19C15-2 49-2 49 19v9l-9-4-8-9-8 9Z" fill="#46575b" stroke="#a5b2b0" stroke-width="2"/><path d="m23 30 6 1m6 0 6-1" stroke="#22363b" stroke-width="3"/><path d="M27 39h10" stroke="#754f42" stroke-width="2"/><path d="M32 3v15" stroke="#d0b274" stroke-width="3"/></svg></div><span class="hero-level-badge" id="heroLevelBadge" aria-hidden="true">1</span></div><div class="hero-info"><button type="button" class="hero-title hero-name-button" id="editHeroName" title="Изменить имя персонажа" aria-haspopup="dialog">Искатель приключений</button><div class="hero-level">Уровень <b id="heroLevel">1</b></div></div></section>
+<div class="arena" id="arena"><section class="hero-panel" aria-label="Персонаж"><div class="hero-xp-ring" id="heroXpBar" role="progressbar" aria-label="Опыт персонажа" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="hero-avatar"><svg viewBox="0 0 64 64" aria-label="Аватар героя" role="img"><defs><linearGradient id="heroArmor" x2="0" y2="1"><stop stop-color="#abb8b8"/><stop offset="1" stop-color="#4b6065"/></linearGradient></defs><path d="M7 64V49l16-8h18l16 8v15" fill="url(#heroArmor)"/><path d="m22 43 10 15 10-15-10 5Z" fill="#c2a56a"/><path d="M17 27C16 9 48 9 47 27l-3 13-12 9-12-9Z" fill="#ba9273"/><path d="M15 28V19C15-2 49-2 49 19v9l-9-4-8-9-8 9Z" fill="#46575b" stroke="#a5b2b0" stroke-width="2"/><path d="m23 30 6 1m6 0 6-1" stroke="#22363b" stroke-width="3"/><path d="M27 39h10" stroke="#754f42" stroke-width="2"/><path d="M32 3v15" stroke="#d0b274" stroke-width="3"/></svg></div><span class="hero-level-badge" id="heroLevelBadge" aria-hidden="true">1</span><span class="hero-points-badge" id="heroPointsBadge" hidden></span></div><div class="hero-info"><button type="button" class="hero-title hero-name-button" id="editHeroName" title="Изменить имя персонажа" aria-haspopup="dialog">Искатель приключений</button><div class="hero-level">Уровень <b id="heroLevel">1</b></div></div></section>
 <div class="gold-wallet" aria-label="Золото"><span class="gold-wallet-icon" aria-hidden="true"><img class="gold-coin" src="assets/coin-gold.svg" alt="" aria-hidden="true"></span><div><span class="gold-wallet-label">ЗОЛОТО</span><b id="gold">0</b></div></div>
-<nav class="feature-toolbar" aria-label="Меню персонажа"><button class="feature-button" id="openEquipment" aria-label="Экипировка" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m8 3-6 4 3 5 3-2v11h8V10l3 2 3-5-6-4-4 3-4-3Z"/></svg><span class="feature-label">Экипировка</span></button><button class="feature-button" id="openInventory" aria-label="Инвентарь" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M6 6h12l2 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9l2-5Z M4 11h16M8 16h8v6M9 6v5M15 6v5"/></svg><span class="feature-label">Инвентарь</span></button><button class="feature-button" id="openTalents" aria-label="Древо талантов" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5M5 12h14M5 12v5M12 12v5M19 12v5"/><circle cx="12" cy="4" r="3"/><circle cx="5" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="19" cy="20" r="2.5"/></svg><span class="feature-label">Древо талантов</span><span id="talentPointsBadge" class="talent-points-badge" hidden></span></button><button class="feature-button" id="openShop" aria-label="Магазин" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9 4.5 4h15L21 9M3 9h18M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 12v8h14v-8M10 20v-5h4v5"/></svg><span class="feature-label">Магазин</span></button></nav>
+<div class="soul-wallet" id="soulWallet" aria-label="Души"><span class="soul-wallet-icon" aria-hidden="true"><img src="assets/soul.svg" alt=""></span><div><span class="soul-wallet-label">ДУШИ</span><b id="souls">0</b></div></div><nav class="feature-toolbar" aria-label="Меню персонажа"><button class="feature-button" id="openEquipment" aria-label="Экипировка" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="m8 3-6 4 3 5 3-2v11h8V10l3 2 3-5-6-4-4 3-4-3Z"/></svg><span class="feature-label">Экипировка</span></button><button class="feature-button" id="openInventory" aria-label="Инвентарь" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M6 6h12l2 5v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9l2-5Z M4 11h16M8 16h8v6M9 6v5M15 6v5"/></svg><span class="feature-label">Инвентарь</span></button><button class="feature-button" id="openTalents" aria-label="Древо талантов" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v5M5 12h14M5 12v5M12 12v5M19 12v5"/><circle cx="12" cy="4" r="3"/><circle cx="5" cy="20" r="2.5"/><circle cx="12" cy="20" r="2.5"/><circle cx="19" cy="20" r="2.5"/></svg><span class="feature-label">Древо талантов</span><span id="talentPointsBadge" class="talent-points-badge" hidden></span></button><button class="feature-button" id="openShop" aria-label="Магазин" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9 4.5 4h15L21 9M3 9h18M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M5 12v8h14v-8M10 20v-5h4v5"/></svg><span class="feature-label">Магазин</span></button></nav>
 <div class="enemy-info"><h1 id="enemyName">Лесной слизень</h1><div class="enemy-type">ОБЫЧНЫЙ ПРОТИВНИК · УР. <span id="level">1</span></div>
 <div class="zone-objective"><span id="zoneProgress">Монстры: 0 / 5</span><span id="bossCountdown" hidden></span><button type="button" id="retreatBoss" hidden>Прервать бой</button></div><div id="bossTimerBar" class="boss-timer-bar" role="progressbar" aria-label="Оставшееся время боя с боссом" aria-valuemin="0" aria-valuemax="60" aria-valuenow="60" hidden><div id="bossTimerFill"></div></div><div class="hp"><div class="hp-metal-frame"><svg class="hp-reference-frame" viewBox="0 0 1160 120" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="hpMetal" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b3a8ad"/><stop offset=".15" stop-color="#62585f"/><stop offset=".35" stop-color="#2b272f"/><stop offset=".65" stop-color="#17151c"/><stop offset=".85" stop-color="#625863"/><stop offset="1" stop-color="#8c808b"/></linearGradient><linearGradient id="hpRim" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e1cdd0"/><stop offset=".3" stop-color="#635960"/><stop offset=".6" stop-color="#17151b"/><stop offset="1" stop-color="#958691"/></linearGradient><linearGradient id="hpGem" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e3d8dc"/><stop offset=".5" stop-color="#68616b"/><stop offset="1" stop-color="#201d26"/></linearGradient></defs>
 <path d="M5 60 59 5 69 14H1091L1101 5 1155 60 1101 115 1091 106H69L59 115Z" fill="url(#hpMetal)" stroke="#413b45" stroke-width="3"/>
@@ -580,15 +605,16 @@ html body #shopDialog .shop-tab.active{color:#062018;background:linear-gradient(
 <button id="openAdmin" class="admin-toggle" aria-haspopup="dialog" aria-controls="adminPanel">⌘ Админ</button>
 <dialog id="adminPanel" aria-labelledby="adminTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">УПРАВЛЕНИЕ ИГРОЙ</div><h2 id="adminTitle">Админ-панель</h2></div><button id="closeAdmin" aria-label="Закрыть админ-панель">×</button></div><p class="admin-caption">Изменения сохраняются автоматически.</p>
 <section class="admin-section"><h3>Предметы</h3><label for="adminItem">Выбери предмет</label><select id="adminItem"></select><div class="admin-row"><label for="adminItemCount">Количество</label><input id="adminItemCount" type="number" min="1" max="24" step="1" value="1"></div><button id="adminGiveItem">Выдать в инвентарь</button><small id="adminInventoryCount"></small></section>
-<section class="admin-section"><h3>Ресурсы и развитие</h3><label for="adminPoints">Очки талантов</label><div class="admin-row"><input id="adminPoints" type="number" min="1" max="1000000" step="1" value="1"><button id="adminAddPoints">Добавить</button></div><label for="adminGold">Золото</label><div class="admin-row"><input id="adminGold" type="number" min="0.01" max="1000000" step="0.01" value="100"><button id="adminAddGold">Добавить</button></div><label for="adminXp">Опыт</label><div class="admin-row"><input id="adminXp" type="number" min="1" max="1000000" step="1" value="100"><button id="adminAddXp">Добавить</button></div></section>
+<section class="admin-section"><h3>Ресурсы и развитие</h3><label for="adminPoints">Очки талантов</label><div class="admin-row"><input id="adminPoints" type="number" min="1" max="1000000" step="1" value="1"><button id="adminAddPoints">Добавить</button></div><label for="adminHeroPoints">Очки прокачки героя</label><div class="admin-row"><input id="adminHeroPoints" type="number" min="1" max="1000000" step="1" value="1"><button id="adminAddHeroPoints">Добавить</button></div><label for="adminGold">Золото</label><div class="admin-row"><input id="adminGold" type="number" min="0.01" max="1000000" step="0.01" value="100"><button id="adminAddGold">Добавить</button></div><label for="adminSouls">Души</label><div class="admin-row"><input id="adminSouls" type="number" min="1" max="1000000" step="1" value="10"><button id="adminAddSouls">Добавить</button></div><label for="adminXp">Опыт</label><div class="admin-row"><input id="adminXp" type="number" min="1" max="1000000" step="1" value="100"><button id="adminAddXp">Добавить</button></div></section>
 <section class="admin-section"><h3>Навыки и мана</h3><div class="admin-quick"><button id="adminRestoreMana">Восстановить ману</button><button id="adminResetCooldowns">Сбросить перезарядки</button><button id="adminUnlockRapid">Открыть Скоростную атаку</button><button id="adminUnlockAim">Открыть Меткий выстрел</button><button id="adminReadyChest">Подготовить сундук</button></div></section>
 <section class="admin-section"><h3>Этапы</h3><label for="adminZone">Перейти в начало этапа</label><div class="admin-row"><input id="adminZone" type="number" min="1" max="100000" step="1" value="1"><button id="adminGoZone">Перейти</button></div></section><p id="adminStatus" role="status"></p></dialog>
-<dialog id="shopDialog" aria-labelledby="shopTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">ЛАВКА ТОРГОВЦА</div><h2 id="shopTitle">Магазин</h2></div><button id="closeShop" aria-label="Закрыть магазин">×</button></div><div class="shop-wallet" aria-label="Твоё золото"><span class="shop-coin" aria-hidden="true"><img class="gold-coin" src="assets/coin-gold.svg" alt="" aria-hidden="true"></span><span>Твоё золото</span><b id="shopGold">0</b></div><div id="shopTabs" class="shop-tabs" role="tablist" aria-label="Разделы магазина"></div><div id="shopSections"></div><p id="shopStatus" class="shop-status" role="status"></p></dialog>
+<dialog id="shopDialog" aria-labelledby="shopTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">ЛАВКА ТОРГОВЦА</div><h2 id="shopTitle">Магазин</h2></div><button id="closeShop" aria-label="Закрыть магазин">×</button></div><div class="shop-wallet" aria-label="Твоё золото"><span class="shop-coin" aria-hidden="true"><img class="gold-coin" src="assets/coin-gold.svg" alt="" aria-hidden="true"></span><span>Твоё золото</span><b id="shopGold">0</b><span class="shop-wallet-souls" title="Твои души"><img src="assets/soul.svg" alt=""><b id="shopSouls">0</b></span></div><div id="shopTabs" class="shop-tabs" role="tablist" aria-label="Разделы магазина"></div><div id="shopSections"></div><p id="shopStatus" class="shop-status" role="status"></p></dialog>
 <dialog id="chestRewardDialog" aria-labelledby="chestRewardTitle"><h2 id="chestRewardTitle">Награда из сундука</h2><button id="rewardCard" class="reward-card" aria-label="Раскрыть предмет"><span class="reward-question">?</span></button><p id="rewardHint">Нажми на карточку, чтобы раскрыть предмет</p><button id="closeReward">Забрать</button></dialog>
 <dialog id="sellAllDialog" aria-labelledby="sellAllTitle"><h2 id="sellAllTitle">Продать всё из инвентаря?</h2><p id="sellAllSummary"></p><p>Надетые предметы останутся в экипировке.</p><div class="settings-actions"><button id="cancelSellAll" autofocus>Отмена</button><button id="confirmSellAll" class="danger">Продать всё</button></div></dialog>
 <dialog id="heroNameDialog" aria-labelledby="heroNameTitle"><form id="heroNameForm"><h2 id="heroNameTitle">Имя персонажа</h2><label for="heroNameInput">Введи новое имя</label><input id="heroNameInput" type="text" maxlength="30" required autocomplete="off" placeholder="Искатель приключений"><div class="settings-actions"><button type="button" id="cancelHeroName">Отмена</button><button type="submit">Сохранить</button></div></form></dialog>
 <script src="shop-catalog.js"></script>
 <script src="hero-tree-data.js"></script>
+<script src="power-strike-data.js"></script>
 <script src="hero-tree.js"></script>
 <script>
 const $=id=>document.getElementById(id);
@@ -640,11 +666,11 @@ function rapidStrikeCount(){return 5+rapidSeriesRank;}
 function rapidDuration(){return rapidStrikeCount()*200;}
 let rapidRestRank=0;
 function rapidCooldown(){return 10000-rapidRestRank*500;}
-let rapidDamageRank=0;let playerLevel=1,playerXp=0,talentPoints=0;
+let rapidDamageRank=0;let playerLevel=1,playerXp=0,talentPoints=0,heroPoints=0,souls=0,soulsInFlight=0;
 function xpRequired(level=playerLevel){return 100*level;}
-function gainExperience(monsterHealth){playerXp=Number((playerXp+monsterHealth*.2).toFixed(2));while(playerXp>=xpRequired()){playerXp=Number((playerXp-xpRequired()).toFixed(2));playerLevel++;talentPoints++;}}
-function renderExperience(){$('heroLevel').textContent=playerLevel;$('heroLevelBadge').textContent=playerLevel;const needed=xpRequired();$('heroXpBar').style.setProperty('--hero-xp',Math.min(100,playerXp/needed*100)+'%');$('heroXpBar').title='Опыт: '+playerXp.toLocaleString('ru-RU')+' / '+needed;$('heroXpBar').setAttribute('aria-valuemax',needed);$('heroXpBar').setAttribute('aria-valuenow',playerXp);$('talentPointsBadge').textContent=talentPoints;$('talentPointsBadge').hidden=talentPoints<=0;$('openTalents').setAttribute('aria-label','Древо талантов'+(talentPoints>0?' — свободных очков: '+talentPoints:''));document.querySelectorAll('.available-talent-points').forEach(el=>el.textContent='Очки талантов: '+talentPoints);}
-function loadExperience(saved){aimUnlocked=saved.aimUnlocked===true;aimRank=Number.isInteger(saved.aimRank)?Math.max(0,Math.min(AIM_MAX_RANK,saved.aimRank)):0;aimReadyAt=Number.isFinite(saved.aimReadyAt)?Math.min(saved.aimReadyAt,Date.now()+AIM_COOLDOWN+15000):0;rapidSeriesRank=Number.isInteger(saved.rapidSeriesRank)?Math.max(0,Math.min(10,saved.rapidSeriesRank)):0;rapidRestRank=Number.isInteger(saved.rapidRestRank)?Math.max(0,Math.min(10,saved.rapidRestRank)):0;rapidDamageRank=Number.isInteger(saved.rapidDamageRank)?Math.max(0,Math.min(10,saved.rapidDamageRank)):0;playerLevel=Number.isSafeInteger(saved.playerLevel)&&saved.playerLevel>=1?saved.playerLevel:1;playerXp=Number.isFinite(saved.playerXp)&&saved.playerXp>=0&&saved.playerXp<xpRequired()?saved.playerXp:0;talentPoints=Number.isSafeInteger(saved.talentPoints)&&saved.talentPoints>=0?saved.talentPoints:0;}
+function gainExperience(monsterHealth){playerXp=Number((playerXp+monsterHealth*.2).toFixed(2));while(playerXp>=xpRequired()){playerXp=Number((playerXp-xpRequired()).toFixed(2));playerLevel++;talentPoints++;heroPoints++;}}
+function renderExperience(){$('heroLevel').textContent=playerLevel;$('heroLevelBadge').textContent=playerLevel;const needed=xpRequired();$('heroXpBar').style.setProperty('--hero-xp',Math.min(100,playerXp/needed*100)+'%');$('heroXpBar').title='Опыт: '+playerXp.toLocaleString('ru-RU')+' / '+needed;$('heroXpBar').setAttribute('aria-valuemax',needed);$('heroXpBar').setAttribute('aria-valuenow',playerXp);$('talentPointsBadge').textContent=talentPoints;$('talentPointsBadge').hidden=talentPoints<=0;$('heroPointsBadge').textContent=heroPoints;$('heroPointsBadge').hidden=heroPoints<=0;document.getElementById('heroXpBar').title='Прокачка героя'+(heroPoints>0?' — свободных очков: '+heroPoints:'');$('openTalents').setAttribute('aria-label','Древо талантов'+(talentPoints>0?' — свободных очков: '+talentPoints:''));document.querySelectorAll('.available-talent-points').forEach(el=>el.textContent='Очки талантов: '+talentPoints);}
+function loadExperience(saved){heroPoints=Number.isSafeInteger(saved.heroPoints)&&saved.heroPoints>=0?saved.heroPoints:0;souls=Number.isSafeInteger(saved.souls)&&saved.souls>=0?saved.souls:0;aimUnlocked=saved.aimUnlocked===true;aimRank=Number.isInteger(saved.aimRank)?Math.max(0,Math.min(AIM_MAX_RANK,saved.aimRank)):0;aimReadyAt=Number.isFinite(saved.aimReadyAt)?Math.min(saved.aimReadyAt,Date.now()+AIM_COOLDOWN+15000):0;rapidSeriesRank=Number.isInteger(saved.rapidSeriesRank)?Math.max(0,Math.min(10,saved.rapidSeriesRank)):0;rapidRestRank=Number.isInteger(saved.rapidRestRank)?Math.max(0,Math.min(10,saved.rapidRestRank)):0;rapidDamageRank=Number.isInteger(saved.rapidDamageRank)?Math.max(0,Math.min(10,saved.rapidDamageRank)):0;playerLevel=Number.isSafeInteger(saved.playerLevel)&&saved.playerLevel>=1?saved.playerLevel:1;playerXp=Number.isFinite(saved.playerXp)&&saved.playerXp>=0&&saved.playerXp<xpRequired()?saved.playerXp:0;talentPoints=Number.isSafeInteger(saved.talentPoints)&&saved.talentPoints>=0?saved.talentPoints:0;}
 const MAX_MANA=100,MANA_REGEN=.1,RAPID_MANA_COST=10;
 // Источники бонусов к характеристикам: надетые предметы и древо прокачки героя.
 function bonusSources(){return [...Object.values(equipped).filter(Boolean),...(window.heroTreeBonus?[window.heroTreeBonus()]:[])];}
@@ -658,6 +684,7 @@ let zone=1,zoneKills=0,bossDeadline=0;let rapidUnlocked=false,rapidActive=false,
 function enemyHealth(atZone=zone,count=zoneKills){const base=count===5?(atZone%5===0?50:25):5;return Math.round(base*(1+.9*Math.floor(atZone/10)));}
 function isTimedBoss(){return zoneKills===5&&zone%5===0;}
 function checkBossTimer(){
+ if(window.dungeonApi?.active()){window.dungeonApi.tick();return;}
  if(!isTimedBoss())bossDeadline=0;
  if(isTimedBoss()&&bossDeadline&&!locked&&Date.now()>=bossDeadline){clearTimeout(enemyTimer);zoneKills=0;bossDeadline=0;maxHp=enemyHealth();hp=maxHp;locked=false;cooldownUntil=0;render();updateAttackButton();}
  const boss=zoneKills===5;
@@ -674,8 +701,9 @@ let settings={animations:true,damage:true},resetBackup=null;
 function saveProgress(){
 regenerateMana();
 try{
-const nextMax=hp===0?enemyHealth():maxHp;
-localStorage.setItem(SAVE_KEY,JSON.stringify({version:8,normalEnemyId,enemySelectionKey,playerLevel,playerXp,talentPoints,rapidDamageRank,rapidRestRank,rapidSeriesRank,powerReadyAt,zone,zoneKills,bossDeadline,rapidUnlocked,rapidReadyAt,aimUnlocked,aimRank,aimReadyAt,mana,manaUpdatedAt,hp:hp===0?nextMax:hp,maxHp:nextMax,gold,kills,cooldownUntil}));
+const away=window.dungeonApi?.forest(),saveHp=away?away.hp:hp,saveMax=away?away.maxHp:maxHp;
+const nextMax=saveHp===0?enemyHealth():saveMax;
+localStorage.setItem(SAVE_KEY,JSON.stringify({version:8,normalEnemyId,enemySelectionKey,playerLevel,playerXp,talentPoints,heroPoints,souls,rapidDamageRank,rapidRestRank,rapidSeriesRank,powerReadyAt,zone,zoneKills,bossDeadline,rapidUnlocked,rapidReadyAt,aimUnlocked,aimRank,aimReadyAt,mana,manaUpdatedAt,hp:saveHp===0?nextMax:saveHp,maxHp:nextMax,gold,kills,cooldownUntil}));
 }catch{storageAvailable=false;$('message').textContent='Браузер не разрешил сохранение. Прогресс доступен только до закрытия страницы.';}
 }
 function loadProgress(){
@@ -707,11 +735,11 @@ function updateHealthTrail(){
  }
  lastHealthRatio=ratio;lastEnemyStamp=stamp;
 }
-function render(){updateTalentResetButtons();updateHealthTrail();renderExperience();updateRapidUI();const boss=maxHp===enemyHealth(zone,5);$('arena').classList.toggle('boss-fight',boss);renderForestEnemy(boss);document.querySelector('.enemy-type').firstChild.textContent=boss?(zone%5===0?'БОСС · УР. ':'МИНИ-БОСС · УР. '):'ОБЫЧНЫЙ ПРОТИВНИК · УР. '; $('health').textContent=hp.toLocaleString('ru-RU',{maximumFractionDigits:1})+' / '+maxHp;$('fill').style.width=(hp/maxHp*100)+'%';$('hpBar').setAttribute('aria-valuemax',maxHp);$('hpBar').setAttribute('aria-valuenow',hp);$('gold').textContent=gold;$('shopGold').textContent=gold;$('wave').textContent=zone;$('previousStage').textContent=zone>1?zone-1:'—';$('previousStage').style.visibility=zone>1?'visible':'hidden';$('previousStageDot').style.visibility=zone>1?'visible':'hidden';$('nextStage').textContent=zone+1;$('wave').classList.toggle('boss-stage-glow',zone%5===0);$('nextStage').classList.toggle('boss-stage-glow',(zone+1)%5===0);$('wave').setAttribute('aria-label','Текущий этап '+zone);$('level').textContent=1; if(storageAvailable)saveProgress(); }
+function render(){updateTalentResetButtons();updateHealthTrail();renderExperience();updateRapidUI();const inDungeon=window.dungeonApi?.active();if(!inDungeon){const boss=maxHp===enemyHealth(zone,5);$('arena').classList.toggle('boss-fight',boss);renderForestEnemy(boss);document.querySelector('.enemy-type').firstChild.textContent=boss?(zone%5===0?'БОСС · УР. ':'МИНИ-БОСС · УР. '):'ОБЫЧНЫЙ ПРОТИВНИК · УР. ';} $('health').textContent=hp.toLocaleString('ru-RU',{maximumFractionDigits:1})+' / '+maxHp;$('fill').style.width=(hp/maxHp*100)+'%';$('hpBar').setAttribute('aria-valuemax',maxHp);$('hpBar').setAttribute('aria-valuenow',hp);$('gold').textContent=gold;$('shopGold').textContent=gold;$('souls').textContent=souls-soulsInFlight;$('wave').textContent=zone;$('previousStage').textContent=zone>1?zone-1:'—';$('previousStage').style.visibility=zone>1?'visible':'hidden';$('previousStageDot').style.visibility=zone>1?'visible':'hidden';$('nextStage').textContent=zone+1;$('wave').classList.toggle('boss-stage-glow',zone%5===0);$('nextStage').classList.toggle('boss-stage-glow',(zone+1)%5===0);$('wave').setAttribute('aria-label','Текущий этап '+zone);$('level').textContent=1;$('shopSouls').textContent=souls;if(inDungeon)window.dungeonApi.renderEnemy();else window.dungeonApi?.refresh(); if(storageAvailable)saveProgress(); }
 function updateAttackButton(){
  const remaining=Math.max(0,cooldownUntil-Date.now());
  $('attack').disabled=locked||remaining>0;
- $('attack').textContent=remaining>0?'⏳ Перезарядка · '+(remaining/1000).toFixed(1)+' с':locked?'Следующий враг…':'⚔ Атаковать';
+ $('attack').textContent=remaining>0?'⏳ Перезарядка · '+(remaining/1000).toFixed(1)+' с':locked?(window.dungeonApi?.attackLabel()||'Следующий враг…'):'⚔ Атаковать';
 }
 setInterval(updateAttackButton,100);
 let swordSwingIndex=0;
@@ -763,11 +791,12 @@ function showSlash(critical){
 function attack(skillStrike=false,damageScale=null,quiet=false){
  checkBossTimer();
  if(locked||$('shopDialog').open||$('talentsDialog').open||$('characterStatsDialog').open||$('itemActionsDialog').open||$('inventoryDialog').open||$('equipmentDialog').open||(!skillStrike&&Date.now()<cooldownUntil)||$('settingsDialog').open||$('resetDialog').open)return;
- const stats=combatStats();if(!skillStrike)cooldownUntil=Date.now()+2000/(1+stats.speed/100);updateAttackButton();const crit=!skillStrike&&Math.random()<stats.crit,damage=Number((stats.damage*(crit?stats.multiplier:1)*(damageScale??(skillStrike?1+rapidDamageRank*.1:1))).toFixed(2));hp=Math.max(0,hp-damage);showMonsterHurt();if(!quiet)showSlash(crit);
+ const stats=combatStats();if(!skillStrike)cooldownUntil=Date.now()+2000/(1+stats.speed/100);updateAttackButton();const crit=!skillStrike&&Math.random()<stats.crit,damage=Number((stats.damage*(crit?stats.multiplier:1)*(damageScale??(skillStrike?1+rapidDamageRank*.1:1))*(window.dungeonApi?.damageFactor()??1)).toFixed(2));hp=Math.max(0,hp-damage);showMonsterHurt();if(!quiet)showSlash(crit);
  if(settings.damage){const pop=document.createElement('div');pop.className='float'+(crit?' crit':'');pop.textContent='−'+damage+(crit?'!':'');pop.style.marginLeft=(Math.random()*70-35)+'px';$('arena').append(pop);setTimeout(()=>pop.remove(),750);}
  if(settings.animations&&damageScale!==10&&!quiet){$('monster').classList.remove('hit');void $('monster').offsetWidth;$('monster').classList.add('hit');setTimeout(()=>$('monster').classList.remove('hit'),120);}
  $('message').textContent=!settings.damage?'Бой продолжается.':crit?'Критический удар! Нанесено '+damage+' урона.':'Ты наносишь '+damage+' урона.';
- if(hp===0){showMonsterDeath();gainExperience(maxHp);const reward=Number((maxHp*(maxHp===enemyHealth(zone,5)?.05:.1)*(1+characterParameters().goldBonus/100)).toFixed(2));locked=true;kills++;if(zoneKills===5){zone++;zoneKills=0;bossDeadline=0;}else{zoneKills++;if(isTimedBoss())bossDeadline=Date.now()+60500;}gold=Number((gold+reward).toFixed(2));$('attack').disabled=true;$('message').textContent='Победа! +'+reward+' золота. Следующий противник уже близко…';enemyTimer=setTimeout(()=>{maxHp=enemyHealth();hp=maxHp;if(isTimedBoss())bossDeadline=Date.now()+60000;locked=false;updateAttackButton();$('message').textContent='Новый слизень появился на тропе. В бой!';render()},500);}
+ if(hp===0&&window.dungeonApi?.active()){showMonsterDeath();window.dungeonApi.onBossKilled();render();return;}
+ if(hp===0){showMonsterDeath();gainExperience(maxHp);const reward=Number((maxHp*(maxHp===enemyHealth(zone,5)?.05:.1)*(1+characterParameters().goldBonus/100)).toFixed(2));const soulGain=zoneKills===5?(zone%5===0?5:2):1;souls+=soulGain;dropSouls(soulGain);locked=true;kills++;if(zoneKills===5){zone++;zoneKills=0;bossDeadline=0;}else{zoneKills++;if(isTimedBoss())bossDeadline=Date.now()+60500;}gold=Number((gold+reward).toFixed(2));$('attack').disabled=true;$('message').textContent='Победа! +'+reward+' золота. Следующий противник уже близко…';enemyTimer=setTimeout(()=>{maxHp=enemyHealth();hp=maxHp;if(isTimedBoss())bossDeadline=Date.now()+60000;locked=false;updateAttackButton();$('message').textContent='Новый слизень появился на тропе. В бой!';render()},500);}
  render();
 }
 function applySettings(){
@@ -783,13 +812,14 @@ function updateUndo(){
  $('undoReset').textContent=resetBackup?'Вернуть прогресс · '+seconds+' сек.':'';
 }
 function retreatFromBoss(){
+ if(window.dungeonApi?.active()){window.dungeonApi.leaveHall();return;}
  if(!isTimedBoss()||locked||hp<=0)return;
  clearBattle();zoneKills=0;bossDeadline=0;maxHp=enemyHealth();hp=maxHp;lastEnemyStamp='';
  render();checkBossTimer();updateAttackButton();saveProgress();
  $('message').textContent='Бой с боссом прерван. Этап начат заново.';
 }
 $('retreatBoss').addEventListener('click',retreatFromBoss);
-function clearBattle(){stopAimShot();clearTimeout(monsterHurtTimer);cancelCustomPowerSwing?.();cancelCustomPowerSwing=null;powerToken++;powerActive=false;document.querySelectorAll(".power-sword-view,.power-impact-trail").forEach(el=>el.remove());$("monster").classList.remove("power-shaken");clearMonsterDeath();rapidToken++;rapidActive=false;clearTimeout(enemyTimer);cooldownUntil=0;locked=false;updateAttackButton();$('monster').classList.remove('hit');document.querySelectorAll('.float').forEach(el=>el.remove());}
+function clearBattle(){stopAimShot();clearTimeout(monsterHurtTimer);cancelCustomPowerSwing?.();cancelCustomPowerSwing=null;powerToken++;powerActive=false;document.querySelectorAll(".power-sword-view,.power-impact-trail,.power-strike-fx").forEach(el=>el.remove());$("monster").classList.remove("power-shaken");clearMonsterDeath();rapidToken++;rapidActive=false;clearTimeout(enemyTimer);cooldownUntil=0;locked=false;updateAttackButton();$('monster').classList.remove('hit');document.querySelectorAll('.float').forEach(el=>el.remove());}
 try{const saved=JSON.parse(localStorage.getItem(SETTINGS_KEY));if(saved){settings.animations=saved.animations!==false;settings.damage=saved.damage!==false;}const backup=JSON.parse(localStorage.getItem(UNDO_KEY));if(backup&&backup.expiresAt>Date.now()&&backup.progress&&[2,3,4,5,6,7,8].includes(backup.progress.version)&&['hp','maxHp','gold','kills'].every(k=>Number.isSafeInteger(backup.progress[k]))&&backup.progress.kills>=0&&backup.progress.gold>=0&&backup.progress.maxHp>=5&&backup.progress.hp>0&&backup.progress.hp<=backup.progress.maxHp)resetBackup=backup;}catch{}
 applySettings();updateUndo();setInterval(updateUndo,250);
 $('openSettings').addEventListener('click',()=>{updateUndo();$('settingsDialog').showModal();});
@@ -799,17 +829,19 @@ $('damageEnabled').addEventListener('change',e=>{settings.damage=e.target.checke
 $('requestReset').addEventListener('click',()=>{updateUndo();if(resetBackup)return;$('settingsDialog').close();$('resetDialog').showModal();});
 $('cancelReset').addEventListener('click',()=>{$('resetDialog').close();$('settingsDialog').showModal();});
 $('confirmReset').addEventListener('click',()=>{
+ const dungeonBackup=window.dungeonApi?.snapshot();window.dungeonApi?.reset();
  const nextMax=hp===0?enemyHealth():maxHp;
- resetBackup={expiresAt:Date.now()+60000,progress:{version:8,playerLevel,playerXp,talentPoints,rapidDamageRank,rapidRestRank,rapidSeriesRank,powerReadyAt,zone,zoneKills,bossDeadline,rapidUnlocked,rapidReadyAt,aimUnlocked,aimRank,aimReadyAt,mana,manaUpdatedAt,hp:hp===0?nextMax:hp,maxHp:nextMax,gold,kills},loot:{items:inventoryItems.map(item=>({...item})),equipped:{...equipped},readyAt:chestReadyAt},shop:{...shopPurchases},hero:window.heroTree?.ranks()};shopPurchases={};saveShopPurchases();window.heroTree?.setRanks({});
+ resetBackup={expiresAt:Date.now()+60000,progress:{version:8,playerLevel,playerXp,talentPoints,heroPoints,souls,rapidDamageRank,rapidRestRank,rapidSeriesRank,powerReadyAt,zone,zoneKills,bossDeadline,rapidUnlocked,rapidReadyAt,aimUnlocked,aimRank,aimReadyAt,mana,manaUpdatedAt,hp:hp===0?nextMax:hp,maxHp:nextMax,gold,kills},loot:{items:inventoryItems.map(item=>({...item})),equipped:{...equipped},readyAt:chestReadyAt},shop:{...shopPurchases},hero:window.heroTree?.ranks(),dungeon:dungeonBackup};shopPurchases={};saveShopPurchases();window.heroTree?.setRanks({});
  try{localStorage.setItem(UNDO_KEY,JSON.stringify(resetBackup));}catch{}
  inventoryItems.length=0;equipped={};renderEquipment();chestReadyAt=Date.now()+CHEST_INTERVAL;persistLoot();updateChest();
- clearBattle();powerReadyAt=0;rapidUnlocked=false;rapidReadyAt=0;mana=maxMana();manaUpdatedAt=Date.now();renderMana();updateRapidUI();zone=1;zoneKills=0;bossDeadline=0;hp=5;maxHp=5;gold=0;kills=0;playerLevel=1;playerXp=0;talentPoints=0;rapidDamageRank=0;rapidRestRank=0;rapidSeriesRank=0;aimUnlocked=false;aimRank=0;aimReadyAt=0;render();$('message').textContent='Прогресс обнулён. Восстановление доступно в настройках в течение минуты.';
+ clearBattle();powerReadyAt=0;rapidUnlocked=false;rapidReadyAt=0;mana=maxMana();manaUpdatedAt=Date.now();renderMana();updateRapidUI();zone=1;zoneKills=0;bossDeadline=0;hp=5;maxHp=5;gold=0;souls=0;kills=0;playerLevel=1;playerXp=0;talentPoints=0;heroPoints=0;rapidDamageRank=0;rapidRestRank=0;rapidSeriesRank=0;aimUnlocked=false;aimRank=0;aimReadyAt=0;render();$('message').textContent='Прогресс обнулён. Восстановление доступно в настройках в течение минуты.';
  $('resetDialog').close();updateUndo();$('settingsDialog').showModal();
 });
 $('undoReset').addEventListener('click',()=>{
  updateUndo();if(!resetBackup)return;
  if(resetBackup.shop){shopPurchases=resetBackup.shop;saveShopPurchases();}
  if(resetBackup.hero)window.heroTree?.setRanks(resetBackup.hero);
+ if(resetBackup.dungeon)window.dungeonApi?.restore(resetBackup.dungeon);
  if(resetBackup.loot){equipped=resetBackup.loot.equipped||{};renderEquipment();inventoryItems.splice(0,inventoryItems.length,...resetBackup.loot.items.filter(item=>itemPool.some(template=>template.slot===item.slot&&template.name===item.name)));chestReadyAt=resetBackup.loot.readyAt;persistLoot();updateChest();}clearBattle();loadExperience(resetBackup.progress);rapidUnlocked=resetBackup.progress.rapidUnlocked===true;rapidReadyAt=resetBackup.progress.rapidReadyAt||0;mana=resetBackup.progress.mana??maxMana();manaUpdatedAt=resetBackup.progress.manaUpdatedAt||Date.now();renderMana();updateRapidUI();zone=resetBackup.progress.zone||1;zoneKills=resetBackup.progress.zoneKills||0;bossDeadline=resetBackup.progress.bossDeadline||0;({hp,maxHp,gold,kills}=resetBackup.progress);hp=Math.max(1,hp/maxHp*enemyHealth());maxHp=enemyHealth();resetBackup=null;try{localStorage.removeItem(UNDO_KEY);}catch{}
  render();updateUndo();$('message').textContent='Прежний прогресс восстановлен.';
 });
@@ -951,8 +983,9 @@ let tooltipPinned=false;
 const itemTooltip=document.createElement('div');itemTooltip.className='item-tooltip';itemTooltip.setAttribute('role','tooltip');itemTooltip.id='itemTooltip';itemTooltip.hidden=true;
 document.body.append(itemTooltip);
 const statSymbols={maxMana:'💧',damageBonus:'⚔',damage:'⚔',goldBonus:'◉',attackSpeed:'➟',critChance:'◎',critDamage:'✹',element:'♨',sellPrice:'◉'};
-const elementNames={fire:'Огонь',lightning:'Молния',poison:'Яд',dark:'Тьма',light:'Свет',none:'Без элемента'};
+const elementNames={fire:'Огонь',lightning:'Молния',poison:'Яд',dark:'Тьма',light:'Свет',ice:'Лёд',none:'Без элемента'};
 // Монета-бабочка вместо знака ◉ везде, где показывается золото.
+function soulCoin(){const soul=goldCoin();soul.src='assets/soul.svg';soul.classList.add('soul-coin');return soul;}
 function goldCoin(){const coin=document.createElement('img');coin.className='gold-coin';coin.src='assets/coin-gold.svg';coin.alt='';coin.setAttribute('aria-hidden','true');return coin;}
 function tooltipRow(icon,label,value){const row=document.createElement('div');row.className='tooltip-stat';const symbol=document.createElement('span');symbol.className='stat-symbol';if(icon==='◉')symbol.append(goldCoin());else symbol.textContent=icon;const text=document.createElement('span');text.textContent=label;const amount=document.createElement('b');amount.textContent=value;row.append(symbol,text,amount);return row;}
 function placeItemTooltip(anchor){const r=anchor.getBoundingClientRect();const width=itemTooltip.offsetWidth,height=itemTooltip.offsetHeight;let left=r.right+12;if(left+width>innerWidth-12)left=r.left-width-12;left=Math.max(12,Math.min(left,innerWidth-width-12));const top=Math.max(12,Math.min(r.top,innerHeight-height-12));itemTooltip.style.left=left+'px';itemTooltip.style.top=top+'px';}
@@ -978,7 +1011,7 @@ window.addEventListener('resize',hideItemTooltip);document.addEventListener('scr
 function characterParameters(){const stats=combatStats(),items=Object.values(equipped).filter(Boolean);return {...stats,goldBonus:bonusSources().reduce((n,i)=>n+(i.goldBonus||0),0),cooldown:2000/(1+stats.speed/100)/1000,critDamage:stats.damage*stats.multiplier,elements:[...new Set(items.filter(i=>i.slot==='weapon').map(i=>elementNames[i.element]||'Без элемента'))],effects:Object.entries(equipped).filter(([,i])=>i&&(i.uniqueProperty||i.bonusProperty)).map(([slot,i])=>({slot,name:i.name,text:i.uniqueProperty||i.bonusProperty}))};}
 function showCharacterStats(){
  const stats=characterParameters();const fmt=n=>Number(n.toFixed(2)).toLocaleString('ru-RU');const list=$('characterStatsList');list.replaceChildren();
- const rows=[['☠','Побеждено врагов',String(kills)],['✦','Уровень персонажа',String(playerLevel)],['◇','Очки талантов',String(talentPoints)],['💧','Максимум маны',String(maxMana())],['💧','Восстановление маны','0,1 / с'],['⚔','Урон за удар',fmt(stats.damage)],['◉','Бонус золота за убийство',fmt(stats.goldBonus)+'%'],['➟','Бонус скорости атаки','+'+fmt(stats.speed)+'%'],['◷','Перезарядка атаки',fmt(stats.cooldown)+' с'],['◎','Шанс критического удара',fmt(stats.crit*100)+'%'],['✹','Урон крита',fmt(stats.multiplier*100)+'%'],['⚔','Урон критического удара',fmt(stats.critDamage)],['♨','Элемент оружия',stats.elements.join(', ')||'Без элемента']];
+ const rows=[['☠','Побеждено врагов',String(kills)],['✦','Уровень персонажа',String(playerLevel)],['◇','Очки талантов',String(talentPoints)],['◈','Очки прокачки героя',String(heroPoints)],['💧','Максимум маны',String(maxMana())],['💧','Восстановление маны','0,1 / с'],['⚔','Урон за удар',fmt(stats.damage)],['◉','Бонус золота за убийство',fmt(stats.goldBonus)+'%'],['➟','Бонус скорости атаки','+'+fmt(stats.speed)+'%'],['◷','Перезарядка атаки',fmt(stats.cooldown)+' с'],['◎','Шанс критического удара',fmt(stats.crit*100)+'%'],['✹','Урон крита',fmt(stats.multiplier*100)+'%'],['⚔','Урон критического удара',fmt(stats.critDamage)],['♨','Элемент оружия',stats.elements.join(', ')||'Без элемента']];
  for(const [icon,label,value] of rows)list.append(tooltipRow(icon,label,value));
  const effects=$('characterEffects');effects.replaceChildren();
  if(!stats.effects.length){const empty=document.createElement('p');empty.className='no-effects';empty.textContent='У надетой экипировки пока нет уникальных эффектов.';effects.append(empty);}
@@ -1050,10 +1083,28 @@ function shopIcon(icon,className){
 }
 function shopPrice(item){return item.price==null||item.price===''?null:Number((item.price*(1-(Number(item.discount)||0)/100)).toFixed(2));}
 function shopStockLeft(item){return item.stock==null||item.stock===''?Infinity:Math.max(0,item.stock-(shopPurchases[item.id]||0));}
+// Души вылетают из побеждённого монстра и по одной долетают до счётчика под золотом; счётчик растёт с каждой долетевшей.
+function dropSouls(count){
+ if(!settings.animations)return;
+ soulsInFlight+=count;$('souls').textContent=souls-soulsInFlight;
+ const arena=$('arena'),zoom=arena.currentCSSZoom||1,box=arena.getBoundingClientRect(),monster=$('monster').getBoundingClientRect(),icon=$('soulWallet').querySelector('img').getBoundingClientRect();
+ const sx=(monster.left+monster.width/2-box.left)/zoom,sy=(monster.top+monster.height/2-box.top)/zoom,tx=(icon.left+icon.width/2-box.left)/zoom,ty=(icon.top+icon.height/2-box.top)/zoom;
+ const pop=document.createElement('span');pop.className='soul-pop';pop.textContent='+'+count;pop.style.left=sx+'px';pop.style.top=sy-80+'px';arena.append(pop);setTimeout(()=>pop.remove(),1100);
+ const land=soul=>{soul.remove();soulsInFlight=Math.max(0,soulsInFlight-1);$('souls').textContent=souls-soulsInFlight;const wallet=$('soulWallet');wallet.classList.remove('soul-pulse');void wallet.offsetWidth;wallet.classList.add('soul-pulse');};
+ for(let i=0;i<count;i++){
+  const soul=document.createElement('img');soul.src='assets/soul.svg';soul.alt='';soul.className='soul-fly';arena.append(soul);
+  const ox=(i-(count-1)/2)*44,oy=-60-Math.random()*20;
+  soul.animate([{translate:`${sx-24}px ${sy-24}px`,scale:.3,opacity:0},{translate:`${sx-24+ox}px ${sy-24+oy}px`,scale:1.25,opacity:1,offset:.35},{translate:`${sx-24+ox}px ${sy-34+oy}px`,scale:1.1,opacity:1,offset:.5},{translate:`${tx-24}px ${ty-24}px`,scale:.65,opacity:1}],
+   {duration:1100,delay:i*90,easing:'cubic-bezier(.5,0,.3,1)',fill:'both'}).finished.then(()=>land(soul),()=>land(soul));
+ }
+}
+// Счётчик душ всегда стоит сразу под кошельком с золотом, на любом размере экрана.
+function placeSoulWallet(){const goldWallet=$('arena').querySelector('.gold-wallet'),wallet=$('soulWallet');wallet.style.top=goldWallet.offsetTop+goldWallet.offsetHeight+10+'px';wallet.style.right=getComputedStyle(goldWallet).right;}
+addEventListener('resize',placeSoulWallet);new ResizeObserver(placeSoulWallet).observe(document.querySelector('#arena .gold-wallet'));
 function renderShop(animate=true){
- const tabs=shopCatalog().tabs||[];
+ const tabs=[...(shopCatalog().tabs||[]),...(window.dungeonApi?.shopTabs()||[])];
  if(!tabs.some(tab=>tab.id===shopActiveTab))shopActiveTab=tabs[0]?.id??null;
- $('shopGold').textContent=gold;
+ $('shopGold').textContent=gold;$('shopSouls').textContent=souls;
  $('shopTabs').hidden=tabs.length<2;
  $('shopTabs').replaceChildren(...tabs.map(tab=>{
   const button=document.createElement('button');button.type='button';button.setAttribute('role','tab');button.className='shop-tab'+(tab.id===shopActiveTab?' active':'');button.setAttribute('aria-selected',tab.id===shopActiveTab);
@@ -1081,7 +1132,8 @@ function renderShop(animate=true){
   else if(left===0){buy.disabled=true;buy.textContent='Нет в наличии';}
   else{
    if(Number(item.discount)>0){const old=document.createElement('s');old.append(goldCoin(),item.price);buy.append(old,' ');}
-   buy.append(goldCoin(),price);buy.disabled=gold<price;if(buy.disabled)buy.title='Не хватает '+Number((price-gold).toFixed(2))+' золота';
+   const bySouls=item.currency==='souls',wallet=bySouls?souls:gold;
+   buy.append(bySouls?soulCoin():goldCoin(),price);buy.disabled=wallet<price;if(buy.disabled)buy.title='Не хватает '+Number((price-wallet).toFixed(2))+(bySouls?' душ':' золота');
    buy.addEventListener('click',()=>buyShopItem(item));
   }
   slot.append(buy);grid.append(slot);
@@ -1089,11 +1141,11 @@ function renderShop(animate=true){
  $('shopSections').replaceChildren(grid);
 }
 function buyShopItem(item){
- const price=shopPrice(item);if(price==null||gold<price||shopStockLeft(item)<=0)return;
+ const price=shopPrice(item),bySouls=item.currency==='souls';if(price==null||(bySouls?souls:gold)<price||shopStockLeft(item)<=0)return;
  const result=(SHOP_EFFECTS[item.effect?.type]||SHOP_EFFECTS.none).apply(Number(item.effect?.amount)||0,item);
  $('shopStatus').classList.toggle('shop-status-error',result!==true);
  if(result!==true){$('shopStatus').textContent=result;return;}
- gold=Number((gold-price).toFixed(2));shopPurchases[item.id]=(shopPurchases[item.id]||0)+1;saveShopPurchases();
+ if(bySouls)souls-=price;else gold=Number((gold-price).toFixed(2));shopPurchases[item.id]=(shopPurchases[item.id]||0)+1;saveShopPurchases();
  render();renderShop(false);$('shopStatus').textContent='';
  const card=[...$('shopSections').querySelectorAll('.shop-slot')].find(slot=>slot.dataset.itemId===item.id);if(card)flashShopLot(card,item);
 }
@@ -1164,116 +1216,107 @@ function updatePowerUI(){
  button.disabled=powerActive||rapidActive||locked||(remaining>0&&mana>=20);button.title='Мощный удар · Урон 10 обычных ударов · 20 маны · Перезарядка 1 с';button.setAttribute('aria-label','Мощный удар · 20 маны · '+(remaining?Math.ceil(remaining/1000)+' с':'готов'));
 }
 let cancelCustomPowerSwing=null;
+// «Мощный удар» — ледяной призрачный меч. Хронометраж при durationScale=1 (мс):
+// появление → замах назад → пауза с дрожью и накоплением силы → молниеносный удар → замирание в момент попадания → доводка → угасание.
+const POWER_PHASE_MS={appear:140,windup:260,hold:150,strike:95,hitstop:55,follow:110,fade:260};
+const POWER_BASE_DURATION=Object.values(POWER_PHASE_MS).reduce((s,ms)=>s+ms,0);
+const POWER_HIT_RATIO=(POWER_PHASE_MS.appear+POWER_PHASE_MS.windup+POWER_PHASE_MS.hold+POWER_PHASE_MS.strike)/POWER_BASE_DURATION;
+function powerStrikeDuration(){return Math.round(POWER_BASE_DURATION*((window.POWER_STRIKE?.durationScale)||1));}
+function hexToRgb(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');const n=m?parseInt(m[1],16):0x9fdcff;return [n>>16&255,n>>8&255,n&255];}
+function powerStrikeGeometry(){
+ const arena=$('arena'),zoom=arena.currentCSSZoom||1,box=arena.getBoundingClientRect(),monster=$('monster').getBoundingClientRect();
+ return {cx:(monster.left+monster.width/2-box.left)/zoom,cy:(monster.top+monster.height/2-box.top)/zoom,w:monster.width/zoom,h:monster.height/zoom};
+}
+new Image().src='assets/spectral-sword.png';
+let powerStrikeSeq=0;
+// Меч вращается вокруг невидимой руки сбоку от моба (справа или слева, случайно); остриё проходит дугой через моба.
+// Сцена — viewBox 300×220, центр моба в (150,125), ширина моба 126 единиц.
 function playCustomPowerSwing(){
+ const cfg=window.POWER_STRIKE||{},k=cfg.durationScale||1,swordScale=cfg.swordScale||1,[cr,cg,cb]=hexToRgb(cfg.trailColor);
+ const color=`rgb(${cr},${cg},${cb})`,core=`rgb(${Math.round(cr+(255-cr)*.72)},${Math.round(cg+(255-cg)*.72)},${Math.round(cb+(255-cb)*.72)})`;
+ const id='ps'+(++powerStrikeSeq),NS='http://www.w3.org/2000/svg',T=POWER_PHASE_MS,MX=150,MY=125;
+ const dir=Math.random()<.5?1:-1,px=dir>0?210:90,py=215,R=172,TIP=125,mir=a=>dir>0?a:180-a;
+ const A0=mir(-85),AW=mir(-58),A1=mir(-188),sgn=Math.sign(A1-AW);
+ let AH=Math.atan2(MY-py,MX-px)*180/Math.PI;
+ while(AH<Math.min(AW,A1))AH+=360;while(AH>Math.max(AW,A1))AH-=360;
 
-const img=new Image();
-img.src='assets/custom-swing-sword-v2.png';
-const c=document.createElement('canvas'),ctx=c.getContext('2d');c.className='custom-power-swing';c.setAttribute('aria-hidden','true');$('arena').append(c);let cancelled=false,raf=0;
-const PX=256,PY=-130,R=870,W=512,H=768; // pivot — точка вне меча, на 130px за навершием (PY меняет расстояние), R — до острия
-const SIZE=0.36,OFF_X=-5,OFF_Y=-200; // размер меча; смещение центра вращения от моба (px при арене 740, -Y = вверх)
-let S,k,dpr;
-function resize(){
-  dpr=window.devicePixelRatio||1;
-  S=Math.min($('arena').clientWidth,$('arena').clientHeight,800);
-  c.style.width=c.style.height=S+'px';
-  c.style.marginLeft=OFF_X*S/740+'px';c.style.marginTop=OFF_Y*S/740+'px';
-  c.width=c.height=S*dpr;
-  k=S*SIZE/840;
-}
-resize();
+ const geom=powerStrikeGeometry(),s=geom.w/126,svg=document.createElementNS(NS,'svg');
+ svg.setAttribute('viewBox','0 0 300 220');svg.setAttribute('aria-hidden','true');svg.classList.add('power-strike-fx');
+ Object.assign(svg.style,{left:geom.cx-MX*s+'px',top:geom.cy-MY*s+'px',width:300*s+'px',height:220*s+'px'});
+ svg.innerHTML=`<defs><filter id="${id}g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6"/></filter>
+  <radialGradient id="${id}f"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="${core}" stop-opacity=".8"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient></defs>`;
+ $('arena').append(svg);
+ const el=(tag,attrs,parent=svg)=>{const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);parent.append(e);return e;};
+ const ease={lin:t=>t,out:t=>1-(1-t)**2,in:t=>t*t*t};
+ const rad=a=>a*Math.PI/180,at=(r,a)=>[px+r*Math.cos(rad(a)),py+r*Math.sin(rad(a))];
 
-const D=Math.PI/180;
-const ease={
-  outC:t=>1-Math.pow(1-t,3),
-  inOut:t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
-  inQ:t=>t*t*t
-};
-// ключевые фазы: [длительность мс, угол от, угол до, функция]
-const A_START=-45*D, A_WIND=A_START+21*D, A_END=-215*D, A_OVER=A_END-31*D; // на экране: старт -45° (вправо-вниз), финал 125° (влево-вверх)
-const phases=[
-  [480,A_START,A_START,ease.outC],  // пауза в стартовой позе
-  [460,A_START,A_WIND,ease.outC],   // замах (назад)
-  [140,A_WIND,A_WIND,ease.outC],    // миг перед ударом
-  [370,A_WIND,A_OVER,ease.inOut],   // резкий взмах справа вверх
-  [380,A_OVER,A_END,ease.outC]      // доводка, затем меч сразу исчезает
-];
-const total=phases.reduce((s,p)=>s+p[0],0);
-function angleAt(t){
-  for(const [d,a,b,f] of phases){
-    if(t<=d)return a+(b-a)*f(d?t/d:1);
-    t-=d;
+ // Опорные точки угла меча по времени: [длительность, к какому углу, сглаживание, дрожь].
+ const segs=[[T.appear,A0,'lin'],[T.windup,AW,'out'],[T.hold,AW,'lin',true],[T.strike,AH,'in'],[T.hitstop,AH,'lin'],[T.follow,A1,'out'],[T.fade,A1+sgn*3,'out']];
+ const mark=[];let acc=0;segs.forEach(g=>{mark.push(acc);acc+=g[0]*k;});
+ const total=acc,strikeStart=mark[3],hitAt=mark[4],fadeStart=mark[6],off=t=>t/total;
+ const pts=[{t:0,a:A0}];let prev=A0;
+ segs.forEach(([ms,to,ez,tremble],i)=>{const n=tremble||ms>120?10:6;for(let j=1;j<=n;j++){const f=j/n;let a=prev+(to-prev)*ease[ez](f);if(tremble)a+=Math.sin(f*Math.PI*6)*1.6*(1-f*.3);pts.push({t:mark[i]+ms*k*f,a});}prev=to;});
+ const motion=pts.map(p=>({transform:`translate(${px}px,${py}px) rotate(${p.a}deg)`,offset:off(p.t)}));
+ const flip=sgn<0?-1:1,sc=v=>`scale(1,${flip*v})`,anims=[],timers=[];
+ const run=(node,frames,opts)=>{anims.push(node.animate(frames,opts));};
+
+ const makeBlade=(lag,ghost)=>{
+  const g=el('g',{}),inner=el('g',{},g);
+  // Размер меча меняется вокруг гарды так, чтобы остриё оставалось на дуге следа.
+  const body=el('g',{transform:`translate(${R-TIP*swordScale} 0) scale(${swordScale})`},inner);
+  body.innerHTML=(ghost?'':`<ellipse class="glow" cx="48" cy="0" rx="92" ry="18" fill="${color}" opacity=".2" filter="url(#${id}g)"/>`)+
+   `<image href="assets/spectral-sword.png" x="-41.5" y="-20.6" width="166.3" height="41.1" style="filter:drop-shadow(0 0 3px ${color})"/>`;
+  run(g,motion,{duration:total,delay:lag,fill:'both'});
+  if(ghost)run(inner,[{transform:sc(1),opacity:0,offset:0},{transform:sc(1),opacity:0,offset:off(strikeStart)},{transform:sc(1),opacity:ghost,offset:off(strikeStart+20*k)},{transform:sc(1),opacity:ghost*.8,offset:off(fadeStart)},{transform:sc(1),opacity:0,offset:1}],{duration:total,delay:lag,fill:'both'});
+  else{
+   run(inner,[{transform:sc(.7),opacity:0,offset:0},{transform:sc(1.06),opacity:1,offset:off(T.appear*k*.6)},{transform:sc(1),opacity:1,offset:off(T.appear*k)},{transform:sc(1),opacity:1,offset:off(fadeStart)},{transform:sc(1),opacity:0,offset:1}],{duration:total,fill:'both'});
+   run(body.querySelector('.glow'),[{opacity:.15,offset:0},{opacity:.2,offset:off(mark[1])},{opacity:.55,offset:off(mark[2])},{opacity:.95,offset:off(strikeStart)},{opacity:1,offset:off(hitAt)},{opacity:.3,offset:off(fadeStart)},{opacity:0,offset:1}],{duration:total,fill:'both'});
   }
-  return A_END;
-}
-let t0=performance.now(),samples=[];
-function restart(){t0=performance.now();samples=[]}
+ };
+ // След-полумесяц появляется только во время удара и дорисовывается ровно за мечом.
+ const arcD=r=>{const [x0,y0]=at(r,AW),[x1,y1]=at(r,A1);return `M${x0} ${y0}A${r} ${r} 0 ${Math.abs(A1-AW)>180?1:0} ${sgn>0?1:0} ${x1} ${y1}`;};
+ const dash=pts.map(p=>({strokeDashoffset:p.t<strikeStart?100:100*(1-Math.min(1,Math.max(0,(p.a-AW)/(A1-AW)))),offset:off(p.t)}));
+ const band=(r,w,col,op,blur)=>{
+  const path=el('path',{d:arcD(r),pathLength:100,fill:'none',stroke:col,'stroke-width':w,'stroke-linecap':'round',opacity:op,'stroke-dasharray':100,'stroke-dashoffset':100});
+  if(blur)path.setAttribute('filter',`url(#${id}g)`);
+  run(path,dash,{duration:total,fill:'forwards'});
+  run(path,[{opacity:op},{opacity:0}],{duration:(T.fade+200)*k,delay:fadeStart-60*k,fill:'forwards'});
+ };
+ band(R-48,76,color,.22,true);band(R-16,22,color,.6,true);band(R-6,4,'#fff',1,false);
+ for(let i=4;i>=1;i--)makeBlade(i*16*k,.5/i);
+ makeBlade(0,0);
 
+ // Накопление силы: ледяные искры стягиваются к острию во время паузы, перед ударом на нём вспыхивает блик.
+ const [tx,ty]=at(R-12,AW);
+ for(let i=0;i<9;i++){
+  const a=Math.random()*Math.PI*2,d=30+Math.random()*26,spark=el('circle',{cx:tx,cy:ty,r:1.4+Math.random()*1.8,fill:i%3?core:'#fff'});
+  run(spark,[{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`,opacity:0},{transform:`translate(${Math.cos(a)*d*.6}px,${Math.sin(a)*d*.6}px)`,opacity:1,offset:.3},{transform:'translate(0,0)',opacity:0}],{duration:(T.hold+T.windup*.5)*k,delay:mark[1]+T.windup*k*.5+i*12*k,easing:'ease-in',fill:'both'});
+ }
+ const glint=el('path',{d:'M0 -14L3 -3L14 0L3 3L0 14L-3 3L-14 0L-3 -3Z',fill:'#fff',transform:`translate(${tx} ${ty})`});
+ run(glint,[{transform:'scale(0) rotate(0deg)',opacity:0},{transform:'scale(1.3) rotate(45deg)',opacity:1,offset:.5},{transform:'scale(.2) rotate(90deg)',opacity:0}],{duration:170*k,delay:strikeStart-130*k,fill:'both'});
 
-function drawSword(th,alpha){
-  ctx.save();
-  ctx.globalAlpha=alpha;
-  ctx.translate(S/2,S/2);
-  ctx.rotate(th);
-  ctx.scale(k,k);
-  ctx.drawImage(img,-PX,-PY,W,H);
-  ctx.restore();
-}
-const tip=(th,r)=>[S/2+(-Math.sin(th))*r*k, S/2+Math.cos(th)*r*k];
-
-function frame(now){
-  let el=now-t0;
-  if(cancelled||el>total){c.remove();return;}
-  const th=angleAt(el);
-  samples.push([el,th]);
-  while(samples.length&&el-samples[0][0]>650)samples.shift();
-
-  ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,S,S);
-
-  // шлейф: клиновидные сегменты между соседними кадрами
-  ctx.save();
-  ctx.globalCompositeOperation='lighter';
-  const g=ctx.createRadialGradient(S/2,S/2,R*k*0.15,S/2,S/2,R*k);
-  g.addColorStop(0,'rgba(120,170,255,0)');
-  g.addColorStop(.55,'rgba(150,200,255,.55)');
-  g.addColorStop(1,'rgba(235,248,255,1)');
-  ctx.fillStyle=g;
-  for(let i=1;i<samples.length;i++){
-    const [ta,a]=samples[i-1],[tb,b]=samples[i];
-    if(Math.abs(b-a)<0.002)continue;
-    const age=(el-tb)/650;
-    const al=Math.pow(Math.max(0,1-age),2)*0.85;
-    if(al<=0.01)continue;
-    const ri=R*0.12,ro=R*1.02;
-    const p1=tip(a,ri),p2=tip(a,ro),p3=tip(b,ro),p4=tip(b,ri);
-    ctx.globalAlpha=al;
-    ctx.beginPath();
-    ctx.moveTo(...p1);ctx.lineTo(...p2);
-    // внешняя кромка — дуга по окружности острия
-    ctx.arc(S/2,S/2,ro*k,Math.atan2(p2[1]-S/2,p2[0]-S/2),Math.atan2(p3[1]-S/2,p3[0]-S/2),b>a?false:true);
-    ctx.lineTo(...p4);ctx.closePath();ctx.fill();
+ // Попадание: вспышка, два ледяных кольца и разлетающиеся осколки в центре моба.
+ timers.push(setTimeout(()=>{
+  const g=el('g',{transform:`translate(${MX} ${MY})`});
+  const flash=el('circle',{r:34,fill:`url(#${id}f)`},g);
+  run(flash,[{transform:'scale(.3)',opacity:1},{transform:'scale(1.7)',opacity:0}],{duration:300*k,easing:'ease-out',fill:'forwards'});
+  for(let i=0;i<2;i++){const ring=el('circle',{r:16,fill:'none',stroke:i?'#fff':color,'stroke-width':i?2.5:6},g);run(ring,[{transform:'scale(.4)',opacity:1},{transform:'scale(4.4)',opacity:0}],{duration:480*k,delay:i*90*k,easing:'cubic-bezier(.2,.8,.3,1)',fill:'both'});}
+  for(let i=0;i<10;i++){
+   const d=46+Math.random()*30,shard=el('path',{d:'M0 -6L3 0L0 6L-3 0Z',fill:i%2?'#fff':core,stroke:color,'stroke-width':.8},g);
+   shard.style.rotate=(i*36+Math.random()*20)+'deg';
+   run(shard,[{transform:'translateX(8px) scale(.6)',opacity:1},{transform:`translateX(${d}px) scale(1.3)`,opacity:1,offset:.55},{transform:`translateX(${d+12}px) scale(.4)`,opacity:0}],{duration:560*k,easing:'cubic-bezier(.15,.85,.35,1)',fill:'forwards'});
   }
-  ctx.restore();
-
-  // призрачные копии меча (смаз движения)
-  for(let i=samples.length-1,n=0;i>=0&&n<6;i-=2,n++){
-    const [tt,a]=samples[i];
-    if(el-tt>140||Math.abs(a-th)<0.03)continue;
-    drawSword(a,0.12*(1-(el-tt)/140));
-  }
-  drawSword(th,1);
-  raf=requestAnimationFrame(frame);
-}
-img.onload=()=>{if(cancelled)return;t0=performance.now();raf=requestAnimationFrame(frame);};
-
-return ()=>{cancelled=true;cancelAnimationFrame(raf);c.remove();};
+ },hitAt));
+ const end=Math.max(total,hitAt+(560+180)*k)+60;
+ timers.push(setTimeout(()=>svg.remove(),end));
+ return ()=>{timers.forEach(clearTimeout);anims.forEach(a=>a.cancel());svg.remove();};
 }
 function usePower(){
  renderMana();checkBossTimer();if(powerActive||rapidActive||aimActive||locked||document.querySelector('dialog[open]'))return;
  if(mana<20){showManaWarning($('powerSkill'));return;}if(Date.now()<powerReadyAt)return;
- const duration=1830;mana=Number((mana-20).toFixed(6));powerActive=true;const token=++powerToken;powerReadyAt=Date.now()+duration+1000;renderMana();saveProgress();updatePowerUI();
+ const duration=powerStrikeDuration();mana=Number((mana-20).toFixed(6));powerActive=true;const token=++powerToken;powerReadyAt=Date.now()+duration+1000;renderMana();saveProgress();updatePowerUI();
  if(settings.animations)cancelCustomPowerSwing=playCustomPowerSwing();
- setTimeout(()=>{if(token!==powerToken)return;if(!locked&&hp>0){attack(true,10);if(settings.animations){$('monster').classList.remove('hit','power-shaken');void $('monster').offsetWidth;$('monster').classList.add('power-shaken');setTimeout(()=>$('monster').classList.remove('power-shaken'),350);}}},1290);
+ setTimeout(()=>{if(token!==powerToken)return;if(!locked&&hp>0){attack(true,10);if(settings.animations){$('monster').style.setProperty('--power-shake-scale',(window.POWER_STRIKE?.shakeScale)??1);$('monster').classList.remove('hit','power-shaken');void $('monster').offsetWidth;$('monster').classList.add('power-shaken');setTimeout(()=>$('monster').classList.remove('power-shaken'),350);}}},Math.round(duration*POWER_HIT_RATIO));
  setTimeout(()=>{if(token!==powerToken)return;cancelCustomPowerSwing?.();cancelCustomPowerSwing=null;powerActive=false;powerReadyAt=Date.now()+1000;saveProgress();updatePowerUI();},duration);
 }
 $('powerSkill').addEventListener('click',usePower);setInterval(updatePowerUI,100);
@@ -1588,7 +1631,9 @@ $('openAdmin').addEventListener('click',openAdminPanel);
 $('closeAdmin').addEventListener('click',()=>$('adminPanel').close());
 $('adminGiveItem').addEventListener('click',()=>{const count=adminNumber('adminItemCount',true);if(count===null)return;const item=itemPool.find(item=>item.id===$('adminItem').value);if(!item){adminMessage('Выбери предмет.',true);return;}if(inventoryItems.length+count>24){adminMessage('Недостаточно места. Свободных ячеек: '+(24-inventoryItems.length)+'.',true);return;}for(let i=0;i<count;i++)inventoryItems.push({...item});adminCommit('Выдано: '+item.name+' × '+count);});
 $('adminAddPoints').addEventListener('click',()=>{const amount=adminNumber('adminPoints',true);if(amount===null)return;talentPoints+=amount;adminCommit('Добавлено очков талантов: '+amount);});
+$('adminAddHeroPoints').addEventListener('click',()=>{const amount=adminNumber('adminHeroPoints',true);if(amount===null)return;heroPoints+=amount;window.heroTree?.refresh?.();adminCommit('Добавлено очков прокачки героя: '+amount);});
 $('adminAddGold').addEventListener('click',()=>{const amount=adminNumber('adminGold');if(amount===null)return;gold=Number((gold+amount).toFixed(2));adminCommit('Добавлено золота: '+amount);});
+$('adminAddSouls').addEventListener('click',()=>{const amount=adminNumber('adminSouls',true);if(amount===null)return;souls+=amount;adminCommit('Добавлено душ: '+amount);});
 $('adminAddXp').addEventListener('click',()=>{const amount=adminNumber('adminXp',true);if(amount===null)return;gainExperience(amount*5);adminCommit('Добавлено опыта: '+amount);});
 $('adminRestoreMana').addEventListener('click',()=>{restoreMana(maxMana());adminMessage('Мана восстановлена.');});
 $('adminResetCooldowns').addEventListener('click',()=>{cooldownUntil=0;rapidReadyAt=0;aimReadyAt=0;updateAttackButton();adminCommit('Перезарядки сброшены.');});
@@ -1640,7 +1685,9 @@ function fitHud(){
 }
 addEventListener('resize',fitHud);fitHud();
 </script>
+<script src="dungeon.js"></script>
 <script src="ui-editor.js"></script>
 <script src="shop-editor.js"></script>
+<script src="power-strike-editor.js"></script>
 </body>
 </html>
