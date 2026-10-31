@@ -235,6 +235,7 @@ dialog{background:#1b241d;color:#f2f1e7;border:1px solid #697754;border-radius:1
 
 #arena{background:linear-gradient(180deg,#08171144,#08171118 50%,#08171166),url('assets/forest-dusk-stylized.png') center center/cover no-repeat;isolation:isolate}
 #arena::before,#arena::after{display:none}
+#arena.location-2{background:linear-gradient(180deg,#08171144,#08171118 50%,#08171166),url('assets/location-2.webp') center center/cover no-repeat}
 
 #monster.monster-dying>svg:not(.slash-effect){animation:monster-death-pop .44s ease-in forwards!important;transform-origin:50% 60%;pointer-events:none}
 #monster.monster-dying>.shadow{animation:monster-death-shadow .4s ease-out forwards}
@@ -636,20 +637,43 @@ const forestEnemies=[
  {id:'spirit',name:'Лесной дух',color:'#62d5bd',light:'#d1fff4',sprite:`<svg viewBox="0 0 200 175" role="img" aria-label="Лесной дух"><defs><radialGradient id="spiritGlow"><stop stop-color="#c7ffe0"/><stop offset=".55" stop-color="#60d6b5"/><stop offset="1" stop-color="#286d70"/></radialGradient></defs><path d="M100 18Q144 23 143 73Q145 103 172 119Q152 129 137 117Q143 150 118 155L106 143L95 162L80 146Q57 155 56 127Q32 141 23 126Q58 105 57 76Q54 29 100 18Z" fill="url(#spiritGlow)" stroke="#a5f4d0" stroke-width="3"/><path d="M76 22Q53 9 48 22Q58 36 74 38M121 21Q143 5 153 18Q142 36 125 37" fill="#5fae77" stroke="#a5d89b" stroke-width="2"/><ellipse cx="82" cy="76" rx="7" ry="12" fill="#16484b"/><ellipse cx="119" cy="76" rx="7" ry="12" fill="#16484b"/><circle cx="83" cy="72" r="3" fill="#e7ffed"/><circle cx="120" cy="72" r="3" fill="#e7ffed"/><path d="M92 97Q100 105 109 97" fill="none" stroke="#21615b" stroke-width="3" stroke-linecap="round"/><path d="M76 114Q67 129 76 135M127 105Q135 115 128 129" fill="none" stroke="#d6ffe6" stroke-width="3" opacity=".5"/></svg>`},
  {id:'spider',name:'Чащобный паук',color:'#ce9c65',light:'#ffe4b8',sprite:`<svg viewBox="0 0 200 175" role="img" aria-label="Чащобный паук"><g fill="none" stroke="#b48762" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"><path d="M76 88L41 60L24 77M70 102L29 91L14 115M71 117L33 126L25 151M81 132L59 149L60 163M124 88L159 60L176 77M130 102L171 91L186 115M129 117L167 126L175 151M119 132L141 149L140 163"/></g><ellipse cx="100" cy="69" rx="40" ry="43" fill="#66503f" stroke="#c69c70" stroke-width="3"/><path d="M83 39L100 56L117 39M80 58L100 75L120 58" fill="none" stroke="#ac8059" stroke-width="5"/><ellipse cx="100" cy="116" rx="36" ry="29" fill="#8d694a" stroke="#d2aa7c" stroke-width="3"/><g fill="#ffce6b"><circle cx="88" cy="110" r="6"/><circle cx="112" cy="110" r="6"/><circle cx="76" cy="104" r="3"/><circle cx="124" cy="104" r="3"/></g><path d="M89 130L94 145L100 133L106 145L111 130" fill="#f6dfb6"/></svg>`}
 ];
+const fieldEnemies=[
+ {id:'field-fox',name:'Полевая лиса',color:'#e8934f',light:'#ffd4a8'},
+ {id:'field-boar',name:'Полевой кабан',color:'#d99554',light:'#ffdfb0'},
+ {id:'field-wolf',name:'Сумеречный волк',color:'#8b8bad',light:'#d4d0f0'},
+ {id:'field-scarecrow',name:'Соломенное пугало',color:'#e0a846',light:'#fff2b8'},
+ {id:'field-raven',name:'Ночной ворон',color:'#9580c4',light:'#e0d4ff'}
+];
 let normalEnemyId='slime',enemySelectionKey='',renderedEnemyId='';
-const eliteNames={slime:['Древний слизень','Чумной король слизней'],bat:['Крупная летучая мышь','Кровокрыл'],spirit:['Старший лесной дух','Осквернённый дух'],spider:['Матёрый чащобный паук','Матриарх ядовитой чащи']};
+const eliteNames={
+ slime:['Древний слизень','Чумной король слизней'],
+ bat:['Крупная летучая мышь','Кровокрыл'],
+ spirit:['Старший лесной дух','Осквернённый дух'],
+ spider:['Матёрый чащобный паук','Матриарх ядовитой чащи'],
+ 'field-fox':['Огненная лиса','Вожак лисьей стаи'],
+ 'field-boar':['Старый секач','Вепрь-разрушитель'],
+ 'field-wolf':['Сумеречный альфа','Призрачный волк'],
+ 'field-scarecrow':['Древнее пугало','Хранитель урожая'],
+ 'field-raven':['Мудрый ворон','Вестник тьмы']
+};
+function getLocationEnemies(){const locationIndex=Math.floor((zone-1)/100);return locationIndex===1?fieldEnemies:forestEnemies;}
 function paintedMonsterSprite(id,boss=false){
- return `<svg viewBox="0 0 200 175" role="img" aria-label="${boss?'Босс':'Лесной монстр'}" style="overflow:hidden"><image href="assets/monster-${id}${boss?'-boss':''}.svg" width="200" height="175" preserveAspectRatio="xMidYMid meet"/></svg>`;
+ const ext=id.startsWith('field-')?'.webp':'.svg';
+ const viewBox=id.startsWith('field-')?'0 0 240 240':'0 0 200 175';
+ const imgSize=id.startsWith('field-')?'240':'200';
+ const imgHeight=id.startsWith('field-')?'240':'175';
+ return `<svg viewBox="${viewBox}" role="img" aria-label="${boss?'Босс':'Монстр'}" style="overflow:visible"><image href="assets/monster-${id}${boss?'-boss':''}${ext}" width="${imgSize}" height="${imgHeight}" preserveAspectRatio="xMidYMid meet"/></svg>`;
 }
 function bossSprite(enemy){return paintedMonsterSprite(enemy.id,true);}
 function renderForestEnemy(elite){
  if(hp>0)clearMonsterDeath();
  const key=zone+':'+zoneKills+':'+kills;
+ const enemies=getLocationEnemies();
  if(hp>0&&key!==enemySelectionKey){
-  const candidates=forestEnemies.filter(enemy=>enemy.id!==normalEnemyId);
+  const candidates=enemies.filter(enemy=>enemy.id!==normalEnemyId);
   normalEnemyId=candidates[Math.floor(Math.random()*candidates.length)].id;enemySelectionKey=key;
  }
- const base=forestEnemies.find(enemy=>enemy.id===normalEnemyId)||forestEnemies[0];
+ const base=enemies.find(enemy=>enemy.id===normalEnemyId)||enemies[0];
  const boss=elite&&zone%5===0;
  const enemy={...base,id:base.id+(elite?(boss?'-boss':'-mini'):''),name:elite?eliteNames[base.id][boss?1:0]:base.name,sprite:boss?bossSprite(base):paintedMonsterSprite(base.id)};
  if(renderedEnemyId!==enemy.id){const old=document.querySelector('#monster > svg:not(.slash-effect)');old.outerHTML=enemy.sprite;renderedEnemyId=enemy.id;}
@@ -735,7 +759,8 @@ function updateHealthTrail(){
  }
  lastHealthRatio=ratio;lastEnemyStamp=stamp;
 }
-function render(){updateTalentResetButtons();updateHealthTrail();renderExperience();updateRapidUI();const inDungeon=window.dungeonApi?.active();if(!inDungeon){const boss=maxHp===enemyHealth(zone,5);$('arena').classList.toggle('boss-fight',boss);renderForestEnemy(boss);document.querySelector('.enemy-type').firstChild.textContent=boss?(zone%5===0?'БОСС · УР. ':'МИНИ-БОСС · УР. '):'ОБЫЧНЫЙ ПРОТИВНИК · УР. ';} $('health').textContent=hp.toLocaleString('ru-RU',{maximumFractionDigits:1})+' / '+maxHp;$('fill').style.width=(hp/maxHp*100)+'%';$('hpBar').setAttribute('aria-valuemax',maxHp);$('hpBar').setAttribute('aria-valuenow',hp);$('gold').textContent=gold;$('shopGold').textContent=gold;$('souls').textContent=souls-soulsInFlight;$('wave').textContent=zone;$('previousStage').textContent=zone>1?zone-1:'—';$('previousStage').style.visibility=zone>1?'visible':'hidden';$('previousStageDot').style.visibility=zone>1?'visible':'hidden';$('nextStage').textContent=zone+1;$('wave').classList.toggle('boss-stage-glow',zone%5===0);$('nextStage').classList.toggle('boss-stage-glow',(zone+1)%5===0);$('wave').setAttribute('aria-label','Текущий этап '+zone);$('level').textContent=1;$('shopSouls').textContent=souls;if(inDungeon)window.dungeonApi.renderEnemy();else window.dungeonApi?.refresh(); if(storageAvailable)saveProgress(); }
+function updateLocation(){const locationIndex=Math.floor((zone-1)/100);$('arena').classList.toggle('location-2',locationIndex===1);}
+function render(){updateTalentResetButtons();updateHealthTrail();renderExperience();updateRapidUI();updateLocation();const inDungeon=window.dungeonApi?.active();if(!inDungeon){const boss=maxHp===enemyHealth(zone,5);$('arena').classList.toggle('boss-fight',boss);renderForestEnemy(boss);document.querySelector('.enemy-type').firstChild.textContent=boss?(zone%5===0?'БОСС · УР. ':'МИНИ-БОСС · УР. '):'ОБЫЧНЫЙ ПРОТИВНИК · УР. ';} $('health').textContent=hp.toLocaleString('ru-RU',{maximumFractionDigits:1})+' / '+maxHp;$('fill').style.width=(hp/maxHp*100)+'%';$('hpBar').setAttribute('aria-valuemax',maxHp);$('hpBar').setAttribute('aria-valuenow',hp);$('gold').textContent=gold;$('shopGold').textContent=gold;$('souls').textContent=souls-soulsInFlight;$('wave').textContent=zone;$('previousStage').textContent=zone>1?zone-1:'—';$('previousStage').style.visibility=zone>1?'visible':'hidden';$('previousStageDot').style.visibility=zone>1?'visible':'hidden';$('nextStage').textContent=zone+1;$('wave').classList.toggle('boss-stage-glow',zone%5===0);$('nextStage').classList.toggle('boss-stage-glow',(zone+1)%5===0);$('wave').setAttribute('aria-label','Текущий этап '+zone);$('level').textContent=1;$('shopSouls').textContent=souls;if(inDungeon)window.dungeonApi.renderEnemy();else window.dungeonApi?.refresh(); if(storageAvailable)saveProgress(); }
 function updateAttackButton(){
  const remaining=Math.max(0,cooldownUntil-Date.now());
  $('attack').disabled=locked||remaining>0;
@@ -762,11 +787,13 @@ function showMonsterHurt(){
  if(!settings.animations)return;
  const image=$('monster').querySelector('svg:not(.slash-effect) image');if(!image)return;
  const current=image.getAttribute('href');if(!current||!current.startsWith('assets/monster-'))return;
- const normal=current.replace('-hurt.svg','.svg');
- clearTimeout(monsterHurtTimer);image.setAttribute('href',normal.replace('.svg','-hurt.svg'));
+ const ext=current.endsWith('.webp')?'.webp':'.svg';
+ const normal=current.replace('-hurt'+ext,ext);
+ clearTimeout(monsterHurtTimer);image.setAttribute('href',normal.replace(ext,'-hurt'+ext));
  monsterHurtTimer=setTimeout(()=>{if(image.isConnected)image.setAttribute('href',normal);},200);
 }
 for(const kind of ['slime','bat','spirit','spider'])for(const suffix of ['','-boss']){const preload=new Image();preload.src='assets/monster-'+kind+suffix+'-hurt.svg';}
+for(const kind of ['field-fox','field-boar','field-wolf','field-scarecrow','field-raven']){for(const suffix of ['-hurt','-boss','-boss-hurt']){const preload=new Image();preload.src='assets/monster-'+kind+suffix+'.webp';}}
 function showMonsterDeath(){
  clearMonsterDeath();if(!settings.animations)return;
  const monster=$('monster');monster.classList.remove('hit');
@@ -1686,6 +1713,7 @@ function fitHud(){
 addEventListener('resize',fitHud);fitHud();
 </script>
 <script src="dungeon.js"></script>
+<script src="music.js"></script>
 <script src="ui-editor.js"></script>
 <script src="shop-editor.js"></script>
 <script src="power-strike-editor.js"></script>
