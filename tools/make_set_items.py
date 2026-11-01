@@ -462,9 +462,14 @@ def build():
                 body = ring(s, extra)
             else:
                 body = amulet(s)
-            with open(os.path.join(OUT_DIR, item_id + '.svg'), 'w', encoding='utf-8', newline='\n') as f:
-                f.write(svg(s, body))
-            item = {'id': item_id, 'name': name, 'slot': slot, 'rarity': s['rarity'], 'image': f'assets/items/{item_id}.svg',
+            # Нарисованная вручную иконка assets/items/<id>.webp важнее сгенерированной — её не перезаписываем.
+            if os.path.exists(os.path.join(OUT_DIR, item_id + '.webp')):
+                image = f'assets/items/{item_id}.webp'
+            else:
+                with open(os.path.join(OUT_DIR, item_id + '.svg'), 'w', encoding='utf-8', newline='\n') as f:
+                    f.write(svg(s, body))
+                image = f'assets/items/{item_id}.svg'
+            item = {'id': item_id, 'name': name, 'slot': slot, 'rarity': s['rarity'], 'image': image,
                     'sellPrice': SELL_PRICE[s['rarity']], 'set': s['id']}
             if slot == 'weapon':
                 item['element'] = s.get('element', 'none')
