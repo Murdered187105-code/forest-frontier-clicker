@@ -624,6 +624,7 @@ html body #shopDialog .shop-tab.active{color:#062018;background:linear-gradient(
 <script src="hero-tree-data.js"></script>
 <script src="power-strike-data.js"></script>
 <script src="hero-tree.js"></script>
+<script src="item-sets.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 
@@ -703,8 +704,8 @@ function gainExperience(monsterHealth){playerXp=Number((playerXp+monsterHealth*.
 function renderExperience(){$('heroLevel').textContent=playerLevel;$('heroLevelBadge').textContent=playerLevel;const needed=xpRequired();$('heroXpBar').style.setProperty('--hero-xp',Math.min(100,playerXp/needed*100)+'%');$('heroXpBar').title='Опыт: '+playerXp.toLocaleString('ru-RU')+' / '+needed;$('heroXpBar').setAttribute('aria-valuemax',needed);$('heroXpBar').setAttribute('aria-valuenow',playerXp);$('talentPointsBadge').textContent=talentPoints;$('talentPointsBadge').hidden=talentPoints<=0;$('heroPointsBadge').textContent=heroPoints;$('heroPointsBadge').hidden=heroPoints<=0;document.getElementById('heroXpBar').title='Прокачка героя'+(heroPoints>0?' — свободных очков: '+heroPoints:'');$('openTalents').setAttribute('aria-label','Древо талантов'+(talentPoints>0?' — свободных очков: '+talentPoints:''));document.querySelectorAll('.available-talent-points').forEach(el=>el.textContent='Очки талантов: '+talentPoints);}
 function loadExperience(saved){heroPoints=Number.isSafeInteger(saved.heroPoints)&&saved.heroPoints>=0?saved.heroPoints:0;souls=Number.isSafeInteger(saved.souls)&&saved.souls>=0?saved.souls:0;aimUnlocked=saved.aimUnlocked===true;aimRank=Number.isInteger(saved.aimRank)?Math.max(0,Math.min(AIM_MAX_RANK,saved.aimRank)):0;aimReadyAt=Number.isFinite(saved.aimReadyAt)?Math.min(saved.aimReadyAt,Date.now()+AIM_COOLDOWN+15000):0;rapidSeriesRank=Number.isInteger(saved.rapidSeriesRank)?Math.max(0,Math.min(10,saved.rapidSeriesRank)):0;rapidRestRank=Number.isInteger(saved.rapidRestRank)?Math.max(0,Math.min(10,saved.rapidRestRank)):0;rapidDamageRank=Number.isInteger(saved.rapidDamageRank)?Math.max(0,Math.min(10,saved.rapidDamageRank)):0;playerLevel=Number.isSafeInteger(saved.playerLevel)&&saved.playerLevel>=1?saved.playerLevel:1;playerXp=Number.isFinite(saved.playerXp)&&saved.playerXp>=0&&saved.playerXp<xpRequired()?saved.playerXp:0;talentPoints=Number.isSafeInteger(saved.talentPoints)&&saved.talentPoints>=0?saved.talentPoints:0;}
 const MAX_MANA=100,MANA_REGEN=.1,RAPID_MANA_COST=10;
-// Источники бонусов к характеристикам: надетые предметы и древо прокачки героя.
-function bonusSources(){return [...Object.values(equipped).filter(Boolean),...(window.heroTreeBonus?[window.heroTreeBonus()]:[])];}
+// Источники бонусов к характеристикам: надетые предметы, древо прокачки героя и собранные комплекты.
+function bonusSources(){return [...Object.values(equipped).filter(Boolean),...(window.heroTreeBonus?[window.heroTreeBonus()]:[]),...(window.setCollectionBonus?[window.setCollectionBonus()]:[])];}
 function maxMana(){return MAX_MANA+bonusSources().reduce((sum,item)=>sum+(item?.maxMana||0),0);}
 let mana=100,manaUpdatedAt=Date.now(),manaSavedAt=Date.now();
 function regenerateMana(){const now=Date.now();mana=Math.min(maxMana(),mana+Math.max(0,now-manaUpdatedAt)/1000*MANA_REGEN);manaUpdatedAt=now;}
@@ -887,17 +888,13 @@ const inventoryItems=[];
 const LOOT_KEY='forest-frontier-loot-v1',CHEST_INTERVAL=5000;
 const rarityNames={Common:'Обычный',Uncommon:'Необычный',Rare:'Редкий',Epic:'Эпический',Legendary:'Легендарный',Divine:'Божественный'};
 function rarityLabel(rarity){return rarityNames[rarity]||rarity;}
-const itemPool=[{id:'admin-sword',name:'Меч админа',slot:'weapon',rarity:'Legendary',image:'assets/admin-sword-painted.svg',damage:5,attackSpeed:50,element:'fire',critChance:5,critDamage:20,sellPrice:1},{id:'mana-ring',name:'Кольцо запаса маны',slot:'ring',rarity:'Uncommon',image:'assets/mana-ring-painted.svg',maxMana:10,sellPrice:1},{id:'strike-ring',name:'Кольцо силы удара',slot:'ring',rarity:'Uncommon',image:'assets/strike-ring-painted.svg',damageBonus:1,sellPrice:1}];
-itemPool.push(...[{"id": "common-item-01", "name": "Льняной капюшон", "slot": "head", "rarity": "Common", "image": "assets/common-item-01.svg", "sellPrice": 1, "maxMana": 3}, {"id": "common-item-02", "name": "Кожаная шапка", "slot": "head", "rarity": "Common", "image": "assets/common-item-02.svg", "sellPrice": 1, "critChance": 1}, {"id": "common-item-03", "name": "Потёртые перчатки", "slot": "gloves", "rarity": "Common", "image": "assets/common-item-03.svg", "sellPrice": 1, "damageBonus": 0.2}, {"id": "common-item-04", "name": "Льняные обмотки", "slot": "gloves", "rarity": "Common", "image": "assets/common-item-04.svg", "sellPrice": 1, "attackSpeed": 2}, {"id": "common-item-05", "name": "Кожаные сапоги", "slot": "boots", "rarity": "Common", "image": "assets/common-item-05.svg", "sellPrice": 1, "attackSpeed": 2}, {"id": "common-item-06", "name": "Холщовые башмаки", "slot": "boots", "rarity": "Common", "image": "assets/common-item-06.svg", "sellPrice": 1, "goldBonus": 2}, {"id": "common-item-07", "name": "Кожаный жилет", "slot": "chest", "rarity": "Common", "image": "assets/common-item-07.svg", "sellPrice": 1, "damageBonus": 0.3}, {"id": "common-item-08", "name": "Лесная туника", "slot": "chest", "rarity": "Common", "image": "assets/common-item-08.svg", "sellPrice": 1, "maxMana": 5}, {"id": "common-item-09", "name": "Кожаные наплечники", "slot": "shoulders", "rarity": "Common", "image": "assets/common-item-09.svg", "sellPrice": 1, "critDamage": 3}, {"id": "common-item-10", "name": "Железные наплечники", "slot": "shoulders", "rarity": "Common", "image": "assets/common-item-10.svg", "sellPrice": 1, "damageBonus": 0.2}, {"id": "common-item-11", "name": "Верёвочный пояс", "slot": "belt", "rarity": "Common", "image": "assets/common-item-11.svg", "sellPrice": 1, "goldBonus": 2}, {"id": "common-item-12", "name": "Кожаный ремень", "slot": "belt", "rarity": "Common", "image": "assets/common-item-12.svg", "sellPrice": 1, "maxMana": 3}, {"id": "common-item-13", "name": "Льняные штаны", "slot": "legs", "rarity": "Common", "image": "assets/common-item-13.svg", "sellPrice": 1, "attackSpeed": 2}, {"id": "common-item-14", "name": "Кожаные штаны", "slot": "legs", "rarity": "Common", "image": "assets/common-item-14.svg", "sellPrice": 1, "critDamage": 3}, {"id": "common-item-15", "name": "Медное кольцо", "slot": "ring", "rarity": "Common", "image": "assets/common-item-15.svg", "sellPrice": 1, "damageBonus": 0.2}, {"id": "common-item-16", "name": "Железное кольцо", "slot": "ring", "rarity": "Common", "image": "assets/common-item-16.svg", "sellPrice": 1, "critChance": 1}, {"id": "common-item-17", "name": "Кулон-лист", "slot": "accessory", "rarity": "Common", "image": "assets/common-item-17.svg", "sellPrice": 1, "maxMana": 4}, {"id": "common-item-18", "name": "Походный оберег", "slot": "accessory", "rarity": "Common", "image": "assets/common-item-18.svg", "sellPrice": 1, "goldBonus": 3}, {"id": "common-item-19", "name": "Короткий меч", "slot": "weapon", "rarity": "Common", "image": "assets/common-item-19.svg", "sellPrice": 1, "damage": 1.5, "element": "none"}, {"id": "common-item-20", "name": "Деревянная дубинка", "slot": "weapon", "rarity": "Common", "image": "assets/common-item-20.svg", "sellPrice": 1, "damage": 2, "element": "none"}]);
-// Кольца всех редкостей — по одному на каждую, характеристики растут с редкостью.
-itemPool.push(
- {id:'ring-common',name:'Бронзовое кольцо стража',slot:'ring',rarity:'Common',image:'assets/ring-common.svg',sellPrice:1,damageBonus:0.3},
- {id:'ring-uncommon',name:'Кольцо лесной росы',slot:'ring',rarity:'Uncommon',image:'assets/ring-uncommon.svg',sellPrice:2,maxMana:8,critChance:1},
- {id:'ring-rare',name:'Сапфировое кольцо бури',slot:'ring',rarity:'Rare',image:'assets/ring-rare.svg',sellPrice:5,attackSpeed:5,critChance:2},
- {id:'ring-epic',name:'Аметистовое кольцо теней',slot:'ring',rarity:'Epic',image:'assets/ring-epic.svg',sellPrice:12,damageBonus:1,critDamage:15},
- {id:'ring-legendary',name:'Кольцо пламенного сердца',slot:'ring',rarity:'Legendary',image:'assets/ring-legendary.svg',sellPrice:30,damageBonus:2,critChance:4,critDamage:25,element:'fire'},
- {id:'ring-divine',name:'Кольцо рассветной звезды',slot:'ring',rarity:'Divine',image:'assets/ring-divine.svg',sellPrice:75,damageBonus:3,attackSpeed:10,critChance:5,critDamage:40,maxMana:20,goldBonus:10}
-);
+const itemPool=[{id:'admin-sword',name:'Меч админа',slot:'weapon',rarity:'Legendary',adminOnly:true,image:'assets/admin-sword-painted.svg',damage:5,attackSpeed:50,element:'fire',critChance:5,critDamage:20,sellPrice:1}];
+// Игровые предметы — комплекты из item-sets.js; «Меч админа» выдаётся только через админ-панель.
+itemPool.push(...(window.SET_ITEMS||[]));
+// Шансы редкостей у сундука и случайных наград магазина (в процентах).
+const LOOT_RARITY_WEIGHTS={Common:60,Uncommon:25,Rare:10,Epic:4,Legendary:.9,Divine:.1};
+function lootPool(){return itemPool.filter(item=>!item.adminOnly);}
+function rollLootItem(){const pool=lootPool(),present=Object.entries(LOOT_RARITY_WEIGHTS).filter(([rarity])=>pool.some(item=>item.rarity===rarity));if(!present.length)return null;let roll=Math.random()*present.reduce((sum,[,weight])=>sum+weight,0),rarity=present[present.length-1][0];for(const [name,weight] of present){if((roll-=weight)<0){rarity=name;break;}}const options=pool.filter(item=>item.rarity===rarity);return {...options[Math.floor(Math.random()*options.length)]};}
 let equipped={};
 function combatStats(){const items=bonusSources();return {damage:(items.reduce((n,i)=>n+(i.damage||0),0)||1)+items.reduce((n,i)=>n+(i.damageBonus||0),0),speed:items.reduce((n,i)=>n+(i.attackSpeed||0),0),crit:Math.min(1,.05+items.reduce((n,i)=>n+(i.critChance||0),0)/100),multiplier:2+items.reduce((n,i)=>n+(i.critDamage||0),0)/100,fire:items.some(i=>i.element==='fire')};}
 function renderEquipment(){renderMana();updateRapidUI();document.querySelectorAll('.equipment-slot').forEach(el=>{const item=equipped[el.dataset.slot];el.querySelectorAll('.equipped-picture').forEach(node=>node.remove());el.classList.toggle('has-item',!!item);el.title=item?item.name+' · '+rarityLabel(item.rarity)+' · Нажми, чтобы сменить':'';el.querySelector('small').textContent=item?item.name:'Пусто';if(item){const image=document.createElement('img');image.className='equipped-picture';image.src=item.image;image.alt=item.name;el.prepend(image);}attachItemTooltip(el,item);el.removeAttribute('title');});document.querySelector('.stat b').textContent=combatStats().damage;}
@@ -937,7 +934,6 @@ function restoreSavedItem(item){
  if(!item||typeof item!=='object')return null;
  const template=itemPool.find(t=>t.id===item.id)||itemPool.find(t=>t.name===item.name&&t.slot===item.slot);
  if(template)return applyForgeBonus({...item,...template});
- if(typeof item.name==='string'&&typeof item.slot==='string'&&matchingSlots(item).some(slot=>Object.hasOwn(slotNames,slot)))return {...item};
  return null;
 }
 try{
@@ -955,9 +951,9 @@ try{
 function updateChest(){const left=Math.max(0,Math.ceil((chestReadyAt-Date.now())/1000));$('lootChest').disabled=left>0;$('lootChest').classList.toggle('ready',left===0);$('chestTimer').textContent=left?String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0'):'Открыть';}
 $('lootChest').addEventListener('click',()=>{
  if(Date.now()<chestReadyAt)return;
- if(!itemPool.length){$('chestNotice').textContent='В сундуке пока нет предметов.';return;}
+ if(!lootPool().length){$('chestNotice').textContent='В сундуке пока нет предметов.';return;}
  if(inventoryItems.length>=24){$('chestNotice').textContent='Инвентарь заполнен. Сундук подождёт.';return;}
- const item={...itemPool[Math.floor(Math.random()*itemPool.length)]};inventoryItems.push(item);chestReadyAt=Date.now()+CHEST_INTERVAL;persistLoot();updateChest();$('chestNotice').textContent='';showChestReward(item);
+ const item=rollLootItem();inventoryItems.push(item);chestReadyAt=Date.now()+CHEST_INTERVAL;persistLoot();updateChest();$('chestNotice').textContent='';showChestReward(item);
 });
 persistLoot();updateChest();setInterval(updateChest,250);
 let inventorySlot=null;
@@ -1098,7 +1094,7 @@ const SHOP_EFFECTS={
  xp:{label:'Опыт',amount:true,hint:a=>'+'+a+' опыта',apply:a=>{gainExperience(a*5);return true;}},
  talent:{label:'Очки талантов',amount:true,hint:a=>'+'+a+' очк. талантов',apply:a=>{talentPoints+=a;return true;}},
  chest:{label:'Сундук готов сразу',amount:false,hint:()=>'Сундук на арене сразу готов',apply:()=>{chestReadyAt=Date.now();updateChest();persistLoot();return true;}},
- item:{label:'Случайный предмет',amount:true,hint:a=>'Случайный предмет × '+a,apply:a=>{const count=Math.max(1,a);if(!itemPool.length)return 'Нет предметов для выдачи';if(inventoryItems.length+count>24)return 'Недостаточно места в инвентаре';for(let i=0;i<count;i++)inventoryItems.push({...itemPool[Math.floor(Math.random()*itemPool.length)]});renderEquipment();persistLoot();return true;}},
+ item:{label:'Случайный предмет',amount:true,hint:a=>'Случайный предмет × '+a,apply:a=>{const count=Math.max(1,a);if(!itemPool.length)return 'Нет предметов для выдачи';if(inventoryItems.length+count>24)return 'Недостаточно места в инвентаре';for(let i=0;i<count;i++)inventoryItems.push(rollLootItem());renderEquipment();persistLoot();return true;}},
  // Конкретный предмет из itemPool по effect.itemId: новые предметы игры появляются в редакторе автоматически.
  gameItem:{label:'Предмет из игры',amount:true,item:true,hint:(a,item)=>{const g=shopGameItem(item);return g?rarityLabel(g.rarity)+' · '+shopSlotLabel(g.slot)+(a>1?' · × '+a:''):'Предмет не выбран';},apply:(a,item)=>{const g=shopGameItem(item);if(!g)return 'Этого предмета больше нет в игре';const count=Math.max(1,a);if(inventoryItems.length+count>24)return 'Недостаточно места в инвентаре';for(let i=0;i<count;i++)inventoryItems.push({...g});renderEquipment();persistLoot();return true;}}
 };
@@ -1750,6 +1746,7 @@ addEventListener('resize',fitHud);fitHud();
 </script>
 <script src="dungeon.js"></script>
 <script src="anvil.js"></script>
+<script src="collection.js"></script>
 <script src="music.js"></script>
 <script src="ui-editor.js"></script>
 <script src="shop-editor.js"></script>

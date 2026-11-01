@@ -453,7 +453,7 @@ function showChest(boss){
  setPanel('');
 }
 function rollBossItem(){
- const eligible=itemPool.filter(i=>CHEST_RARITY_WEIGHTS[i.rarity]);if(!eligible.length)return null;
+ const eligible=lootPool().filter(i=>CHEST_RARITY_WEIGHTS[i.rarity]);if(!eligible.length)return null;
  const present=Object.entries(CHEST_RARITY_WEIGHTS).filter(([r])=>eligible.some(i=>i.rarity===r));
  let roll=Math.random()*present.reduce((s,[,w])=>s+w,0),rarity=present[0][0];
  for(const [r,w] of present){if((roll-=w)<0){rarity=r;break;}}
