@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><defs>
-<radialGradient id="aura"><stop offset="0" stop-color="#76d76b" stop-opacity="0.26"/><stop offset="1" stop-color="#76d76b" stop-opacity="0"/></radialGradient>
-<linearGradient id="mat" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0f4f5"/><stop offset=".45" stop-color="#a7b0b5"/><stop offset="1" stop-color="#4a5257"/></linearGradient>
-<linearGradient id="matV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a7b0b5"/><stop offset="1" stop-color="#4a5257"/></linearGradient>
-<linearGradient id="trim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#76d76b"/><stop offset="1" stop-color="#7a5228"/></linearGradient>
-<radialGradient id="gem" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#76d76b"/><stop offset="1" stop-color="#4a5257"/></radialGradient>
-<linearGradient id="wood" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a5a2a"/><stop offset=".5" stop-color="#5a3414"/><stop offset="1" stop-color="#3a200a"/></linearGradient>
-</defs><circle cx="64" cy="64" r="60" fill="url(#aura)"/><g transform="rotate(20 64 64)"><path d="M59 14H69V118H59Z" fill="url(#wood)" stroke="#140d06" stroke-width="2.5" stroke-linejoin="round"/><path d="M66 20C92 14 106 28 106 48C106 62 98 70 86 68L66 56Z" fill="url(#mat)" stroke="#140d06" stroke-width="2.5" stroke-linejoin="round"/><path d="M56 22H72V34H56Z" fill="url(#trim)" stroke="#140d06" stroke-width="2.5" stroke-linejoin="round"/><circle cx="64" cy="28" r="3.5" fill="url(#gem)" stroke="#140d06" stroke-width="1.6"/><circle cx="62.8" cy="26.8" r="1.0" fill="#fff" opacity=".8"/></g></svg>
