@@ -1664,7 +1664,7 @@ const TALENT_CATEGORIES=[
  }
 })();
 function updateTalentCategories(){
- const open=[rapidUnlocked,powerUnlocked,aimUnlocked,false,false,false];
+ const open=[rapidUnlocked,powerUnlocked,aimUnlocked,window.cutApi?.unlocked()??false,false,false];
  for(const category of TALENT_CATEGORIES)category.box.querySelector('.talent-category-count').textContent=category.skills.filter(index=>open[index]).length+' из '+category.skills.length+' открыто';
 }
 $('openTalents').addEventListener('click',updateTalentCategories);updateTalentCategories();
@@ -1745,6 +1745,7 @@ function fitHud(){
 addEventListener('resize',fitHud);fitHud();
 </script>
 <script src="dungeon.js"></script>
+<script src="precise-cut.js"></script>
 <script src="anvil.js"></script>
 <script src="collection.js"></script>
 <script src="music.js"></script>
