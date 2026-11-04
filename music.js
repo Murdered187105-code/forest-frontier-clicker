@@ -109,9 +109,35 @@ const THEMES={
   beat(b,step,t,spb){
    if(Math.random()<.28)bell(b,walk(this.scale),t,.05);
    if(Math.random()<.07)drip(b,t+rnd(0,spb));
+  }},
+ waste:{bpm:54,bpc:8,pad:{cutoff:1700,level:.03},
+  chords:[[33,[57,64,67,71]],[29,[53,60,67,69]],[36,[55,60,64,71]],[28,[52,59,64,67]]],
+  scale:[76,79,81,83,84,88,91],
+  beds:b=>[bed(b,{type:'bandpass',freq:1500,q:.6,level:.008,lfo:.04}),bed(b,{freq:260,level:.007,lfo:.03})],
+  beat(b,step,t,spb){
+   if(Math.random()<.3)bell(b,walk(this.scale),t,.03,5.5); // ледяной перезвон
+   if(step%4===0&&Math.random()<.22)flute(b,walk(this.scale)-12,t,spb*rnd(2,3),.03);
+  }},
+ mines:{bpm:62,bpc:8,pad:{cutoff:950,level:.035},
+  chords:[[31,[55,58,62,67]],[27,[51,58,63,67]],[29,[53,57,60,65]],[26,[50,57,62,65]]],
+  scale:[67,70,72,74,75,77,79,82],
+  beds:b=>[drone(b,31,.022),bed(b,{freq:320,level:.011,lfo:.05})],
+  beat(b,step,t,spb){
+   if(step%2===0&&Math.random()<.45)pluck(b,walk(this.scale)-12,t,.05,1.8);
+   if(Math.random()<.09)bell(b,88,t+rnd(0,spb),.012,.8); // далёкий удар кирки
+   if(Math.random()<.1)drip(b,t+rnd(0,spb));
+  }},
+ desert:{bpm:72,bpc:8,pad:{cutoff:1200,level:.03},
+  chords:[[26,[50,57,62,66]],[27,[51,58,63,67]],[26,[50,57,62,66]],[31,[55,58,62,67]]],
+  scale:[74,75,78,79,81,82,84,86],
+  beds:b=>[bed(b,{type:'bandpass',freq:700,q:.4,level:.009,lfo:.06})],
+  beat(b,step,t,spb,notes){
+   if(step%4===0&&Math.random()<.5)flute(b,walk(this.scale),t,spb*rnd(1.5,2.5),.04);
+   if(Math.random()<.5)pluck(b,notes[step%notes.length]+12,t+(step%2?spb/2:0),.04,.9); // струнный перебор
   }}
 };
-function wanted(){if(window.dungeonApi?.active())return 'dungeon';return Math.floor((zone-1)/100)===1?'field':'forest';}
+const LOCATION_THEMES=['forest','field','waste','mines','desert'];
+function wanted(){if(window.dungeonApi?.active())return 'dungeon';return LOCATION_THEMES[Math.floor((zone-1)/100)]||'forest';}
 function startTheme(name){
  const now=ctx.currentTime,old=current;
  if(old){

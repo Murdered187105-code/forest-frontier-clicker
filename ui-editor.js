@@ -143,7 +143,7 @@ panel.addEventListener('change',e=>{if(e.target.matches('input'))renderList()});
 function renderList(){const pos=panel.scrollTop;renderPanel();panel.scrollTop=pos}
 panel.addEventListener('click',e=>{
  const b=e.target.closest('button');if(!b)return;
- if(b.dataset.go){const el=document.querySelector(b.dataset.go);if(el)select(el);else alert('Элемент сейчас не найден на странице (возможно, он в закрытом окне).');return}
+ if(b.dataset.go){const el=document.querySelector(b.dataset.go);if(el)select(el);else gameConfirm({title:'Элемент не найден',text:'Его сейчас нет на странице — возможно, он в закрытом окне.',ok:'Понятно',cancel:false});return}
  const a=b.dataset.a,sel=selected&&selectorFor(selected);
  if(a==='close')toggle(false);
  else if(a==='side')panel.classList.toggle('left');
@@ -152,7 +152,7 @@ panel.addEventListener('click',e=>{
  else if(a==='hide'&&selected){snapshot();const o=entry(selected);o.hide?delete o.hide:o.hide=true;save();renderList()}
  else if(a==='reset'&&selected){snapshot();delete overrides[sel];save();renderList()}
  else if(a==='undo'&&undo.length){overrides=JSON.parse(undo.pop());save();renderList()}
- else if(a==='clear'&&Object.keys(overrides).length&&confirm('Сбросить все изменения интерфейса?')){snapshot();overrides={};save();renderList()}
+ else if(a==='clear'&&Object.keys(overrides).length)gameConfirm({title:'Сбросить изменения интерфейса?',text:'Все правки внешнего вида вернутся к исходным.',ok:'Сбросить'}).then(yes=>{if(yes){snapshot();overrides={};save();renderList()}})
  else if(a==='export'){const ta=panel.querySelector('textarea');ta.hidden=false;ta.value=css.textContent||'/* Изменений нет */';ta.select();navigator.clipboard?.writeText(ta.value).then(()=>b.textContent='Скопировано ✓',()=>{})}
  else if(a==='download'){const url=URL.createObjectURL(new Blob([css.textContent],{type:'text/css'})),l=document.createElement('a');l.href=url;l.download='ui-overrides.css';l.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 });

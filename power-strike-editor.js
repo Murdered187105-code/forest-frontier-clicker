@@ -70,12 +70,12 @@ panel.addEventListener('input',event=>{
  cfg[key]=key==='trailColor'?event.target.value:Number(event.target.value);
  commit();
 });
-panel.addEventListener('click',event=>{
+panel.addEventListener('click',async event=>{
  const b=event.target.closest('button');if(!b)return;
  if(b.dataset.a==='close'){panel.hidden=true;return;}
  if(b.dataset.a==='play'){preview();return;}
  if(b.dataset.a==='revert'){
-  if(dirty&&!confirm('Отменить изменения и вернуть настройки из файла?'))return;
+  if(dirty&&!await gameConfirm({title:'Отменить изменения?',text:'Вернутся настройки анимации из файла.',ok:'Отменить правки'}))return;
   try{localStorage.removeItem(DRAFT_KEY);}catch{}cfg=normalize(window.POWER_STRIKE);window.POWER_STRIKE=clone(cfg);dirty=false;render();return;
  }
  if(b.dataset.a==='save'){save();}

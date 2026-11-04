@@ -14,7 +14,7 @@ const FUSION_ODDS={
  Legendary:{Legendary:900,Divine:100}
 };
 const GROUP_NAMES={Common:'три обычных',Uncommon:'три необычных',Rare:'три редких',Epic:'три эпических',Legendary:'три легендарных'};
-const STAT_NAMES={damage:'урону',damageBonus:'доп. урону удара',maxMana:'максимуму маны',goldBonus:'золоту за убийство',attackSpeed:'скорости атаки',critChance:'шансу крита',critDamage:'урону крита'};
+const STAT_NAMES={damage:'урону',damageBonus:'доп. урону удара',maxMana:'максимуму маны',manaRegen:'восстановлению маны',goldBonus:'золоту за убийство',attackSpeed:'скорости атаки',critChance:'шансу крита',critDamage:'урону крита'};
 const FUSE_MS=2300,FUSE_MS_REDUCED=350,FX_MS=1900;
 const rank=rarity=>RANKS.indexOf(rarity);
 const color=rarity=>rarityFlashColors[rarity]||'#d9b56a';
@@ -72,6 +72,16 @@ html body #anvilDialog .anvil-tab:disabled:not(.active){opacity:.45;cursor:not-a
 .anvil-result.ready,.anvil-result.revealed{background:radial-gradient(ellipse at 50% 35%,#1d3d26,#07130b) padding-box,linear-gradient(145deg,var(--rc),#5a3d12 50%,var(--rc)) border-box;box-shadow:inset 0 0 18px #000c,0 6px 16px #000a,0 0 18px color-mix(in srgb,var(--rc) 60%,transparent),0 0 40px color-mix(in srgb,var(--rc) 25%,transparent);cursor:pointer}
 .anvil-result.ready .anvil-question{color:var(--rc);text-shadow:0 0 14px var(--rc)}
 .anvil-result.ready{animation:anvil-ready-pulse 1.6s ease-in-out infinite}
+/* Закрытый результат — тот же задник карточки, что у сундука; вопрос уже на картинке */
+.anvil-result.closed,.anvil-result.ready{border-color:transparent;background:url(assets/card-back.png) center/100% 100% no-repeat border-box}
+.anvil-result.closed .anvil-question,.anvil-result.ready .anvil-question{display:none}
+/* Готовый результат: те же слои и эффекты редкости, что у карточки сундука (index.html), только мельче. При наведении покачивание останавливается, чтобы не спорить с наклоном */
+.anvil-result.ready{--reward-color:var(--rc);--rc-fx:250px;--rc-rise:-175px;overflow:visible;background:none}
+.anvil-result.ready:is(:hover,:focus-visible){animation:none}
+/* Окно не прыгает при открытии: без ползунка на время переворота и с местом под три строки статуса */
+html body #anvilDialog:has(.rc-flipping,.rc-wave-host){overflow:hidden}
+html body #anvilDialog #anvilStatus{min-height:54.6px}
+.anvil-result.ready small.anvil-hint{z-index:5;left:6px;right:6px;bottom:8px;padding:2px 0;border-radius:5px;background:#07130bd9;opacity:1;font-size:8.5px;white-space:nowrap}
 @keyframes anvil-ready-pulse{50%{transform:translateY(-3px) scale(1.03)}}
 .anvil-result:focus-visible{outline:2px solid var(--rc);outline-offset:4px}
 .anvil-result small.anvil-hint{position:absolute;bottom:6px;left:4px;right:4px;font-size:9px;color:#efe6cd;opacity:.85}
@@ -136,6 +146,9 @@ html body #anvilDialog .anvil-fuse:disabled{opacity:.4;cursor:not-allowed;filter
 .smelt-empty{display:grid;place-items:center;padding:8px;border:2px dashed #c9a35a55;border-radius:10px;text-align:center;font-size:10px;line-height:1.3;color:#8f8565}
 .smelt-card{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px;border-radius:10px;border:2px solid transparent;background:radial-gradient(ellipse at 50% 25%,#1c3123,#09130d) padding-box,linear-gradient(145deg,var(--rc),#4a3a1a 55%,var(--rc)) border-box;box-shadow:0 6px 14px #000b;text-align:center;transform:translate(var(--x),var(--y)) rotate(var(--r))}
 .smelt-card img{width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 4px #000a)}
+.smelt-card.has-level{gap:2px;justify-content:flex-start}
+.smelt-card.has-level img{flex:none;width:42px;height:42px}
+.smelt-card.has-level strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .smelt-card strong{font-size:9.5px;font-weight:600;line-height:1.1;color:#efe6cd}
 .smelt-card small{font-size:8px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--rc)}
 .smelt-card.card-in{animation:smelt-card-in .32s cubic-bezier(.2,.8,.3,1.2)}
@@ -309,6 +322,7 @@ dialog.innerHTML=`<div class="equipment-heading"><div><div class="talents-eyebro
 document.body.append(dialog);
 
 const forge=$('anvilForge'),resultCard=$('anvilResult'),slots=[...forge.querySelectorAll('.anvil-slot')];
+addCardTilt(resultCard,()=>resultCard.classList.contains('ready'));
 // selected — три позиции верхних слотов (null — пусто); sources — расплавляемые предметы на время анимации.
 let selected=[null,null,null],sources=null,result=null,sourceRarity=null,phase='idle',timers=[],note='';
 
@@ -331,12 +345,14 @@ function rollRarity(group){
 }
 // Обычные — эпические предметы получают случайную прибавку к одной из своих характеристик; легендарные и божественные остаются как в каталоге.
 function forgeItem(template){
- const item={...template};
+ // Сначала выпадают уровень и случайные характеристики, закалка усиливает одну из выпавших.
+ const item=window.rollItemStats?window.rollItemStats({...template}):{...template};
  if(rank(item.rarity)>=rank('Legendary'))return item;
- const own=Object.keys(STAT_NAMES).filter(key=>typeof template[key]==='number'&&template[key]>0);
+ const own=Object.keys(STAT_NAMES).filter(key=>typeof item[key]==='number'&&item[key]>0);
  const keys=own.length?own:['damageBonus','maxMana','critChance','goldBonus','attackSpeed'];
- const key=keys[Math.floor(Math.random()*keys.length)],base=template[key]||1,share=.1+Math.random()*.2;
- const bonus=key==='damageBonus'?Math.max(.1,Number((base*share).toFixed(1))):Math.max(1,Math.round(base*share));
+ const key=keys[Math.floor(Math.random()*keys.length)],base=item[key]||1,share=.1+Math.random()*.2;
+ // Дробные характеристики получают дробную прибавку: восстановление маны измеряется сотыми долями в секунду.
+ const bonus=key==='damageBonus'?Math.max(.1,Number((base*share).toFixed(1))):key==='manaRegen'?Math.max(.01,Number((base*share).toFixed(2))):Math.max(1,Math.round(base*share));
  item.forgeBonus={[key]:bonus};
  return applyForgeBonus(item);
 }
@@ -345,7 +361,7 @@ function rollResult(group){
  // Если в каталоге нет предметов выпавшей редкости, берём ближайшую нижнюю, но не ниже исходной.
  while(rank(rarity)>rank(group)&&!lootPool().some(item=>item.rarity===rarity))rarity=RANKS[rank(rarity)-1];
  const pool=lootPool().filter(item=>item.rarity===rarity);
- return pool.length?forgeItem(pool[Math.floor(Math.random()*pool.length)]):null;
+ return pool.length?forgeItem(starterWeapon(pool[Math.floor(Math.random()*pool.length)])):null;
 }
 
 function fuse(){
@@ -367,14 +383,20 @@ function finishMelting(){
  forge.classList.remove('melting');sources=null;phase='ready';render();renderTabs();
  resultCard.focus({preventScroll:true});
 }
+let flipping=false;
 function openResult(){
  if(phase==='ready'){
+  if(flipping)return;
+  flipping=true;hideItemTooltip(true);
+  playCardFlip(resultCard,result.rarity,()=>{
+  flipping=false;if(phase!=='ready'||!result)return;
   phase='revealed';
   const up=rank(result.rarity)>rank(sourceRarity);
   note=up?'Успех! Редкость повышена: '+rarityLabel(sourceRarity)+' → '+rarityLabel(result.rarity)+'.':'Редкость сохранена: '+rarityLabel(result.rarity)+'.';
   const bonus=result.forgeBonus&&Object.entries(result.forgeBonus)[0];
   if(bonus)note+=' Закалка: +'+bonus[1]+' к '+STAT_NAMES[bonus[0]]+'.';
-  render();revealEffect(result.rarity);
+  render();revealEffect(result.rarity);revealDone();
+  });
  }else if(phase==='revealed'){
   note='«'+result.name+'» отправлен в инвентарь.';
   hideItemTooltip(true);result=null;sourceRarity=null;phase='idle';clearEffects();render();
@@ -415,12 +437,12 @@ $('anvilFuse').addEventListener('click',fuse);
 function renderSlots(){
  const shown=sources||selected;
  slots.forEach((slot,i)=>{
-  const item=shown[i];slot.replaceChildren();slot.classList.toggle('filled',!!item);
+  const item=shown[i];slot.replaceChildren();slot.classList.remove('has-level');slot.classList.toggle('filled',!!item);
   if(item){
    slot.style.setProperty('--rc',color(item.rarity));
    const image=document.createElement('img');image.src=item.image;image.alt='';
    const name=document.createElement('strong');name.textContent=item.name;
-   slot.append(image,name);
+   slot.append(image,name);addLevelPlate(slot,item);
    const label=item.name+' · '+rarityLabel(item.rarity)+(sources?'':' — нажми, чтобы убрать');
    slot.setAttribute('aria-label',label);slot.setAttribute('role','button');slot.tabIndex=sources?-1:0;
   }else{
@@ -448,14 +470,14 @@ function renderResult(){
  resultCard.style.setProperty('--rc',color(result.rarity));resultCard.setAttribute('role','button');resultCard.tabIndex=0;
  const hint=document.createElement('small');hint.className='anvil-hint';
  if(phase==='ready'){
-  hint.textContent='Нажми, чтобы открыть';resultCard.classList.add('closed','ready');resultCard.append(question,hint);
+  hint.textContent='Нажми, чтобы открыть';resultCard.classList.add('closed','ready','rc-'+result.rarity.toLowerCase());resultCard.innerHTML=rewardBackLayers(result.rarity);resultCard.append(hint);
   resultCard.setAttribute('aria-label','Закрытый результат — нажми, чтобы открыть');return;
  }
  const rarity=document.createElement('span');rarity.className='anvil-result-rarity';rarity.textContent=rarityLabel(result.rarity);
  const image=document.createElement('img');image.src=result.image;image.alt='';
  const name=document.createElement('strong');name.textContent=result.name;
  hint.textContent='Нажми, чтобы забрать';
- resultCard.classList.add('revealed');resultCard.append(rarity,image,name,hint);
+ resultCard.classList.add('revealed');resultCard.append(rarity,image,name,hint);addLevelPlate(resultCard,result);
  resultCard.setAttribute('aria-label',result.name+' · '+rarityLabel(result.rarity)+' — нажми, чтобы забрать');
  attachItemTooltip(resultCard,result);
 }
@@ -501,7 +523,7 @@ function renderGrid(){
   const image=document.createElement('img');image.src=item.image;image.alt='';
   const name=document.createElement('strong');name.textContent=item.name;
   const rarity=document.createElement('small');rarity.textContent=rarityLabel(item.rarity);
-  cell.append(image,name,rarity);
+  cell.append(image,name,rarity);addLevelPlate(cell,item);
   attachItemTooltip(cell,item);
   onActivate(cell,()=>toggleItem(item));
   grid.append(cell);
@@ -554,7 +576,7 @@ function renderStack(added=null){
   const pose=cardPose(offset+i),card=document.createElement('div');card.className='smelt-card'+(item===added?' card-in':'');
   card.style.cssText=`--rc:${color(item.rarity)};--x:${pose.x}px;--y:${pose.y}px;--r:${pose.r}deg;z-index:${i+1}`;
   card.dataset.x=pose.x;card.dataset.y=pose.y;card.dataset.r=pose.r;
-  card.innerHTML=`<small>${rarityLabel(item.rarity)}</small><img src="${item.image}" alt=""><strong></strong>`;card.querySelector('strong').textContent=item.name;
+  card.innerHTML=`<small>${rarityLabel(item.rarity)}</small><img src="${item.image}" alt=""><strong></strong>`;card.querySelector('strong').textContent=item.name;addLevelPlate(card,item);
   stack.append(card);
  });
  if(list.length>1){const count=document.createElement('span');count.className='smelt-count';count.textContent='×'+list.length;stack.append(count);}
@@ -603,7 +625,7 @@ function renderSmeltGrid(){
   cell.className='anvil-item'+(chosen?' selected':'')+(available?'':' locked');cell.style.setProperty('--rc',color(item.rarity));
   cell.setAttribute('role','button');cell.tabIndex=available?0:-1;cell.setAttribute('aria-pressed',String(chosen));cell.setAttribute('aria-disabled',String(!available));
   const [min,max]=REAGENT_YIELD[item.rarity];cell.setAttribute('aria-label',item.name+' · '+rarityLabel(item.rarity)+' · '+min+'–'+max+' реагентов');
-  cell.innerHTML=`<img src="${item.image}" alt=""><strong></strong><small>${rarityLabel(item.rarity)}</small>`;cell.querySelector('strong').textContent=item.name;
+  cell.innerHTML=`<img src="${item.image}" alt=""><strong></strong><small>${rarityLabel(item.rarity)}</small>`;cell.querySelector('strong').textContent=item.name;addLevelPlate(cell,item);
   attachItemTooltip(cell,item);
   onActivate(cell,()=>toggleSmelt(item));
   grid.append(cell);
@@ -712,7 +734,7 @@ function playSmelt(cards,gain){
 
 // ── Наковальня: ковка предметов комплектов из реагентов ──
 // Цена: 100 реагентов редкости предмета и 200 реагентов на ступень ниже (у обычных предметов — только 100 обычных).
-const CRAFT_MAIN=100,CRAFT_LOWER=200,INVENTORY_LIMIT=24,SFX_KEY='forest-frontier-sfx-v1';
+const CRAFT_MAIN=100,CRAFT_LOWER=200,SFX_KEY='forest-frontier-sfx-v1';
 // Тайминг ковки: реагенты летят на наковальню, затем молот бьёт STRIKES раз, после чего появляется предмет.
 const DROP_MS=650,STRIKE_START=1150,STRIKE_GAP=460,STRIKES=4,STRIKE_HIT=.68,STRIKE_MS=440,CRAFT_REDUCED=350;
 const KIND_LABEL={weapon:'Оружие',accessory:'Аксессуары',armor:'Броня'};
@@ -814,7 +836,7 @@ function renderCraftList(){
    const open=known(item.id);
    cell.className='anvil-item'+(chosen?' selected':'')+(locked?' locked':'')+(open?'':' unknown');cell.style.setProperty('--rc',color(item.rarity));
    cell.setAttribute('role','button');cell.tabIndex=locked?-1:0;cell.setAttribute('aria-pressed',String(chosen));
-   cell.innerHTML='<img alt=""><strong></strong><small></small>';cell.querySelector('img').src=item.image;cell.querySelector('strong').textContent=item.name;
+   cell.innerHTML='<img alt=""><strong></strong><small></small>';cell.querySelector('img').src=item.image;cell.querySelector('strong').textContent=item.name;addLevelPlate(cell,item);
    const tag=cell.querySelector('small');tag.textContent=affordable(craftCost(item.rarity))?'Можно выковать':open?rarityLabel(item.rarity):'Не открыт';if(affordable(craftCost(item.rarity)))tag.classList.add('craft-made');
    cell.setAttribute('aria-label',item.name+' · '+rarityLabel(item.rarity)+(open?'':' · ещё не открыт в коллекции'));
    attachItemTooltip(cell,item);
@@ -841,7 +863,7 @@ function forgeCraft(){
  if(!affordable(cost)||inventoryItems.length>=INVENTORY_LIMIT){renderCraft();return;}
  // Реагенты списываются и предмет кладётся в инвентарь сразу — анимация лишь показывает ковку.
  for(const [rarity,amount] of Object.entries(cost))reagents[rarity]-=amount;
- const made={...item};inventoryItems.push(made);
+ const made=starterWeapon({...item});inventoryItems.push(made);
  saveReagents();persistLoot();
  craftBusy=true;craftDone=null;craftNote='';hideItemTooltip(true);clearCraftScene();
  const quiet=reducedMotion();
@@ -849,11 +871,11 @@ function forgeCraft(){
  renderCraft();renderTabs();
  if(!quiet){$('craftBank').scrollIntoView({block:'start',behavior:'smooth'});playForge(cost);}
  const total=quiet?CRAFT_REDUCED:STRIKE_START+STRIKES*STRIKE_GAP+500;
- craftTimers.push(setTimeout(()=>finishForge(item),total));
+ craftTimers.push(setTimeout(()=>finishForge(made),total));
 }
 function finishForge(item){
  if(!craftBusy||!dialog.open)return;
- craftBusy=false;craftDone=item;Object.assign(shown,reagents);
+ craftBusy=false;craftDone=item;Object.assign(shown,reagents);revealDone();
  craftNote='Выковано: «'+item.name+'». Предмет уже в инвентаре.';
  craftStage.querySelectorAll('.craft-temp').forEach(node=>node.remove());
  meltPile();
@@ -1011,14 +1033,17 @@ $('confirmReset').addEventListener('click',()=>{reagentBackup={until:Date.now()+
 $('undoReset').addEventListener('click',()=>{if(reagentBackup&&Date.now()<reagentBackup.until){Object.assign(reagents,reagentBackup.data);saveReagents();Object.assign(shown,reagents);}reagentBackup=null;});
 
 function reset(){
- timers.forEach(clearTimeout);timers=[];clearEffects();forge.classList.remove('melting');
+ flipping=false;timers.forEach(clearTimeout);timers=[];clearEffects();forge.classList.remove('melting');
  selected=[null,null,null];sources=null;result=null;sourceRarity=null;phase='idle';note='';
 }
 
 openButton.addEventListener('click',()=>{reset();resetSmelt();resetCraft();renderTabs();dialog.showModal();renderActive();});
 // Результат уже лежит в инвентаре, поэтому при закрытии достаточно остановить эффекты и снять блокировки.
 // Событие close приходит асинхронно, поэтому кнопка закрытия чистит всё сразу, а Escape — через событие.
-function closeAnvil(){hideItemTooltip(true);reset();resetSmelt();resetCraft();}
+function closeAnvil(){hideItemTooltip(true);reset();resetSmelt();resetCraft();revealDone();}
+// Пока результат сплавления или ковки не показан, коллекция придерживает сообщение о собранном комплекте.
+window.anvilApi={revealPending:()=>dialog.open&&(phase==='melting'||phase==='ready'||craftBusy)};
+function revealDone(){setTimeout(()=>window.collectionApi?.flush());}
 $('closeAnvil').addEventListener('click',()=>{closeAnvil();dialog.close();});
 dialog.addEventListener('close',closeAnvil);
 })();
