@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ледяной голем — сборка и анимация</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:24px;background:radial-gradient(ellipse at 50% 0,#14283a,#060c14 70%);color:#e6f4ff;font-family:Manrope,'Segoe UI',sans-serif}
+h1{margin:0 0 6px;font-size:20px}.lead{margin:0 0 18px;color:#a0bcd8;font-size:13px;max-width:900px}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.col h2{margin:0 0 8px;font-size:14px}
+.stage{position:relative;width:340px;height:300px;border-radius:14px;background:repeating-conic-gradient(#102030 0 25%,#0c1826 0 50%) 0 0/24px 24px;border:1px solid #7ad4ff44;overflow:hidden}
+.stage.light{background:#f4f1ea}
+.stage>img.ref{width:100%;height:100%;object-fit:contain}
+.overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.45;pointer-events:none}
+button{margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#bff0ff,#5fc6ff);color:#04182a;font:800 13px Manrope,sans-serif;cursor:pointer}
+label{display:block;margin-top:8px;font-size:12px;color:#a0bcd8}
+/* кукла: координаты образца 1359×1158 */
+.puppet{position:absolute;left:0;top:0;width:1359px;height:1158px;transform-origin:0 0}
+.shake,.body,.grp{position:absolute;inset:0}
+.part{position:absolute;display:block;pointer-events:none}
+/* Стойка: тяжёлое медленное дыхание — кулаки чуть покачиваются, голова кивает; глаза и кристалл в груди мерцают холодным светом */
+.floating .body{animation:i-glow 3.8s ease-in-out infinite}
+.floating .i-arm-l{animation:i-arm-l 3.8s ease-in-out infinite}
+.floating .i-arm-r{animation:i-arm-r 3.8s ease-in-out -.4s infinite}
+.floating .i-head{animation:i-head 3.8s ease-in-out -.2s infinite}
+@keyframes i-glow{0%,100%{filter:drop-shadow(0 0 6px rgba(120,220,255,.25))}50%{filter:drop-shadow(0 0 18px rgba(130,225,255,.6))}}
+@keyframes i-arm-l{0%,100%{transform:none}50%{transform:rotate(-2deg) translateY(-4px)}}
+@keyframes i-arm-r{0%,100%{transform:none}50%{transform:rotate(2deg) translateY(-4px)}}
+@keyframes i-head{0%,100%{transform:none}50%{transform:translateY(5px) rotate(1deg)}}
+/* Удар: голем тяжело вздрагивает, голова откидывается, кулаки разлетаются в стороны и с силой возвращаются */
+.hit .shake{animation:i-shake .55s linear}
+.hit .g-head{animation:i-hit-head .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-arm-l{animation:i-hit-arm-l .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-arm-r{animation:i-hit-arm-r .6s cubic-bezier(.2,.9,.3,1)}
+.hit .body img{animation:i-hit-flash .5s ease-out}
+@keyframes i-shake{0%,100%{transform:none}10%{transform:translateX(-10px)}22%{transform:translateX(8px)}34%{transform:translateX(-6px)}48%{transform:translateX(3px)}64%{transform:translateX(-1px)}}
+@keyframes i-hit-head{0%{transform:none}14%{transform:translateY(-12px) rotate(-4deg)}60%{transform:translateY(2px)}100%{transform:none}}
+@keyframes i-hit-arm-l{0%{transform:none}16%{transform:translate(-14px,-10px) rotate(4deg)}60%{transform:translate(1px,1px)}100%{transform:none}}
+@keyframes i-hit-arm-r{0%{transform:none}16%{transform:translate(14px,-10px) rotate(-4deg)}60%{transform:translate(-1px,1px)}100%{transform:none}}
+@keyframes i-hit-flash{0%{filter:none}10%{filter:brightness(.82) saturate(1.25)}35%{filter:brightness(1.15)}100%{filter:none}}
+</style>
+</head>
+<body>
+<h1>Ледяной голем — сборка из частей</h1>
+<p class="lead">Образец и голем, нарезанный из него на подвижные части (голова, два кулака с предплечьями) поверх подложки: на тёмном фоне, на светлой подложке, в стойке и с ударами.</p>
+<div class="row">
+ <div class="col"><h2>Образец</h2><div class="stage"><img class="ref" src="reference.png" alt=""></div></div>
+ <div class="col"><h2>Собран из частей</h2><div class="stage" id="still"></div><label><input type="checkbox" id="ov"> наложить образец</label></div>
+ <div class="col"><h2>Светлая подложка</h2><div class="stage light" id="light"></div></div>
+ <div class="col"><h2>Стоит</h2><div class="stage" id="idle"></div></div>
+ <div class="col"><h2>Стоит + удары</h2><div class="stage" id="hits"></div><button id="hit">⚔ Ударить</button><label><input type="checkbox" id="loop" checked> бить каждые 1,2 с</label></div>
+</div>
+<script>
+const P='../../assets/bosses/ice-golem/',CW=1359,CH=1158;
+// Часть: файл, центр (в координатах образца), группа. Части вырезаны прямо из образца: голова — по каменному блоку с глазами,
+// кулаки с предплечьями — от локтей под ледяными наплечниками; плечи, грудь с кристаллом и ноги — неподвижное тело.
+// Под ними — подложка (under): размытый образец полосой ~32 px вокруг тела; закрывает щёлки швов.
+const PARTS=[
+ ['under',649.5,577,'under'],['body',650,576,'body'],['head',764,415.5,'head'],['arm-l',203,765.5,'arm-l'],['arm-r',1131,857.5,'arm-r']
+];
+// Точки поворота — на швах: шея, локти.
+const PIVOT={'under':[680,700],'body':[680,700],'head':[764,500],'arm-l':[300,560],'arm-r':[960,640]};
+const SIZE={};
+async function sizes(){await Promise.all(PARTS.map(([f])=>new Promise(r=>{const i=new Image();i.onload=()=>{SIZE[f]=[i.naturalWidth,i.naturalHeight];r();};i.src=P+f+'.png';})));}
+function build(stage){
+ const sw=stage.clientWidth,k=Math.min(sw/CW,stage.clientHeight/CH),puppet=document.createElement('div');puppet.className='puppet';puppet.style.transform=`translateX(${(sw-CW*k)/2}px) scale(${k})`;
+ const shake=document.createElement('div');shake.className='shake';const body=document.createElement('div');body.className='body';shake.append(body);puppet.append(shake);const groups={};
+ for(const [file,cx,cy,g] of PARTS){
+  if(!groups[g]){const el=document.createElement('div');el.className='grp g-'+g;const idle=document.createElement('div');idle.className='grp i-'+g;el.style.transformOrigin=idle.style.transformOrigin=PIVOT[g].map(v=>v+'px').join(' ');el.append(idle);body.append(el);groups[g]=idle;}
+  const [w,h]=SIZE[file],img=new Image();img.className='part p-'+file;img.src=P+file+'.png';
+  Object.assign(img.style,{width:w+'px',height:h+'px',left:cx-w/2+'px',top:cy-h/2+'px'});
+  groups[g].append(img);
+ }
+ stage.append(puppet);return puppet;
+}
+if(location.hash==='#big'){document.querySelectorAll('.col').forEach((c,i)=>{if(i!==1)c.style.display='none'});const s=document.getElementById('still');s.style.width='1359px';s.style.height='1158px';document.querySelector('.lead').hidden=true;}
+sizes().then(()=>{
+ build(document.getElementById('still'));
+ const ov=document.createElement('img');ov.className='overlay';ov.src='reference.png';ov.hidden=true;document.getElementById('still').append(ov);
+ document.getElementById('ov').onchange=e=>ov.hidden=!e.target.checked;
+ build(document.getElementById('light'));
+ build(document.getElementById('idle')).classList.add('floating');
+ const hits=build(document.getElementById('hits'));hits.classList.add('floating');
+ const hit=()=>{hits.classList.remove('hit');void hits.offsetWidth;hits.classList.add('hit');};
+ document.getElementById('hit').onclick=hit;setInterval(()=>{if(document.getElementById('loop').checked)hit();},1200);
+});
+</script>
+</body>
+</html>

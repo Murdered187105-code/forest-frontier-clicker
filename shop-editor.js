@@ -230,7 +230,7 @@ dialog.addEventListener('change',event=>{
 });
 
 function move(list,id,step){const index=list.findIndex(x=>x.id===id),next=index+step;if(index<0||next<0||next>=list.length)return;[list[index],list[next]]=[list[next],list[index]];}
-dialog.addEventListener('click',event=>{
+dialog.addEventListener('click',async event=>{
  const button=event.target.closest('button'),rowEl=event.target.closest('.se-row');
  if(rowEl&&!button){const inTabs=rowEl.parentElement.dataset.list==='tabs';if(inTabs){tabId=rowEl.dataset.id;itemId=null;}else itemId=rowEl.dataset.id;renderAll();return;}
  if(!button)return;
@@ -238,7 +238,7 @@ dialog.addEventListener('click',event=>{
   const inTabs=rowEl.parentElement.dataset.list==='tabs',list=inTabs?catalog.tabs:tab().items,id=rowEl.dataset.id;
   if(button.dataset.move){move(list,id,Number(button.dataset.move));commit();return;}
   if(button.hasAttribute('data-dup')){const source=list.find(x=>x.id===id),copy={...clone(source),id:uid('item'),name:source.name+' (копия)'};list.splice(list.indexOf(source)+1,0,copy);itemId=copy.id;commit();renderAll();return;}
-  if(button.hasAttribute('data-del')){const target=list.find(x=>x.id===id);if(inTabs&&target.items.length&&!confirm(`Удалить вкладку «${target.title}» вместе с товарами (${target.items.length})?`))return;if(!inTabs&&!confirm(`Удалить товар «${target.name}»?`))return;list.splice(list.indexOf(target),1);commit();renderAll();return;}
+  if(button.hasAttribute('data-del')){const target=list.find(x=>x.id===id);if(inTabs&&target.items.length&&!await gameConfirm({title:'Удалить вкладку?',text:`Вкладка «${target.title}» удалится вместе с товарами (${target.items.length}).`,ok:'Удалить'}))return;if(!inTabs&&!await gameConfirm({title:'Удалить товар?',text:`Товар «${target.name}» пропадёт из магазина.`,ok:'Удалить'}))return;list.splice(list.indexOf(target),1);commit();renderAll();return;}
  }
  if(button.dataset.badge!==undefined){const i=item();i.badge=button.dataset.badge;$q('[data-f=badge]').value=i.badge;commit();return;}
  switch(button.dataset.a){
@@ -248,10 +248,10 @@ dialog.addEventListener('click',event=>{
   case 'addGameItems':openPicker({multi:true,onDone:ids=>{const t=tab();if(!t)return;const games=api.gameItems();for(const id of ids)t.items.push(productFromGameItem(games.find(g=>g.id===id)));itemId=t.items.at(-1).id;commit();renderAll();setState('Добавлено товаров: '+ids.length+' · цены выставлены по редкости','dirty');}});break;
   case 'preview':api.open();break;
   case 'save':saveFile();break;
-  case 'revert':if(dirty&&!confirm('Отменить все изменения и вернуть каталог из файла?'))break;try{localStorage.removeItem(api.draftKey);}catch{}catalog=normalize(window.SHOP_CATALOG);dirty=false;api.refresh();renderAll();break;
+  case 'revert':if(dirty&&!await gameConfirm({title:'Отменить изменения каталога?',text:'Все правки пропадут, вернётся каталог из файла.',ok:'Отменить правки'}))break;try{localStorage.removeItem(api.draftKey);}catch{}catalog=normalize(window.SHOP_CATALOG);dirty=false;api.refresh();renderAll();break;
   case 'export':download('shop-catalog.json',JSON.stringify(catalog,null,1),'application/json');break;
   case 'import':$q('input[type=file]').click();break;
-  case 'resetBuys':if(confirm('Сбросить счётчики покупок всех товаров?')){api.resetPurchases();renderItemForm();}break;
+  case 'resetBuys':if(await gameConfirm({title:'Сбросить счётчики покупок?',text:'Счётчики покупок всех товаров обнулятся.',ok:'Сбросить'})){api.resetPurchases();renderItemForm();}break;
   case 'resetItemBuys':api.resetPurchases(itemId);renderItemForm();break;
  }
 });

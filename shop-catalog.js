@@ -60,48 +60,48 @@ window.SHOP_CATALOG={
    "icon": "potionMana",
    "items": [
     {
-     "id": "potion-1",
-     "name": "Зелье 1",
+     "id": "mana-potion",
+     "name": "Зелье маны",
      "desc": "",
      "icon": "potionMana",
-     "price": null,
+     "price": 50,
      "discount": 0,
      "stock": null,
      "badge": "",
      "hidden": false,
      "effect": {
-      "type": "none",
-      "amount": 0
+      "type": "manaPotion",
+      "amount": 1
      }
     },
     {
-     "id": "potion-2",
-     "name": "Зелье 2",
+     "id": "mana-potion-large",
+     "name": "Большое зелье маны",
      "desc": "",
-     "icon": "potionMana",
-     "price": null,
+     "icon": "potionManaLarge",
+     "price": 200,
      "discount": 0,
      "stock": null,
      "badge": "",
      "hidden": false,
      "effect": {
-      "type": "none",
-      "amount": 0
+      "type": "manaPotionLarge",
+      "amount": 1
      }
     },
     {
-     "id": "potion-3",
-     "name": "Зелье 3",
+     "id": "mana-potion-full",
+     "name": "Огромное зелье маны",
      "desc": "",
-     "icon": "potionMana",
-     "price": null,
+     "icon": "potionManaFull",
+     "price": 500,
      "discount": 0,
      "stock": null,
      "badge": "",
      "hidden": false,
      "effect": {
-      "type": "none",
-      "amount": 0
+      "type": "manaPotionFull",
+      "amount": 1
      }
     }
    ]

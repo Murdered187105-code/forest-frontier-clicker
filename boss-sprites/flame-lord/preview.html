@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Владыка пламени — сборка и анимация</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:24px;background:radial-gradient(ellipse at 50% 0,#3a1a12,#120806 70%);color:#ffece0;font-family:Manrope,'Segoe UI',sans-serif}
+h1{margin:0 0 6px;font-size:20px}.lead{margin:0 0 18px;color:#d8b4a0;font-size:13px;max-width:900px}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.col h2{margin:0 0 8px;font-size:14px}
+.stage{position:relative;width:330px;height:300px;border-radius:14px;background:repeating-conic-gradient(#2a1510 0 25%,#22110c 0 50%) 0 0/24px 24px;border:1px solid #ff8a5044;overflow:hidden}
+.stage.light{background:#f4f1ea}
+.stage>img.ref{width:100%;height:100%;object-fit:contain}
+.overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.45;pointer-events:none}
+button{margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#ffd27a,#ff8a50);color:#2a0d04;font:800 13px Manrope,sans-serif;cursor:pointer}
+label{display:block;margin-top:8px;font-size:12px;color:#d8b4a0}
+/* кукла: координаты образца 1312×1199 */
+.puppet{position:absolute;left:0;top:0;width:1312px;height:1199px;transform-origin:0 0}
+.shake,.body,.grp{position:absolute;inset:0}
+.part{position:absolute;display:block;pointer-events:none}
+/* Парение: владыка медленно всплывает и опускается, огонь мерцает, вихрь под ним колышется, руки и голова чуть покачиваются */
+.floating .body{animation:f-float 3.4s ease-in-out infinite}
+.floating .i-tail{animation:f-tail 2.6s ease-in-out infinite}
+.floating .i-head{animation:f-head 3.4s ease-in-out -.5s infinite}
+.floating .i-arm-l{animation:f-arm-l 3.4s ease-in-out infinite}
+.floating .i-arm-r{animation:f-arm-r 3.4s ease-in-out -.3s infinite}
+@keyframes f-float{0%,100%{transform:translateY(0);filter:none}25%{filter:brightness(1.06)}50%{transform:translateY(-16px);filter:brightness(.97)}75%{filter:brightness(1.05)}}
+@keyframes f-tail{0%,100%{transform:rotate(-1.8deg) skewX(1.5deg)}50%{transform:rotate(1.8deg) skewX(-2deg)}}
+@keyframes f-head{0%,100%{transform:none}50%{transform:rotate(-1.5deg) translateY(-3px)}}
+@keyframes f-arm-l{0%,100%{transform:none}50%{transform:rotate(1.6deg)}}
+@keyframes f-arm-r{0%,100%{transform:none}50%{transform:rotate(-1.6deg)}}
+/* Удар: владыка вздрагивает, голова откидывается, булава и когтистая рука вскидываются, вихрь хлещет */
+.hit .shake{animation:f-shake .5s linear}
+.hit .g-head{animation:f-hit-head .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-arm-l{animation:f-hit-arm-l .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-arm-r{animation:f-hit-arm-r .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-tail{animation:f-hit-tail .6s cubic-bezier(.2,.9,.3,1)}
+.hit .body img{animation:f-hit-flash .5s ease-out}
+@keyframes f-shake{0%,100%{transform:none}10%{transform:translateX(-12px)}22%{transform:translateX(10px)}34%{transform:translateX(-7px)}48%{transform:translateX(4px)}64%{transform:translateX(-2px)}}
+@keyframes f-hit-head{0%{transform:none}14%{transform:rotate(-4deg) translateY(-6px)}60%{transform:rotate(1deg)}100%{transform:none}}
+@keyframes f-hit-arm-l{0%{transform:none}16%{transform:rotate(5deg)}60%{transform:rotate(-1deg)}100%{transform:none}}
+@keyframes f-hit-arm-r{0%{transform:none}16%{transform:rotate(-5deg)}60%{transform:rotate(1deg)}100%{transform:none}}
+@keyframes f-hit-tail{0%{transform:none}18%{transform:rotate(3deg) skewX(-3deg)}62%{transform:rotate(-1deg)}100%{transform:none}}
+@keyframes f-hit-flash{0%{filter:none}10%{filter:brightness(.82) saturate(1.25)}35%{filter:brightness(1.15)}100%{filter:none}}
+</style>
+</head>
+<body>
+<h1>Владыка пламени — сборка из частей</h1>
+<p class="lead">Образец и владыка, нарезанный из него на подвижные части (рука с булавой, когтистая рука, голова с короной, огненный вихрь) поверх подложки: на тёмном фоне, на светлой подложке, в покое и с ударами.</p>
+<div class="row">
+ <div class="col"><h2>Образец</h2><div class="stage"><img class="ref" src="reference.png" alt=""></div></div>
+ <div class="col"><h2>Собран из частей</h2><div class="stage" id="still"></div><label><input type="checkbox" id="ov"> наложить образец</label></div>
+ <div class="col"><h2>Светлая подложка</h2><div class="stage light" id="light"></div></div>
+ <div class="col"><h2>Парит</h2><div class="stage" id="idle"></div></div>
+ <div class="col"><h2>Парит + удары</h2><div class="stage" id="hits"></div><button id="hit">⚔ Ударить</button><label><input type="checkbox" id="loop" checked> бить каждые 1,2 с</label></div>
+</div>
+<script>
+const P='../../assets/bosses/flame-lord/',CW=1312,CH=1199;
+// Часть: файл, центр (в координатах образца), группа. Части вырезаны прямо из образца по швам: рука с булавой — у локтя
+// под наплечником, когтистая рука — под правым наплечником, голова с короной и пламенем — по шее, вихрь — по поясу.
+// Под ними — подложка (under): размытый образец полосой ~30 px вокруг неподвижного тела; закрывает щёлки швов.
+const PARTS=[
+ ['under',820,526.5,'under'],['tail',718.5,948.5,'tail'],['body',835,512.5,'body'],
+ ['arm-r',1145,673.5,'arm-r'],['arm-l',284.5,544,'arm-l'],['head',820.5,212.5,'head']
+];
+// Точки поворота — на швах: локоть руки с булавой, плечо когтистой руки, шея, пояс.
+const PIVOT={'under':[650,600],'body':[650,600],'arm-l':[560,610],'arm-r':[1000,560],'head':[780,415],'tail':[740,710]};
+const SIZE={};
+async function sizes(){await Promise.all(PARTS.map(([f])=>new Promise(r=>{const i=new Image();i.onload=()=>{SIZE[f]=[i.naturalWidth,i.naturalHeight];r();};i.src=P+f+'.png';})));}
+function build(stage){
+ const sw=stage.clientWidth,k=Math.min(sw/CW,stage.clientHeight/CH),puppet=document.createElement('div');puppet.className='puppet';puppet.style.transform=`translateX(${(sw-CW*k)/2}px) scale(${k})`;
+ // дрожь удара — на отдельном слое, чтобы не перебивать парение тела
+ const shake=document.createElement('div');shake.className='shake';const body=document.createElement('div');body.className='body';shake.append(body);puppet.append(shake);const groups={};
+ for(const [file,cx,cy,g] of PARTS){
+  if(!groups[g]){const el=document.createElement('div');el.className='grp g-'+g;const idle=document.createElement('div');idle.className='grp i-'+g;el.style.transformOrigin=idle.style.transformOrigin=PIVOT[g].map(v=>v+'px').join(' ');el.append(idle);body.append(el);groups[g]=idle;}
+  const [w,h]=SIZE[file],img=new Image();img.className='part p-'+file;img.src=P+file+'.png';
+  Object.assign(img.style,{width:w+'px',height:h+'px',left:cx-w/2+'px',top:cy-h/2+'px'});
+  groups[g].append(img);
+ }
+ stage.append(puppet);return puppet;
+}
+// #big — крупная сборка для проверки швов.
+if(location.hash==='#big'){document.querySelectorAll('.col').forEach((c,i)=>{if(i!==1)c.style.display='none'});const s=document.getElementById('still');s.style.width='1312px';s.style.height='1199px';document.querySelector('.lead').hidden=true;}
+sizes().then(()=>{
+ build(document.getElementById('still'));
+ const ov=document.createElement('img');ov.className='overlay';ov.src='reference.png';ov.hidden=true;document.getElementById('still').append(ov);
+ document.getElementById('ov').onchange=e=>ov.hidden=!e.target.checked;
+ build(document.getElementById('light'));
+ build(document.getElementById('idle')).classList.add('floating');
+ const hits=build(document.getElementById('hits'));hits.classList.add('floating');
+ const hit=()=>{hits.classList.remove('hit');void hits.offsetWidth;hits.classList.add('hit');};
+ document.getElementById('hit').onclick=hit;setInterval(()=>{if(document.getElementById('loop').checked)hit();},1200);
+});
+</script>
+</body>
+</html>

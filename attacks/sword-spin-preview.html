@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Навык «Меч на рукояти»: три варианта</title>
+<!-- Прототип для выбора варианта. В игру не подключён, нужен сервер игры: http://127.0.0.1:8765/attacks/sword-spin-preview.html -->
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Russo+One&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#0b120e;color:#f0e6c8;font-family:Manrope,Segoe UI,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+#arena{position:fixed;inset:0;background:#0b120e url(../assets/forest-dusk-stylized.png) center/cover no-repeat}
+#arena:after{content:'';position:absolute;inset:0;background:linear-gradient(#0b120ecc,#0b120e22 28%,#0b120e22 70%,#0b120ecc)}
+#monster{position:absolute;z-index:1;object-fit:contain;pointer-events:none;filter:drop-shadow(0 14px 14px #0009)}
+#enemyBar{position:absolute;z-index:2;height:14px;border-radius:8px;border:1px solid #d9c07a88;background:#2a0d0d;overflow:hidden;translate:-50% 0}
+#enemyFill{height:100%;width:100%;background:linear-gradient(#ff5a4d,#b31717);transition:width .12s}
+#fx{position:fixed;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}
+#tabs{position:fixed;z-index:4;top:14px;left:50%;translate:-50% 0;display:flex;gap:8px;max-width:calc(100% - 24px)}
+#tabs button{font:inherit;font-weight:700;font-size:13px;color:#d9cfae;padding:9px 14px;border-radius:10px;border:1px solid #8c805588;background:#111c16e6;cursor:pointer;white-space:nowrap}
+#tabs button:hover{border-color:#edc77b}
+#tabs button.on{color:#22160a;background:linear-gradient(#f2d48a,#c89a48);border-color:#fff2c4}
+#about{position:fixed;z-index:4;top:64px;left:50%;translate:-50% 0;width:min(620px,calc(100% - 24px));text-align:center;padding:10px 14px;border-radius:10px;background:#0d1712d9;border:1px solid #8b805044;pointer-events:none}
+#about b{display:block;font-family:'Russo One',Georgia,serif;font-weight:400;font-size:17px;color:#ffe9a8}
+#about span{display:block;margin-top:3px;font-size:13px;line-height:1.4;color:#c6d0b8}
+#score{position:fixed;z-index:4;top:14px;right:14px;padding:8px 12px;border-radius:10px;background:#0d1712d9;border:1px solid #8b805044;font-size:12px;line-height:1.6;color:#c6d0b8;text-align:right;pointer-events:none}
+#score b{color:#ffe9a8}
+#dock{position:fixed;z-index:5;bottom:16px;left:50%;translate:-50% 0;display:flex;flex-direction:column;align-items:center;gap:12px}
+#skillWrap{position:relative;width:84px;height:84px}
+#skill{position:absolute;inset:0;padding:0;border-radius:50%;border:2px solid #8c8055;background:radial-gradient(circle at 40% 30%,#344637,#111b15 75%);box-shadow:inset 0 0 16px #0008,0 3px 12px #0006;cursor:pointer;overflow:hidden}
+#skill img{position:absolute;inset:6px;width:calc(100% - 12px);height:calc(100% - 12px);object-fit:contain;pointer-events:none;transition:filter .2s}
+#skill:hover{border-color:#edc77b}
+#skillWrap.on #skill{border-color:#7fc8ff;box-shadow:inset 0 0 18px #0009,0 0 18px #4aa8ff88}
+#skillWrap.on #skill img{filter:brightness(1.1) saturate(1.2)}
+#skillWrap.empty{animation:empty .35s}
+@keyframes empty{25%{translate:-6px 0}50%{translate:6px 0}75%{translate:-3px 0}}
+#skillFx{position:absolute;left:50%;top:50%;width:200px;height:200px;translate:-50% -50%;pointer-events:none;z-index:2}
+.badge{position:absolute;z-index:3;font-size:11px;font-weight:800;border-radius:9px;padding:1px 7px;pointer-events:none}
+#key{bottom:-7px;left:50%;translate:-50% 0;color:#d5c18b;background:#19261d;border:1px solid #766d47}
+#cost{top:-4px;left:-6px;color:#eaf6ff;background:#1b5fb0;border:1px solid #9fd0ff}
+#manaBar{position:relative;width:min(380px,calc(100vw - 32px));height:22px;border-radius:12px;border:1px solid #6fb4ff99;background:#0a1a2c;overflow:hidden}
+#manaFill{height:100%;background:linear-gradient(#58b6ff,#1c62c9)}
+#manaText{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000}
+#note{font-size:11px;color:#c6d0b8;text-shadow:0 1px 2px #000}
+@media(max-width:640px){#tabs button{padding:8px 9px;font-size:11px}#score{top:auto;bottom:150px}#about span{font-size:12px}}
+</style>
+</head>
+<body>
+<div id="arena">
+ <img id="monster" src="../assets/monster-slime.svg" alt="">
+ <div id="enemyBar"><div id="enemyFill"></div></div>
+</div>
+<canvas id="fx"></canvas>
+<nav id="tabs" aria-label="Варианты навыка"></nav>
+<div id="about"><b></b><span></span></div>
+<div id="score">Урон удара: <b>10</b><br>Попаданий: <b id="hits">0</b><br>Всего урона: <b id="total">0</b></div>
+<div id="dock">
+ <div id="skillWrap">
+  <button id="skill" type="button" aria-pressed="false" aria-label="Меч на рукояти"><img src="../assets/hero-icons/swords-whirl.webp" alt=""></button>
+  <canvas id="skillFx" width="400" height="400"></canvas>
+  <span class="badge" id="cost">5/с</span><span class="badge" id="key">1</span>
+ </div>
+ <div id="manaBar"><div id="manaFill"></div><div id="manaText"></div></div>
+ <div id="note">Включи навык кнопкой или клавишей 1. В прототипе мана быстро восстанавливается, пока навык выключен.</div>
+</div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+const VARIANTS=[
+ {name:'Призрачный клинок',about:'Возьмись за рукоять: клинок всегда смотрит на курсор, где бы тот ни был. Самое точное управление. Значок: мана сгорает по кольцу.',
+  L:225,w:9,blade:['#e6f6ff','#6fc4ff','#2a7fd0'],glow:'#6fc4ff',trail:'111,196,255',minSpeed:0,alpha:.86},
+ {name:'Тяжёлый двуручник',about:'Меч с весом: тянется за курсором с инерцией. Раскрути и отпусти, он покрутится сам. Бьёт только на скорости. Значок: мана выгорает как жидкость.',
+  L:255,w:15,blade:['#ffffff','#b9c1c6','#6d757b'],glow:'#ffd27a',trail:'255,214,140',minSpeed:3,alpha:1},
+ {name:'Огненная вертушка',about:'Возьмись за рукоять и рисуй круги мышью в любом месте экрана: один круг мышью равен одному обороту меча. Значок: охвачен синим огнём.',
+  L:225,w:11,blade:['#fff4cf','#ff9a3d','#c43a12'],glow:'#ff8a2a',trail:'255,130,40',minSpeed:0,alpha:1}
+];
+const DAMAGE=10,ENEMY_HP=400,COST=5,REGEN_OFF=25,GUARD=28,TAU=Math.PI*2;
+const wrap=a=>{a=(a+Math.PI)%TAU;return a<0?a+TAU-Math.PI:a-Math.PI;};
+const canvas=$('fx'),ctx=canvas.getContext('2d'),iconCanvas=$('skillFx'),ictx=iconCanvas.getContext('2d');
+const monster=$('monster');
+let vi=0,on=false,mana=100,show=0,angle=-Math.PI/2,prevAngle=angle,vel=0,grabbed=false,everGrabbed=false,target=angle;
+let mouse={x:0,y:0},heading=null,lastSample=null,touching=false,trail=[],particles=[],floats=[];
+let hits=0,total=0,hp=ENEMY_HP,deadUntil=0,tick=0,time=0,iconParts=[],W=0,H=0,dpr=1,geo={};
+const V=()=>VARIANTS[vi];
+
+function layout(){
+ dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;
+ const size=Math.min(250,H*.36,W*.34),cx=W*.42,cy=H*.46;
+ monster.style.cssText=`left:${cx-size/2}px;top:${cy-size/2}px;width:${size}px;height:${size}px`;
+ const bar=$('enemyBar');bar.style.left=cx+'px';bar.style.top=cy-size/2-22+'px';bar.style.width=size*.9+'px';
+ geo={cx,cy,rx:size*.36,ry:size*.36,px:Math.min(W-50,cx+size*.36+135),py:cy+8};
+}
+function setVariant(i){
+ vi=i;[...$('tabs').children].forEach((b,n)=>b.classList.toggle('on',n===i));
+ document.querySelector('#about b').textContent=V().name;document.querySelector('#about span').textContent=V().about;
+ resetSword();iconParts=[];
+}
+function resetSword(){angle=prevAngle=target=-Math.PI/2;vel=0;grabbed=false;touching=false;trail=[];heading=null;lastSample=null;everGrabbed=false;}
+function toggle(){
+ if(!on&&mana<1){$('skillWrap').classList.remove('empty');void $('skillWrap').offsetWidth;$('skillWrap').classList.add('empty');return;}
+ on=!on;$('skillWrap').classList.toggle('on',on);$('skill').setAttribute('aria-pressed',on);
+ if(on){resetSword();tick=0;burst(geo.px,geo.py,26,V().trail,240);}else grabbed=false;
+}
+VARIANTS.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+'. '+v.name;b.addEventListener('click',()=>setVariant(i));$('tabs').append(b);});
+$('skill').addEventListener('click',toggle);
+addEventListener('keydown',e=>{if((e.code==='Digit1'||e.code==='Numpad1')&&!e.repeat)toggle();});
+
+const overHilt=(x,y)=>on&&show>.8&&Math.hypot(x-geo.px,y-geo.py)<44;
+addEventListener('pointerdown',e=>{
+ mouse={x:e.clientX,y:e.clientY};if(!overHilt(mouse.x,mouse.y)||e.button!==0)return;
+ grabbed=true;everGrabbed=true;heading=null;lastSample={...mouse};target=angle;
+ try{document.documentElement.setPointerCapture(e.pointerId);}catch{}
+ e.preventDefault();
+});
+addEventListener('pointermove',e=>{
+ mouse={x:e.clientX,y:e.clientY};
+ if(grabbed&&vi===2&&lastSample){
+  const dx=mouse.x-lastSample.x,dy=mouse.y-lastSample.y;
+  if(Math.hypot(dx,dy)>=5){const h=Math.atan2(dy,dx);if(heading!==null){const d=wrap(h-heading);if(Math.abs(d)<1.7)target+=d;}heading=h;lastSample={...mouse};}
+ }
+});
+const release=()=>{grabbed=false;heading=null;lastSample=null;};
+addEventListener('pointerup',release);addEventListener('pointercancel',release);addEventListener('blur',release);
+addEventListener('resize',layout);
+
+function burst(x,y,n,rgb,speed){for(let i=0;i<n;i++){const a=Math.random()*TAU,s=speed*(.3+Math.random()*.7);particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.35+Math.random()*.3,max:.65,size:1.5+Math.random()*2.5,rgb});}}
+function hit(x,y){
+ hits++;total+=DAMAGE;$('hits').textContent=hits;$('total').textContent=total;
+ hp-=DAMAGE;floats.push({x:x+(Math.random()*30-15),y:y-10,text:'−'+DAMAGE,life:.75,color:'#fff0c0',size:24});
+ burst(x,y,16,V().trail,300);burst(x,y,6,'255,255,255',200);
+ monster.src='../assets/monster-slime-hurt.svg';clearTimeout(hit.t);hit.t=setTimeout(()=>{monster.src='../assets/monster-slime.svg';},170);
+ monster.animate([{transform:'translate(0,0)'},{transform:`translate(${Math.cos(angle+Math.PI/2)*10}px,${Math.sin(angle+Math.PI/2)*10}px) scale(1.04)`,filter:'brightness(1.7)',offset:.3},{transform:'translate(0,0)'}],{duration:190,easing:'ease-out'});
+ if(hp<=0){deadUntil=performance.now()+500;monster.animate([{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(1.25)'},{opacity:0},{opacity:1,transform:'scale(1)'}],{duration:900});hp=ENEMY_HP;floats.push({x:geo.cx,y:geo.cy-40,text:'Победа!',life:1,color:'#b9f48a',size:26});}
+ $('enemyFill').style.width=hp/ENEMY_HP*100+'%';
+}
+// Лезвие проверяется по точкам; новое попадание засчитывается, только когда клинок полностью вышел из врага.
+function bladeCheck(speed){
+ const c=Math.cos(angle),s=Math.sin(angle),L=V().L;let inside=null,near=false;
+ for(let i=0;i<=16;i++){
+  const r=GUARD+(L-GUARD)*i/16,x=geo.px+c*r,y=geo.py+s*r,d=((x-geo.cx)/geo.rx)**2+((y-geo.cy)/geo.ry)**2;
+  if(d<1&&!inside)inside={x,y};if(d<1.3)near=true;
+ }
+ if(inside&&!touching){touching=true;if(speed>=V().minSpeed&&performance.now()>deadUntil)hit(inside.x,inside.y);}
+ else if(!near)touching=false;
+}
+function update(dt){
+ time+=dt;
+ if(on){
+  mana-=COST*dt;tick+=dt;
+  if(tick>=1){tick-=1;const r=$('skill').getBoundingClientRect();floats.push({x:r.left+r.width+6,y:r.top+8,text:'−'+COST,life:.8,color:'#8fd0ff',size:15});}
+  if(mana<=0){mana=0;toggle();$('skillWrap').classList.add('empty');setTimeout(()=>$('skillWrap').classList.remove('empty'),400);}
+ }else mana=Math.min(100,mana+REGEN_OFF*dt);
+ show=Math.max(0,Math.min(1,show+(on?dt/.3:-dt/.2)));
+ if(show>0){
+  prevAngle=angle;
+  const toMouse=Math.atan2(mouse.y-geo.py,mouse.x-geo.px);
+  if(vi===0){
+   if(grabbed)angle+=wrap(toMouse-angle)*Math.min(1,dt*28);
+  }else if(vi===1){
+   if(grabbed)vel+=wrap(toMouse-angle)*70*dt;
+   vel*=Math.exp(-dt*(grabbed?4.5:.55));vel=Math.max(-20,Math.min(20,vel));angle+=vel*dt;
+  }else{
+   if(grabbed)angle+=(target-angle)*Math.min(1,dt*22);
+   else{angle+=vel*dt;vel*=Math.exp(-dt*1.4);target=angle;}
+  }
+  const speed=Math.abs(wrap(angle-prevAngle))/Math.max(dt,.001);
+  if(vi!==1&&grabbed)vel=wrap(angle-prevAngle)/Math.max(dt,.001);
+  trail.push({a:angle,t:time,speed});trail=trail.filter(p=>time-p.t<.28);
+  if(on&&show>=1)bladeCheck(speed);
+  if(vi===2&&on){const r=GUARD+Math.random()*(V().L-GUARD),n=1+Math.floor(speed/6);for(let i=0;i<n;i++)particles.push({x:geo.px+Math.cos(angle)*r,y:geo.py+Math.sin(angle)*r,vx:(Math.random()-.5)*40,vy:-50-Math.random()*70,life:.3+Math.random()*.25,max:.55,size:2+Math.random()*3.5,rgb:Math.random()<.5?'255,150,50':'255,220,120'});}
+ }
+ particles=particles.filter(p=>(p.life-=dt)>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.97;p.vy*=.97;}
+ floats=floats.filter(f=>(f.life-=dt)>0);for(const f of floats)f.y-=46*dt;
+ $('manaFill').style.width=mana+'%';$('manaText').textContent=Math.ceil(mana)+' / 100';
+ document.body.style.cursor=grabbed?'grabbing':overHilt(mouse.x,mouse.y)?'grab':'';
+}
+function drawTrail(){
+ const v=V(),c=ctx;c.save();c.globalCompositeOperation='lighter';
+ for(let i=1;i<trail.length;i++){
+  const a=trail[i-1],b=trail[i],diff=wrap(b.a-a.a);if(Math.abs(diff)<.004)continue;
+  const fade=1-(time-b.t)/.28,alpha=fade*fade*Math.min(.3,b.speed*.03)*show;
+  c.fillStyle=`rgba(${v.trail},${alpha})`;c.beginPath();c.arc(geo.px,geo.py,v.L,a.a,a.a+diff,diff<0);c.arc(geo.px,geo.py,v.L*.35,a.a+diff,a.a,diff>=0);c.closePath();c.fill();
+ }
+ c.restore();
+}
+function drawSword(){
+ const v=V(),c=ctx,L=v.L,w=v.w,scale=.5+.5*show;
+ c.save();c.translate(geo.px,geo.py);c.rotate(angle);c.scale(scale,scale);c.globalAlpha=show*v.alpha;
+ c.shadowColor=v.glow;c.shadowBlur=grabbed?26:16;
+ const g=c.createLinearGradient(0,-w,0,w);g.addColorStop(0,v.blade[0]);g.addColorStop(.5,v.blade[1]);g.addColorStop(1,v.blade[2]);
+ c.fillStyle=g;c.beginPath();c.moveTo(GUARD,-w);c.lineTo(L-34,-w*.8);c.lineTo(L,0);c.lineTo(L-34,w*.8);c.lineTo(GUARD,w);c.closePath();c.fill();
+ c.shadowBlur=0;c.strokeStyle='#ffffffb0';c.lineWidth=1.5;c.beginPath();c.moveTo(GUARD+2,0);c.lineTo(L-6,0);c.stroke();
+ c.strokeStyle='#1b222688';c.lineWidth=1;c.beginPath();c.moveTo(GUARD,-w);c.lineTo(L-34,-w*.8);c.lineTo(L,0);c.lineTo(L-34,w*.8);c.lineTo(GUARD,w);c.closePath();c.stroke();
+ // рукоять
+ c.globalAlpha=show;
+ c.fillStyle='#1f3b3a';c.fillRect(-26,-6.5,48,13);c.strokeStyle='#0d1f1f';c.lineWidth=1.5;for(let x=-22;x<20;x+=7){c.beginPath();c.moveTo(x,-6.5);c.lineTo(x+4,6.5);c.stroke();}
+ const gold=c.createLinearGradient(0,-34,0,34);gold.addColorStop(0,'#f8dc8a');gold.addColorStop(.5,'#c8922e');gold.addColorStop(1,'#8a5f18');
+ c.fillStyle=gold;c.beginPath();c.moveTo(18,-34);c.quadraticCurveTo(30,-30,28,-8);c.lineTo(28,8);c.quadraticCurveTo(30,30,18,34);c.quadraticCurveTo(24,14,18,8);c.lineTo(18,-8);c.quadraticCurveTo(24,-14,18,-34);c.closePath();c.fill();
+ c.beginPath();c.arc(-32,0,8,0,TAU);c.fill();
+ c.fillStyle='#e0322d';c.beginPath();c.moveTo(23,-7);c.lineTo(29,0);c.lineTo(23,7);c.lineTo(17,0);c.closePath();c.fill();
+ c.restore();
+ // подсказка, что рукоять можно взять
+ if(on&&show>=1&&!grabbed){
+  const pulse=.5+.5*Math.sin(time*4),hover=overHilt(mouse.x,mouse.y);
+  c.save();c.strokeStyle=`rgba(255,233,168,${hover?.95:.3+pulse*.45})`;c.lineWidth=2;c.setLineDash([6,5]);c.lineDashOffset=-time*18;c.beginPath();c.arc(geo.px,geo.py,40+(hover?3:pulse*3),0,TAU);c.stroke();c.setLineDash([]);
+  if(!everGrabbed){c.font='800 13px Manrope,Segoe UI,sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#000b';c.fillStyle='#ffe9a8';c.strokeText('Возьмись за рукоять',geo.px,geo.py+62);c.fillText('Возьмись за рукоять',geo.px,geo.py+62);}
+  c.restore();
+ }
+}
+function drawOverlay(){
+ const c=ctx;c.save();c.globalCompositeOperation='lighter';
+ for(const p of particles){c.fillStyle=`rgba(${p.rgb},${Math.min(1,p.life/p.max*1.4)})`;c.beginPath();c.arc(p.x,p.y,p.size,0,TAU);c.fill();}
+ c.restore();c.save();c.textAlign='center';
+ for(const f of floats){c.globalAlpha=Math.min(1,f.life*2.2);c.font=`800 ${f.size}px Manrope,Segoe UI,sans-serif`;c.lineWidth=4;c.strokeStyle='#000c';c.strokeText(f.text,f.x,f.y);c.fillStyle=f.color;c.fillText(f.text,f.x,f.y);}
+ c.restore();
+}
+// Значок навыка: у каждого варианта своё сгорание маны. Холст 200×200 css, центр значка — 100,100, радиус слота 42.
+function drawIcon(dt){
+ const c=ictx,R=42,low=mana<20,blue=low?'255,110,90':'90,170,255',hot=low?'255,200,170':'205,235,255';
+ c.setTransform(2,0,0,2,0,0);c.clearRect(0,0,200,200);
+ if(on){
+  if(vi===0){
+   const end=-Math.PI/2+TAU*mana/100,hx=100+Math.cos(end)*R,hy=100+Math.sin(end)*R;
+   c.lineCap='round';c.lineWidth=5;c.strokeStyle=`rgba(${blue},.25)`;c.beginPath();c.arc(100,100,R,0,TAU);c.stroke();
+   c.shadowColor=`rgb(${blue})`;c.shadowBlur=12;c.strokeStyle=`rgb(${blue})`;c.beginPath();c.arc(100,100,R,-Math.PI/2,end);c.stroke();c.shadowBlur=0;
+   const ring=(tick%1);c.strokeStyle=`rgba(${hot},${(1-ring)*.5})`;c.lineWidth=2;c.beginPath();c.arc(100,100,R+ring*16,0,TAU);c.stroke();
+   for(let i=0;i<2;i++)iconParts.push({x:hx,y:hy,vx:(Math.random()-.5)*50,vy:-20-Math.random()*50,life:.5,max:.5,size:1+Math.random()*2.2,hot:true});
+  }else if(vi===1){
+   const top=100+R-(2*R)*mana/100;
+   c.save();c.beginPath();c.arc(100,100,R-2,0,TAU);c.clip();
+   const g=c.createLinearGradient(0,top,0,100+R);g.addColorStop(0,`rgba(${hot},.75)`);g.addColorStop(.18,`rgba(${blue},.55)`);g.addColorStop(1,`rgba(${blue},.2)`);c.fillStyle=g;
+   c.beginPath();c.moveTo(40,160);c.lineTo(40,top);for(let x=40;x<=160;x+=4)c.lineTo(x,top+Math.sin(x*.16+time*7)*2.6+Math.sin(x*.07-time*4)*1.8);c.lineTo(160,160);c.closePath();c.fill();
+   c.restore();
+   if(mana>1)for(let i=0;i<2;i++){const half=Math.sqrt(Math.max(0,R*R-(top-100)**2))*.92;iconParts.push({x:100+(Math.random()*2-1)*half,y:top,vx:(Math.random()-.5)*14,vy:-26-Math.random()*40,life:.45,max:.45,size:1+Math.random()*2.6,hot:Math.random()<.5});}
+  }else{
+   const n=low?3:5;for(let i=0;i<n;i++){const a=Math.random()*TAU,flare=Math.max(.25,.6-.4*Math.sin(a));iconParts.push({x:100+Math.cos(a)*(R-2),y:100+Math.sin(a)*(R-2),vx:Math.cos(a)*10,vy:-44-Math.random()*62*flare,life:.28+Math.random()*.3,max:.58,size:3+Math.random()*4.5,hot:Math.random()<.3});}
+   c.shadowColor=`rgb(${blue})`;c.shadowBlur=18;c.strokeStyle=`rgba(${hot},.85)`;c.lineWidth=2.5;c.beginPath();c.arc(100,100,R,0,TAU);c.stroke();c.shadowBlur=0;
+   c.save();c.beginPath();c.arc(100,100,R-1,0,TAU);c.clip();c.fillStyle=`rgba(0,10,30,${.55*(1-mana/100)})`;c.fillRect(100-R,100+R-2*R*(1-mana/100),2*R,2*R);c.restore();
+  }
+ }
+ c.save();c.globalCompositeOperation='lighter';
+ iconParts=iconParts.filter(p=>(p.life-=dt)>0);
+ for(const p of iconParts){p.x+=p.vx*dt;p.y+=p.vy*dt;const k=p.life/p.max;c.fillStyle=`rgba(${p.hot?hot:blue},${k})`;c.beginPath();c.arc(p.x,p.y,p.size*(.5+k*.5),0,TAU);c.fill();}
+ c.restore();
+}
+let last=performance.now();
+function frame(now){
+ const dt=Math.min(.05,(now-last)/1000);last=now;
+ update(dt);
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+ if(show>0){drawTrail();drawSword();}
+ drawOverlay();drawIcon(dt);
+ requestAnimationFrame(frame);
+}
+window.swordPreview={hilt:()=>({x:geo.px,y:geo.py}),state:()=>({variant:vi,on,mana,angle,grabbed,show,hits,total,vel})};
+layout();setVariant(0);requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Небесный серафим — сборка и анимация</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:24px;background:radial-gradient(ellipse at 50% 0,#3a2c12,#100c04 70%);color:#fff4dc;font-family:Manrope,'Segoe UI',sans-serif}
+h1{margin:0 0 6px;font-size:20px}.lead{margin:0 0 18px;color:#d8c6a0;font-size:13px;max-width:900px}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.col h2{margin:0 0 8px;font-size:14px}
+.stage{position:relative;width:390px;height:260px;border-radius:14px;background:repeating-conic-gradient(#2a2210 0 25%,#221b0c 0 50%) 0 0/24px 24px;border:1px solid #ffd27a44;overflow:hidden}
+.stage.light{background:#f4f1ea}
+.stage>img.ref{width:100%;height:100%;object-fit:contain}
+.overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.45;pointer-events:none}
+button{margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#fff0a0,#ffc24a);color:#2a1a04;font:800 13px Manrope,sans-serif;cursor:pointer}
+label{display:block;margin-top:8px;font-size:12px;color:#d8c6a0}
+/* кукла: координаты образца 1536×1024 */
+.puppet{position:absolute;left:0;top:0;width:1536px;height:1024px;transform-origin:0 0}
+.shake,.body,.grp{position:absolute;inset:0}
+.part{position:absolute;display:block;pointer-events:none}
+/* Парение: светлый лик парит и мягко сияет, три пары крыльев взмахивают волной — верхняя, средняя, нижняя */
+.floating .body{animation:s-float 3.6s ease-in-out infinite}
+.floating .i-wing-tl{animation:s-flap-l 2.4s ease-in-out infinite}
+.floating .i-wing-tr{animation:s-flap-r 2.4s ease-in-out infinite}
+.floating .i-wing-ml{animation:s-flap-l 2.4s ease-in-out -.3s infinite}
+.floating .i-wing-mr{animation:s-flap-r 2.4s ease-in-out -.3s infinite}
+.floating .i-wing-bl{animation:s-flap-l 2.4s ease-in-out -.6s infinite}
+.floating .i-wing-br{animation:s-flap-r 2.4s ease-in-out -.6s infinite}
+@keyframes s-float{0%,100%{transform:translateY(0);filter:drop-shadow(0 0 10px rgba(255,225,140,.45))}50%{transform:translateY(-14px);filter:drop-shadow(0 0 26px rgba(255,230,150,.85))}}
+@keyframes s-flap-l{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(5deg)}}
+@keyframes s-flap-r{0%,100%{transform:rotate(3deg)}50%{transform:rotate(-5deg)}}
+/* Удар: серафим вздрагивает, лик вспыхивает и чуть раздувается, все крылья разом распахиваются */
+.hit .shake{animation:s-shake .5s linear}
+.hit .g-core{animation:s-hit-core .5s cubic-bezier(.2,.9,.3,1)}
+.hit .g-wing-tl,.hit .g-wing-ml,.hit .g-wing-bl{animation:s-hit-l .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-wing-tr,.hit .g-wing-mr,.hit .g-wing-br{animation:s-hit-r .6s cubic-bezier(.2,.9,.3,1)}
+.hit .body img{animation:s-hit-flash .5s ease-out}
+@keyframes s-shake{0%,100%{transform:none}10%{transform:translateX(-12px)}22%{transform:translateX(10px)}34%{transform:translateX(-7px)}48%{transform:translateX(4px)}64%{transform:translateX(-2px)}}
+@keyframes s-hit-core{0%{transform:none}14%{transform:scale(1.04)}60%{transform:scale(.99)}100%{transform:none}}
+@keyframes s-hit-l{0%{transform:none}16%{transform:rotate(8deg)}60%{transform:rotate(-1.5deg)}100%{transform:none}}
+@keyframes s-hit-r{0%{transform:none}16%{transform:rotate(-8deg)}60%{transform:rotate(1.5deg)}100%{transform:none}}
+@keyframes s-hit-flash{0%{filter:none}10%{filter:brightness(.82) saturate(1.25)}35%{filter:brightness(1.15)}100%{filter:none}}
+</style>
+</head>
+<body>
+<h1>Небесный серафим — сборка из частей</h1>
+<p class="lead">Образец и серафим, нарезанный из него: светлый лик с нимбом и обручем и шесть крыльев поверх подложки; на тёмном фоне, на светлой подложке, в парении и с ударами.</p>
+<div class="row">
+ <div class="col"><h2>Образец</h2><div class="stage"><img class="ref" src="reference.png" alt=""></div></div>
+ <div class="col"><h2>Собран из частей</h2><div class="stage" id="still"></div><label><input type="checkbox" id="ov"> наложить образец</label></div>
+ <div class="col"><h2>Светлая подложка</h2><div class="stage light" id="light"></div></div>
+ <div class="col"><h2>Парит</h2><div class="stage" id="idle"></div></div>
+ <div class="col"><h2>Парит + удары</h2><div class="stage" id="hits"></div><button id="hit">⚔ Ударить</button><label><input type="checkbox" id="loop" checked> бить каждые 1,2 с</label></div>
+</div>
+<script>
+const P='../../assets/bosses/seraph/',CW=1536,CH=1024;
+// Часть: файл, центр (в координатах образца), группа. Крылья отделены секторами вокруг лика (за пределами его рамки);
+// золотой нимб и наклонный обруч оставлены в лике, поэтому не рвутся, когда крылья машут. Крылья лежат за ликом.
+// Под ними — подложка (under): размытый образец полосой ~32 px вокруг лика; закрывает щёлки у корней крыльев.
+const PARTS=[
+ ['under',763,464,'under'],
+ ['wing-tl',503.5,203,'wing-tl'],['wing-tr',1035.5,186,'wing-tr'],['wing-ml',276.5,495,'wing-ml'],['wing-mr',1263,495.5,'wing-mr'],
+ ['wing-bl',430,769,'wing-bl'],['wing-br',1108.5,748.5,'wing-br'],
+ ['core',763,463.5,'core']
+];
+// Точки поворота — корни крыльев у рамки лика.
+const PIVOT={'under':[770,490],'core':[770,490],'wing-tl':[567,383],'wing-tr':[975,383],'wing-ml':[550,500],'wing-mr':[1000,500],'wing-bl':[567,633],'wing-br':[975,633]};
+const SIZE={};
+async function sizes(){await Promise.all(PARTS.map(([f])=>new Promise(r=>{const i=new Image();i.onload=()=>{SIZE[f]=[i.naturalWidth,i.naturalHeight];r();};i.src=P+f+'.png';})));}
+function build(stage){
+ const sw=stage.clientWidth,k=Math.min(sw/CW,stage.clientHeight/CH),puppet=document.createElement('div');puppet.className='puppet';puppet.style.transform=`translateX(${(sw-CW*k)/2}px) scale(${k})`;
+ const shake=document.createElement('div');shake.className='shake';const body=document.createElement('div');body.className='body';shake.append(body);puppet.append(shake);const groups={};
+ for(const [file,cx,cy,g] of PARTS){
+  if(!groups[g]){const el=document.createElement('div');el.className='grp g-'+g;const idle=document.createElement('div');idle.className='grp i-'+g;el.style.transformOrigin=idle.style.transformOrigin=PIVOT[g].map(v=>v+'px').join(' ');el.append(idle);body.append(el);groups[g]=idle;}
+  const [w,h]=SIZE[file],img=new Image();img.className='part p-'+file;img.src=P+file+'.png';
+  Object.assign(img.style,{width:w+'px',height:h+'px',left:cx-w/2+'px',top:cy-h/2+'px'});
+  groups[g].append(img);
+ }
+ stage.append(puppet);return puppet;
+}
+if(location.hash==='#big'){document.querySelectorAll('.col').forEach((c,i)=>{if(i!==1)c.style.display='none'});const s=document.getElementById('still');s.style.width='1536px';s.style.height='1024px';document.querySelector('.lead').hidden=true;}
+sizes().then(()=>{
+ build(document.getElementById('still'));
+ const ov=document.createElement('img');ov.className='overlay';ov.src='reference.png';ov.hidden=true;document.getElementById('still').append(ov);
+ document.getElementById('ov').onchange=e=>ov.hidden=!e.target.checked;
+ build(document.getElementById('light'));
+ build(document.getElementById('idle')).classList.add('floating');
+ const hits=build(document.getElementById('hits'));hits.classList.add('floating');
+ const hit=()=>{hits.classList.remove('hit');void hits.offsetWidth;hits.classList.add('hit');};
+ document.getElementById('hit').onclick=hit;setInterval(()=>{if(document.getElementById('loop').checked)hit();},1200);
+});
+</script>
+</body>
+</html>

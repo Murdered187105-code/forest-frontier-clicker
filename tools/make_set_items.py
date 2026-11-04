@@ -24,6 +24,8 @@ SLOT_STATS = {
     'weapon': ['critChance', 'critDamage'],
 }
 ARMOR_SLOTS = ['head', 'gloves', 'boots', 'chest', 'shoulders', 'belt', 'legs']
+# Восстановление маны (в секунду, база игры — 0,1): получают все предметы с максимумом маны.
+MANA_REGEN = {'Common': .02, 'Uncommon': .03, 'Rare': .05, 'Epic': .07, 'Legendary': .1, 'Divine': .15}
 
 # Каждый комплект: id, название, редкость, тип, материал/палитра, тематическая характеристика, предметы и бонус.
 # Бонусы легендарных и божественного комплектов пустые — их задаст автор игры.
@@ -262,6 +264,8 @@ def item_stats(set_def, slot, index):
     rng = random.Random(set_def['id'] + slot + str(index))
     for key in keys[:max(0, count)]:
         stats[key] = round_stat(key, STAT_UNIT[key] * scale * rng.uniform(.9, 1.15))
+    if 'maxMana' in stats:
+        stats['manaRegen'] = MANA_REGEN[rarity]
     return stats
 
 

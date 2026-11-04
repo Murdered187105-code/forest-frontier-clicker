@@ -5,7 +5,7 @@
 const COLLECTION_KEY='forest-frontier-collection-v1';
 const RANKS=['Common','Uncommon','Rare','Epic','Legendary','Divine'];
 const KIND_NAMES={weapon:'Оружие',accessory:'Аксессуары',armor:'Броня'};
-const BONUS_TEXT={damage:['к урону',''],damageBonus:['к урону удара',''],maxMana:['к максимуму маны',''],goldBonus:['золота за убийство','%'],attackSpeed:['скорости атаки','%'],critChance:['шанса крита',' п.п.'],critDamage:['урона крита','%']};
+const BONUS_TEXT={damage:['к урону',''],damageBonus:['к урону удара',''],maxMana:['к максимуму маны',''],manaRegen:['к восстановлению маны',' / с'],goldBonus:['золота за убийство','%'],attackSpeed:['скорости атаки','%'],critChance:['шанса крита',' п.п.'],critDamage:['урона крита','%']};
 const sets=(window.ITEM_SETS||[]).filter(set=>RANKS.includes(set.rarity)&&KIND_NAMES[set.kind]&&Array.isArray(set.items)&&set.items.length);
 const color=rarity=>rarityFlashColors[rarity]||'#d9b56a';
 const template=id=>itemPool.find(item=>item.id===id)||null;
@@ -17,7 +17,7 @@ try{const saved=JSON.parse(localStorage.getItem(COLLECTION_KEY));if(saved){(save
 function save(){try{localStorage.setItem(COLLECTION_KEY,JSON.stringify({items:[...collected],sets:[...completed]}));}catch{}}
 const progress=set=>set.items.filter(id=>collected.has(id)).length;
 // Другие окна (наковальня) спрашивают, открыт ли предмет в коллекции.
-window.collectionApi={has:id=>collected.has(id)};
+window.collectionApi={has:id=>collected.has(id),flush:()=>flush()};
 
 // Суммарный бонус всех собранных комплектов — подключается в bonusSources() как ещё один источник характеристик.
 window.setCollectionBonus=()=>{
@@ -107,7 +107,13 @@ openButton.className='feature-button collection-button';openButton.id='openColle
 openButton.setAttribute('aria-label','Коллекция комплектов');openButton.setAttribute('aria-haspopup','dialog');
 openButton.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6Z"/><path d="m9 12 2 2 4-4"/></svg><span class="feature-label">Коллекция комплектов</span>';
 statsButton.after(openButton);
-function placeButton(){const cs=getComputedStyle(statsButton);openButton.style.left=statsButton.offsetLeft+statsButton.offsetWidth+12+'px';openButton.style.bottom=cs.bottom;}
+// Кнопка настроек — следующей в том же ряду, справа от коллекции.
+const settingsButton=$('openSettings');
+openButton.after(settingsButton);
+function placeButton(){
+ const cs=getComputedStyle(statsButton);openButton.style.left=statsButton.offsetLeft+statsButton.offsetWidth+12+'px';openButton.style.bottom=cs.bottom;
+ settingsButton.style.left=openButton.offsetLeft+openButton.offsetWidth+12+'px';settingsButton.style.bottom=cs.bottom;
+}
 addEventListener('resize',placeButton);placeButton();
 
 const dialog=document.createElement('dialog');
@@ -146,7 +152,7 @@ function setCard(set){
   const item=template(id),owned=collected.has(id),cell=document.createElement('div');
   cell.className='set-item '+(owned?'owned':'missing');cell.style.setProperty('--rc',color(item?.rarity||set.rarity));
   cell.innerHTML='<img alt=""><strong></strong><small></small>';
-  if(item){cell.querySelector('img').src=item.image;cell.querySelector('strong').textContent=item.name;cell.querySelector('small').textContent=slotName(item)+(owned?'':' · не получен');attachItemTooltip(cell,item);}
+  if(item){cell.querySelector('img').src=item.image;cell.querySelector('strong').textContent=item.name;cell.querySelector('small').textContent=slotName(item)+(owned?'':' · не получен');addLevelPlate(cell,item);attachItemTooltip(cell,item);}
   else cell.querySelector('strong').textContent='Неизвестный предмет';
   list.append(cell);
  }
@@ -171,15 +177,26 @@ function render(){
   list.append(section);
  }
 }
+// Сообщение о комплекте ждёт, пока игрок увидит полученный предмет: карточку сундука или результат наковальни.
+// Предмет записывается в инвентарь раньше показа, поэтому без ожидания сообщение опережало бы карточку.
+let queued=[];
+const revealPending=()=>($('chestRewardDialog').open&&!$('rewardCard').classList.contains('reward-revealed'))||!!window.anvilApi?.revealPending();
 function announce(fresh){
  if(!settings.animations)return;
- fresh.forEach((set,i)=>setTimeout(()=>{
+ queued.push(...fresh);setTimeout(flush);
+}
+function flush(){
+ if(!queued.length||revealPending())return;
+ const list=queued;queued=[];
+ list.forEach((set,i)=>setTimeout(()=>{
   const toast=document.createElement('div');toast.className='collection-toast';toast.style.setProperty('--rc',color(set.rarity));
   toast.innerHTML='<small>Комплект собран</small><b></b><span></span>';toast.querySelector('b').textContent=set.name;toast.querySelector('span').textContent=bonusLines(set.bonus).join(', ');
   (document.querySelector('dialog[open]')||document.body).append(toast);setTimeout(()=>toast.remove(),3300);
  },i*900));
 }
 
+$('rewardCard').addEventListener('click',()=>setTimeout(flush));
+$('chestRewardDialog').addEventListener('close',()=>setTimeout(flush));
 $('collectionSearch').addEventListener('input',render);
 openButton.addEventListener('click',()=>{record();render();dialog.showModal();});
 $('closeCollection').addEventListener('click',()=>dialog.close());

@@ -1,13 +1,13 @@
-// Точный разрез (слот 4, клавиша 4): за ману игрок оставляет на враге несколько отметок, проводя курсором через него
-// без нажатия кнопки мыши. Сила каждой отметки — множитель ×1–×5 от скорости мыши. Урон не наносится сразу:
+// Точный разрез (слот 4, клавиша 4): за ману игрок оставляет на враге несколько отметок, задевая его курсором
+// без нажатия кнопки мыши: отметка появляется сразу при попадании и ложится по направлению взмаха. Сила каждой отметки — множитель ×1–×5 от скорости мыши. Урон не наносится сразу:
 // когда размещены все отметки, разрезы срабатывают по очереди с шагом 0,2 с и бьют только того врага, на котором оставлены.
 // Таланты: «Серия разрезов» добавляет отметки, «Перекрёстный разрез» усиливает серию за каждое пересечение отметок.
 // Все числа навыка и талантов — в precise-cut-data.js.
 (()=>{
-const CFG=Object.assign({mana:25,unlockCost:35,baseCuts:3,icon:'assets/precision-cut-icon-v1.png',
+const CFG=Object.assign({mana:25,baseCuts:3,icon:'assets/precision-cut-icon-v1.png',
  series:{name:'Серия разрезов',cutsPerRank:1,costs:[1,2,3,4,5,6,7]},cross:{name:'Перекрёстный разрез',bonusPerCross:.1,costs:[1]}},window.PRECISE_CUT||{});
-const CUT_KEY='forest-frontier-cut-v1',CUT_MANA=CFG.mana,CUT_UNLOCK_COST=CFG.unlockCost;
-const CUT_MIN_PATH=18,SAMPLE_STALE=150,SPEED_WINDOW=120,FIRE_STEP=200,FX_MS=500,FINAL_WAIT=700;
+const CUT_KEY='forest-frontier-cut-v1',CUT_MANA=CFG.mana;
+const SAMPLE_STALE=150,SPEED_WINDOW=120,FIRE_STEP=200,FX_MS=500;
 // Область попадания — эллипс внутри изображения врага (доли его ширины и высоты).
 const HIT={cx:.5,cy:.48,rx:.43,ry:.45};
 const SERIES_MAX=CFG.series.costs.length,CROSS_MAX=CFG.cross.costs.length;
@@ -25,9 +25,8 @@ const cutSpentMax=()=>spentOn(CFG.series.costs,SERIES_MAX)+spentOn(CFG.cross.cos
 // active — навык включён (идёт набор отметок или их срабатывание); firing — отметки уже срабатывают.
 // runTotal и runCross фиксируются при активации: прокачка во время серии действует только на следующую.
 let active=false,firing=false,token=0,marks=[],timers=[],runTotal=CFG.baseCuts,runCross=false,crossings={};
-// Состояние текущего прохода курсора: armed — курсор побывал вне врага после прошлого разреза.
-// live — линия, которая прямо сейчас тянется за курсором по врагу.
-let armed=true,passPath=0,lastPoint=null,samples=[],live=null;
+// armed — курсор побывал вне врага после прошлого разреза: одно касание врага даёт одну отметку.
+let armed=true,lastPoint=null,samples=[];
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const quietFx=()=>!settings.animations||matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -50,7 +49,6 @@ style.textContent=`
 #cutSkill .cut-count{position:absolute;left:50%;top:50%;z-index:3;translate:-50% -50%;padding:1px 6px;border-radius:9px;background:#08141ccc;font-size:13px;font-weight:800;line-height:1.2;color:#f2faff;text-shadow:0 0 6px #7fc8ff;box-shadow:0 0 8px #9fd6ff66;pointer-events:none}
 #cutSkill .cut-count:empty{display:none}
 #cutSkill.skill-running{filter:none;box-shadow:0 0 0 2px #d8efff,0 0 18px #9fd6ff}
-#cutSkill.mana-insufficient .cut-icon{opacity:.45}
 .cut-mark,.cut-fx{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-50%) rotate(var(--angle))}
 .cut-mark{height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff 10%,#fff 90%,transparent);opacity:var(--opacity);filter:brightness(var(--bright));box-shadow:0 0 var(--glow) #bfe4ff,0 0 calc(var(--glow) / 2.5) #fff}
 .cut-mark.cut-settle{transition:width .14s ease-out}
@@ -91,6 +89,7 @@ function refreshIcons(){
  button.querySelector('.cut-icon').outerHTML=iconHtml();
  $('cutTreeIcon').innerHTML=iconHtml();
  const root=document.querySelector('#talentTreeContent .detail-root.cut-root');if(root)root.innerHTML=iconHtml();
+ window.skillDockRefresh?.();
 }
 
 // Слот 4: пустой слот превращается в кнопку навыка; до изучения он выглядит пустым (как остальные свободные слоты).
@@ -115,16 +114,15 @@ function updateCutUI(){
 
 function useCut(){
  renderMana();checkBossTimer();
- if(!cutUnlocked||active||rapidActive||powerActive||aimActive||locked||hp<=0||modalOpen())return;
+ if(!cutUnlocked||active||locked||hp<=0||modalOpen())return;
  if(mana<CUT_MANA){showManaWarning(button);return;}
  mana=Number((mana-CUT_MANA).toFixed(6));renderMana();saveProgress();
- active=true;firing=false;marks=[];token++;armed=true;resetPass();samples=[];lastPoint=null;live?.el.remove();live=null;
+ active=true;firing=false;marks=[];token++;armed=true;samples=[];lastPoint=null;
  runTotal=cutsTotal();runCross=crossRank>0;crossings={};
  resetMultiplier();
- $('message').textContent='Точный разрез: проведи курсором через врага '+runTotal+' раз. Чем быстрее взмах — тем сильнее разрез.';
+ $('message').textContent='Точный разрез: задень врага курсором '+runTotal+' раз. Чем быстрее взмах — тем сильнее разрез.';
  updateCutUI();
 }
-function resetPass(){passPath=0;}
 
 // Длина части отрезка a→b внутри эллипса и точка середины этой части (в координатах экрана).
 function insideSegment(ax,ay,bx,by,e){
@@ -155,72 +153,42 @@ function onPointerMove(event){
  const collecting=active&&!firing&&marks.length<runTotal;
  cursor.hidden=!collecting||modalOpen();
  if(collecting){cursor.style.transform=`translate(${event.clientX}px,${event.clientY}px)`;}
- // Последний разрез дорисовывается за курсором, пока тот не покинет врага.
- if(!collecting&&!live){lastPoint=null;return;}
+ if(!collecting){lastPoint=null;return;}
  const point={x:event.clientX,y:event.clientY,t:now};
- if(!lastPoint||now-lastPoint.t>SAMPLE_STALE){endLive(lastPoint);samples=[point];lastPoint=point;resetPass();return;}
+ if(!lastPoint||now-lastPoint.t>SAMPLE_STALE){samples=[point];lastPoint=point;return;}
  samples.push(point);if(samples.length>40)samples.shift();
- if(!canStrikeEnemy()){endLive(lastPoint);lastPoint=point;resetPass();return;}
- const e=hitEllipse(),part=insideSegment(lastPoint.x,lastPoint.y,point.x,point.y,e),inside=insideEllipse(point.x,point.y,e);
- if(part&&armed&&collecting){
-  passPath+=part.length;
-  if(!live)live=startLive(part.enter||lastPoint);
- }
- if(collecting&&armed&&live&&passPath>=CUT_MIN_PATH){
-  registerMark(currentSpeed(now),e);
-  armed=false;
- }
- // Линия разреза тянется от точки входа во врага за курсором.
- if(live)drawLive(inside?point:(part?.exit||point));
- // После разреза новый засчитывается, только когда курсор выйдет за пределы врага.
- if(!inside){endLive(part?.exit||point);armed=true;resetPass();}
+ if(!canStrikeEnemy()){lastPoint=point;return;}
+ const e=hitEllipse(),part=insideSegment(lastPoint.x,lastPoint.y,point.x,point.y,e);
+ // Отметка ставится в момент попадания; следующая засчитывается, только когда курсор выйдет за пределы врага.
+ if(part&&armed){registerMark(currentSpeed(now),e,lastPoint,point);armed=false;}
+ if(!insideEllipse(point.x,point.y,e))armed=true;
  lastPoint=point;
 }
 
-// Живой след: бледная линия от точки входа до курсора. Засчитанный разрез становится отметкой, незасчитанный гаснет.
-function startLive(from){
- const el=document.createElement('div');el.className='cut-mark cut-live cut-wound';
- el.style.cssText='--opacity:.35;--bright:.8;--glow:6px';$('arena').append(el);
- return {el,start:{x:from.x,y:from.y},mark:null};
+// Направление взмаха — путь курсора за последние 120 мс (или последний шаг, если пути нет).
+function swingDirection(from,to){
+ const recent=samples.filter(s=>to.t-s.t<=SPEED_WINDOW),start=recent.length>1?recent[0]:from;
+ let dx=to.x-start.x,dy=to.y-start.y;if(!dx&&!dy){dx=to.x-from.x;dy=to.y-from.y;}
+ const norm=Math.hypot(dx,dy)||1;return {x:dx/norm,y:dy/norm};
 }
-function lineGeometry(a,b){
- const p=arenaPoint(a.x,a.y),q=arenaPoint(b.x,b.y);
- return {x:(p.x+q.x)/2,y:(p.y+q.y)/2,length:Math.max(2,Math.hypot(q.x-p.x,q.y-p.y)),angle:Math.atan2(q.y-p.y,q.x-p.x)*180/Math.PI};
-}
-function placeLine(el,g){el.style.left=g.x+'px';el.style.top=g.y+'px';el.style.width=g.length+'px';el.style.setProperty('--angle',g.angle+'deg');}
-function drawLive(end){
- const g=lineGeometry(live.start,end);placeLine(live.el,g);
- if(live.mark)Object.assign(live.mark,{x:g.x,y:g.y,angle:g.angle,length:Math.max(g.length,2)});
-}
-// Курсор покинул врага: засчитанный разрез фиксируется по траектории и вытягивается до длины, заданной скоростью.
-function endLive(end){
- if(!live)return;
- const current=live;live=null;
- if(!current.mark){current.el.animate([{opacity:.35},{opacity:0}],{duration:180,fill:'forwards'}).onfinish=()=>current.el.remove();return;}
- if(end)drawLiveFor(current,end);
- const mark=current.mark,length=Math.max(mark.length,mark.targetLength);
- if(!quietFx())current.el.classList.add('cut-settle');
- current.el.style.width=length+'px';mark.length=length;
- settleMark(mark);
-}
-function drawLiveFor(current,end){
- const g=lineGeometry(current.start,end);placeLine(current.el,g);
- Object.assign(current.mark,{x:g.x,y:g.y,angle:g.angle,length:g.length});
-}
-
-function registerMark(speed,e){
+// Разрез ложится через врага по направлению взмаха: центр — середина хорды области попадания на этой прямой.
+// Отметка сразу вытягивается до длины, заданной скоростью.
+function registerMark(speed,e,from,to){
  const multiplier=Number(speedMultiplier(speed).toFixed(2)),intensity=clamp(speed/4800,0,1);
  const zoom=$('arena').currentCSSZoom||1,enemyWidth=e.rect.width/zoom;
  const referenceLength=Math.max(220,enemyWidth*1.65),targetLength=referenceLength*(.7+.7*intensity);
- const el=live.el;el.classList.remove('cut-live');
- const mark={multiplier,intensity,angle:0,x:0,y:0,length:0,targetLength,brightness:.65+.85*intensity,opacity:.5+.45*intensity,glow:8+22*intensity,enemy:enemyKey(),el,settled:false};
- el.style.setProperty('--opacity',mark.opacity);el.style.setProperty('--bright',mark.brightness);el.style.setProperty('--glow',mark.glow+'px');
- live.mark=mark;
+ const dir=swingDirection(from,to),reach=(e.rx+e.ry)*4;
+ const chord=insideSegment(to.x-dir.x*reach,to.y-dir.y*reach,to.x+dir.x*reach,to.y+dir.y*reach,e),hit=chord?.mid||to,center=arenaPoint(hit.x,hit.y);
+ const el=document.createElement('div');el.className='cut-mark cut-wound';
+ const mark={multiplier,intensity,angle:Math.atan2(dir.y,dir.x)*180/Math.PI,x:center.x,y:center.y,length:targetLength,targetLength,brightness:.65+.85*intensity,opacity:.5+.45*intensity,glow:8+22*intensity,enemy:enemyKey(),el,settled:false};
+ el.style.cssText=`left:${mark.x}px;top:${mark.y}px;width:2px;--angle:${mark.angle}deg;--opacity:${mark.opacity};--bright:${mark.brightness};--glow:${mark.glow}px`;
+ $('arena').append(el);
+ if(!quietFx()){el.classList.add('cut-settle');el.getBoundingClientRect();}
+ el.style.width=mark.length+'px';
  marks.push(mark);
  $('message').textContent='Разрез '+marks.length+' из '+runTotal+' · сила ×'+multiplier.toLocaleString('ru-RU');
- // Если курсор задержался на враге после последней отметки, она фиксируется сама.
- if(marks.length===runTotal){const current=token;timers.push(setTimeout(()=>{if(current===token&&live?.mark===mark)endLive(null);},FINAL_WAIT));}
  updateCutUI();
+ settleMark(mark);
 }
 
 // ── Пересечения отметок ──
@@ -332,7 +300,7 @@ function cancelCut(){
  token++;timers.forEach(clearTimeout);timers=[];
  marks.forEach(mark=>mark.el?.remove());document.querySelectorAll('.cut-mark,.cut-fx,.cut-spark,.cut-ring,.cut-cross-flash').forEach(el=>el.remove());
  multiplierFade?.cancel();multiplierFade=null;multiplierLabel.hidden=true;
- live?.el.remove();live=null;marks=[];active=false;firing=false;cursor.hidden=true;lastPoint=null;samples=[];resetPass();updateCutUI();
+ marks=[];active=false;firing=false;cursor.hidden=true;lastPoint=null;samples=[];updateCutUI();
 }
 // Сброс боя (переход на этап, вход и выход из подземелья, отступление) отменяет навык.
 const originalClearBattle=clearBattle;
@@ -342,13 +310,12 @@ document.addEventListener('pointermove',onPointerMove,{passive:true});
 document.addEventListener('mouseout',event=>{if(!event.relatedTarget){cursor.hidden=true;lastPoint=null;}});
 addEventListener('blur',()=>{cursor.hidden=true;lastPoint=null;});
 button.addEventListener('click',useCut);
-document.addEventListener('keydown',event=>{if((event.code==='Digit4'||event.code==='Numpad4')&&!event.repeat)useCut();});
 setInterval(()=>{updateCutUI();if(modalOpen())cursor.hidden=true;},100);
 
 function unlockCut(){
- if(cutUnlocked||gold<CUT_UNLOCK_COST)return;
- gold=Number((gold-CUT_UNLOCK_COST).toFixed(2));cutUnlocked=true;saveCut();saveProgress();render();updateCutUI();
- $('message').textContent='Точный разрез открыт! Используй четвёртый слот навыка или клавишу 4.';
+ if(cutUnlocked||!spendSkillUnlock())return;
+ cutUnlocked=true;saveCut();saveProgress();render();updateCutUI();
+ $('message').textContent='Точный разрез открыт! Перетащи его в слот наверху древа талантов.';
 }
 
 // ── Древо талантов: ветка «Точный разрез» на месте «Навыка 4», в категории ближнего боя ──
@@ -382,8 +349,8 @@ function showCutInfo(anchor){
  tooltipShell(anchor,'⟋ Точный разрез');
  itemTooltip.append(tooltipRow('💧','Мана',String(CUT_MANA)),tooltipRow('⟋','Разрезов',total+' отложенных'),tooltipRow('✦','Урон','×1–×5 от скорости мыши'),tooltipRow('⚔','Срабатывание','по очереди через 0,2 с'));
  if(crossRank>0)itemTooltip.append(tooltipRow('✕','Перекрестие','+'+String(CFG.cross.bonusPerCross).replace('.',',')+' к множителю серии'));
- tooltipText(anchor,'Проведи курсором через врага — кнопку мыши нажимать не нужно. Каждый взмах оставляет белую отметку; чем быстрее движение, тем длиннее и ярче разрез и выше его урон (×1 до 800 пикс./с, ×3 при 2400, ×5 от 4800). После каждого разреза выведи курсор за пределы врага. Когда оставлены все '+total+' отметок, они срабатывают одна за другой через 0,2 секунды и бьют только того врага, на котором были оставлены. Разрезы не критуют.'+(crossRank>0?' Каждое пересечение двух отметок на одном враге усиливает всю серию.':''),
-  cutUnlocked?'Навык открыт · слот 4 или клавиша 4':gold<CUT_UNLOCK_COST?'Открывается за '+CUT_UNLOCK_COST+' золота · у тебя '+gold:'Нажми, чтобы открыть за '+CUT_UNLOCK_COST+' золота');
+ tooltipText(anchor,'Задень врага курсором — кнопку мыши нажимать не нужно. Отметка появляется сразу при попадании и ложится по направлению взмаха; чем быстрее движение, тем длиннее и ярче разрез и выше его урон (×1 до 800 пикс./с, ×3 при 2400, ×5 от 4800). После каждого разреза выведи курсор за пределы врага. Когда оставлены все '+total+' отметок, они срабатывают одна за другой через 0,2 секунды и бьют только того врага, на котором были оставлены. Разрезы не критуют.'+(crossRank>0?' Каждое пересечение двух отметок на одном враге усиливает всю серию.':''),
+  cutUnlocked?'Навык открыт · '+skillDockHint('cut'):skillUnlockHint());
 }
 // Таланты ветки: «Серия разрезов» (7 уровней по нарастающей цене) и «Перекрёстный разрез» (1 уровень).
 const TALENTS=[
@@ -466,6 +433,8 @@ $('undoReset').addEventListener('click',()=>{if(cutBackup&&Date.now()<cutBackup.
 // Картинка иконки: если файл есть, она заменяет рисованную иконку в слоте, в списке веток и в корне древа.
 const probe=new Image();probe.onload=()=>{iconReady=true;refreshIcons();};probe.src=CFG.icon;
 
-window.cutApi={unlocked:()=>cutUnlocked,active:()=>active};
+// ranks/setRanks — для черновика прокачки в окне ветки: «Отмена» возвращает уровни талантов.
+window.cutApi={unlocked:()=>cutUnlocked,active:()=>active,use:useCut,ranks:()=>({cutSeries:seriesRank,cutCross:crossRank}),
+ setRanks:ranks=>{if(!('cutSeries' in ranks))return;seriesRank=ranks.cutSeries;crossRank=ranks.cutCross;saveCut();updateCutUI();}};
 updateCutUI();
 })();

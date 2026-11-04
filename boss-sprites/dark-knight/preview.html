@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тёмный рыцарь — анимация урона</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:24px;background:radial-gradient(ellipse at 50% 0,#2a1748,#0d0718 70%);color:#f0e6ff;font-family:Manrope,'Segoe UI',sans-serif}
+h1{margin:0 0 6px;font-size:20px}.lead{margin:0 0 18px;color:#b9a6d8;font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.col h2{margin:0 0 8px;font-size:14px}
+.stage{position:relative;width:310px;height:400px;border-radius:14px;background:#1a0f2e;border:1px solid #a77bff44;overflow:hidden}
+.stage>img.ref{width:100%;height:100%;object-fit:contain}
+.overlay{position:absolute;inset:0;opacity:.45;pointer-events:none}
+button{margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#d4ff7a,#5fe6b6);color:#062018;font:800 13px Manrope,sans-serif;cursor:pointer}
+label{display:block;margin-top:8px;font-size:12px;color:#b9a6d8}
+/* кукла: система координат 620×800, уменьшена до 310×400 */
+.puppet{position:absolute;left:0;top:0;width:620px;height:800px;transform-origin:0 0;transform:scale(.5)}
+.knight{position:absolute;inset:0;transform-origin:310px 760px}
+.grp{position:absolute;inset:0}
+.part{position:absolute;display:block;pointer-events:none}
+/* A · Отброс: рыцаря отбрасывает назад, голова и руки откидываются */
+.va.hit .knight{animation:k-body .5s cubic-bezier(.2,.9,.3,1)}
+.va.hit .g-head{animation:k-head .5s cubic-bezier(.2,.9,.3,1)}
+.va.hit .g-arm-l{animation:k-arm-l .55s cubic-bezier(.2,.9,.3,1)}
+.va.hit .g-arm-r,.va.hit .g-hand-r{animation:k-arm-r .55s cubic-bezier(.2,.9,.3,1)}
+.va.hit .g-cape-l{animation:k-cape-l .7s ease-out}
+.va.hit .g-cape-r{animation:k-cape-r .7s ease-out}
+.va.hit .g-pauldrons{animation:k-pauldrons .45s ease-out}
+.va.hit .g-gem{animation:k-gem .5s ease-out}
+.va.hit .knight .part{animation:k-flash .35s ease-out}
+/* B · Оседание: удар сверху вдавливает рыцаря, броня подпрыгивает и тяжело оседает, плащ вздымается */
+.vb.hit .knight{animation:b-body .6s cubic-bezier(.3,1.4,.5,1)}
+.vb.hit .g-head{animation:b-head .6s cubic-bezier(.3,1.4,.5,1)}
+.vb.hit .g-pauldrons{animation:b-pauldrons .6s cubic-bezier(.3,1.4,.5,1)}
+.vb.hit .g-arm-l{animation:b-arm-l .6s ease-out}
+.vb.hit .g-arm-r,.vb.hit .g-hand-r{animation:b-arm-r .6s ease-out}
+.vb.hit .g-cape-l,.vb.hit .g-cape-r{animation:b-cape .8s ease-out}
+.vb.hit .g-gem{animation:k-gem .6s ease-out}
+.vb.hit .knight .part{animation:b-flash .45s ease-out}
+@keyframes b-body{0%{transform:none}15%{transform:scale(1.08,.86)}40%{transform:scale(.96,1.05) translateY(-8px)}65%{transform:scale(1.02,.98)}100%{transform:none}}
+@keyframes b-head{0%{transform:none}15%{transform:translateY(22px)}40%{transform:translateY(-14px)}70%{transform:translateY(4px)}100%{transform:none}}
+@keyframes b-pauldrons{0%{transform:none}15%{transform:translateY(14px) scaleX(1.06)}40%{transform:translateY(-10px)}100%{transform:none}}
+@keyframes b-arm-l{0%{transform:none}18%{transform:rotate(-10deg)}50%{transform:rotate(5deg)}100%{transform:none}}
+@keyframes b-arm-r{0%{transform:none}18%{transform:rotate(8deg) translateY(10px)}50%{transform:rotate(-4deg)}100%{transform:none}}
+@keyframes b-cape{0%{transform:none}20%{transform:translateY(-16px) scaleY(.94)}55%{transform:translateY(6px)}100%{transform:none}}
+@keyframes b-flash{0%{filter:none}10%{filter:brightness(2.1) sepia(.4) hue-rotate(220deg)}100%{filter:none}}
+/* C · Разлёт брони: части на миг разлетаются от удара и с дрожью собираются обратно, вспышка фиолетовой тьмы */
+.vc.hit .knight{animation:c-shake .55s linear}
+.vc.hit .g-head{animation:c-head .55s cubic-bezier(.2,.9,.3,1)}
+.vc.hit .g-pauldrons{animation:c-pauldrons .55s cubic-bezier(.2,.9,.3,1)}
+.vc.hit .g-arm-l{animation:c-arm-l .55s cubic-bezier(.2,.9,.3,1)}
+.vc.hit .g-arm-r,.vc.hit .g-hand-r{animation:c-arm-r .55s cubic-bezier(.2,.9,.3,1)}
+.vc.hit .g-cape-l{animation:c-cape-l .6s cubic-bezier(.2,.9,.3,1)}
+.vc.hit .g-cape-r{animation:c-cape-r .6s cubic-bezier(.2,.9,.3,1)}
+.vc.hit .g-gem{animation:c-gem .55s ease-out}
+.vc.hit .knight .part{animation:c-flash .5s ease-out}
+@keyframes c-shake{0%,100%{transform:none}10%{transform:translateX(-10px)}20%{transform:translateX(9px)}30%{transform:translateX(-7px)}40%{transform:translateX(6px)}55%{transform:translateX(-3px)}70%{transform:translateX(2px)}}
+@keyframes c-head{0%{transform:none}14%{transform:translateY(-34px) rotate(-6deg)}60%{transform:translateY(3px)}100%{transform:none}}
+@keyframes c-pauldrons{0%{transform:none}14%{transform:translateY(-14px) scaleX(1.14)}60%{transform:scaleX(.98)}100%{transform:none}}
+@keyframes c-arm-l{0%{transform:none}14%{transform:translate(-26px,-6px) rotate(8deg)}60%{transform:translate(3px,0)}100%{transform:none}}
+@keyframes c-arm-r{0%{transform:none}14%{transform:translate(26px,-6px) rotate(-8deg)}60%{transform:translate(-3px,0)}100%{transform:none}}
+@keyframes c-cape-l{0%{transform:none}16%{transform:translateX(-22px) rotate(-5deg)}60%{transform:translateX(3px)}100%{transform:none}}
+@keyframes c-cape-r{0%{transform:none}16%{transform:translateX(22px) rotate(5deg)}60%{transform:translateX(-3px)}100%{transform:none}}
+@keyframes c-gem{0%{filter:none;transform:none}10%{filter:brightness(3) drop-shadow(0 0 30px #b26bff);transform:scale(1.6)}100%{filter:none;transform:none}}
+/* Дыхание: грудь, наплечники и голова плавно поднимаются и опускаются (ноги стоят), плащ чуть колышется, кристалл тлеет */
+.breathing .i-body{animation:idle-chest 3.4s ease-in-out infinite}
+.breathing .i-gem{animation:idle-gem 3.4s ease-in-out infinite}
+.breathing .i-pauldrons{animation:idle-shoulders 3.4s ease-in-out infinite}
+.breathing .i-head{animation:idle-head 3.4s ease-in-out infinite}
+.breathing .i-arm-l{animation:idle-arm-l 3.4s ease-in-out infinite}
+.breathing .i-arm-r,.breathing .i-hand-r{animation:idle-arm-r 3.4s ease-in-out infinite}
+.breathing .i-cape-l{animation:idle-cape-l 4.6s ease-in-out infinite}
+.breathing .i-cape-r{animation:idle-cape-r 4.6s ease-in-out infinite}
+@keyframes idle-chest{0%,100%{transform:none}50%{transform:translateY(-4px) scale(1.015,1.02)}}
+@keyframes idle-gem{0%,100%{transform:none;filter:none}50%{transform:translateY(-5px);filter:brightness(1.35) drop-shadow(0 0 10px #b98bff)}}
+@keyframes idle-shoulders{0%,100%{transform:none}50%{transform:translateY(-7px)}}
+@keyframes idle-head{0%,100%{transform:none}50%{transform:translateY(-8px) rotate(-.6deg)}}
+@keyframes idle-arm-l{0%,100%{transform:none}50%{transform:translateY(-6px) rotate(1.4deg)}}
+@keyframes idle-arm-r{0%,100%{transform:none}50%{transform:translateY(-6px) rotate(-1deg)}}
+@keyframes idle-cape-l{0%,100%{transform:none}50%{transform:rotate(1.6deg) skewY(.6deg)}}
+@keyframes idle-cape-r{0%,100%{transform:none}50%{transform:rotate(-1.6deg) skewY(-.6deg)}}
+@keyframes c-flash{0%{filter:none}10%{filter:brightness(.4) drop-shadow(0 0 14px #9a4cff) saturate(2)}35%{filter:brightness(1.4)}100%{filter:none}}
+@keyframes k-body{0%{transform:none}18%{transform:translateX(22px) rotate(3.5deg) scale(1.02,.97)}45%{transform:translateX(-6px) rotate(-1deg)}70%{transform:translateX(3px)}100%{transform:none}}
+@keyframes k-head{0%{transform:none}18%{transform:rotate(-9deg) translateY(-6px)}50%{transform:rotate(3deg)}100%{transform:none}}
+@keyframes k-arm-l{0%{transform:none}20%{transform:rotate(14deg)}55%{transform:rotate(-4deg)}100%{transform:none}}
+@keyframes k-arm-r{0%{transform:none}20%{transform:rotate(-10deg)}55%{transform:rotate(3deg)}100%{transform:none}}
+@keyframes k-cape-l{0%{transform:none}25%{transform:rotate(7deg) skewY(2deg)}60%{transform:rotate(-3deg)}100%{transform:none}}
+@keyframes k-cape-r{0%{transform:none}25%{transform:rotate(9deg) skewY(-2deg)}60%{transform:rotate(-3deg)}100%{transform:none}}
+@keyframes k-pauldrons{0%{transform:none}18%{transform:translateY(-8px)}100%{transform:none}}
+@keyframes k-gem{0%{filter:none;transform:none}15%{filter:brightness(2.4) drop-shadow(0 0 18px #c79bff);transform:scale(1.25)}100%{filter:none;transform:none}}
+@keyframes k-flash{0%{filter:none}12%{filter:brightness(1.9) saturate(.4)}100%{filter:none}}
+</style>
+</head>
+<body>
+<h1>Тёмный рыцарь — сборка из частей и анимация урона</h1>
+<p class="lead">Сверху — образец и рыцарь, собранный из 20 частей. Снизу — выбранный вариант C «Разлёт брони» с дыханием: слева рыцарь просто стоит и дышит, справа дышит и получает удары каждые 1,2 секунды.</p>
+<div class="row">
+ <div class="col"><h2>Образец</h2><div class="stage"><img class="ref" src="reference.png" alt=""></div></div>
+ <div class="col"><h2>Собран из частей</h2><div class="stage" id="still"></div><label><input type="checkbox" id="ov"> наложить образец</label></div>
+</div>
+<div class="row" style="margin-top:22px">
+ <div class="col"><h2>Дыхание (стоит)</h2><div class="stage" id="anim-idle"></div></div>
+ <div class="col"><h2>Дыхание + удары (вариант C)</h2><div class="stage" id="anim-c"></div><button data-v="c">⚔ Ударить</button></div>
+</div>
+<label><input type="checkbox" id="loop" checked> бить каждые 1,2 с</label>
+<script>
+// Части: файл, центр на образце (в координатах образца 620×800) и порядок отрисовки сверху вниз по слоям.
+const S=1.12,P='../../assets/bosses/dark-knight/';
+const PARTS=[
+ ['cape-l',121,578,'cape-l'],['cape-r',470,578,'cape-r'],['mantle',292,353,'body'],
+ ['upper-arm-l',145,412,'arm-l'],['forearm-l',137,476,'arm-l'],
+ ['upper-arm-r',452,430,'arm-r'],['forearm-r',488,400,'arm-r'],
+ ['thigh-l',236,610,'legs'],['thigh-r',362,610,'legs'],['boot-l',220,693,'legs'],['boot-r',378,693,'legs'],
+ ['belt',292,558,'body'],['torso',301,425,'body'],['gem',300,402,'gem'],
+ ['fist-l',130,566,'arm-l'],
+ ['pauldron-l',149,330,'pauldrons'],['pauldron-r',441,333,'pauldrons'],
+ // Кулак с мечом лежат поверх наплечника (как на образце), а плечо и предплечье — под ним; двигаются вместе.
+ ['sword',531,521,'hand-r'],['fist-r',527,363,'hand-r'],['helmet',298,166,'head']
+];
+// Точки поворота групп (плечи, шея, верх плаща).
+const PIVOT={'head':[298,270],'arm-l':[150,380],'arm-r':[445,380],'hand-r':[445,380],'cape-l':[200,360],'cape-r':[400,360],'pauldrons':[298,340],'gem':[300,402],'body':[300,560],'legs':[300,760]};
+const SIZE={};
+function build(stage){
+ const puppet=document.createElement('div');puppet.className='puppet';const knight=document.createElement('div');knight.className='knight';puppet.append(knight);
+ const groups={};
+ for(const [file,cx,cy,g] of PARTS){
+  // Группа несёт анимацию удара, вложенный слой .idle — дыхание; так они складываются, а не перебивают друг друга.
+  if(!groups[g]){const el=document.createElement('div');el.className='grp g-'+g;const idle=document.createElement('div');idle.className='grp idle i-'+g;el.style.transformOrigin=idle.style.transformOrigin=PIVOT[g].map(v=>v+'px').join(' ');el.append(idle);knight.append(el);groups[g]=idle;}
+  const img=new Image();img.className='part';img.src=P+file+'.png';img.onload=()=>{const w=img.naturalWidth*S,h=img.naturalHeight*S;img.style.width=w+'px';img.style.height=h+'px';img.style.left=cx-w/2+'px';img.style.top=cy-h/2+'px';};
+  groups[g].append(img);
+ }
+ stage.append(puppet);return puppet;
+}
+build(document.getElementById('still'));
+build(document.getElementById('anim-idle')).classList.add('breathing');
+const anims={c:build(document.getElementById('anim-c'))};anims.c.classList.add('vc','breathing');
+const ov=document.createElement('img');ov.className='overlay';ov.src='reference.png';ov.hidden=true;ov.style.cssText+='width:100%;height:100%;object-fit:contain';document.getElementById('still').append(ov);
+document.getElementById('ov').onchange=e=>ov.hidden=!e.target.checked;
+const hit=v=>{const a=anims[v];a.classList.remove('hit');void a.offsetWidth;a.classList.add('hit');};
+document.querySelectorAll('button[data-v]').forEach(b=>b.onclick=()=>hit(b.dataset.v));
+setInterval(()=>{if(document.getElementById('loop').checked)for(const v in anims)hit(v);},1200);
+</script>
+</body>
+</html>

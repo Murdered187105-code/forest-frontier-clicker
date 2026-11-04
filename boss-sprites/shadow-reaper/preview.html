@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Теневой жнец — сборка и анимация</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:24px;background:radial-gradient(ellipse at 50% 0,#2a1748,#0d0718 70%);color:#f0e6ff;font-family:Manrope,'Segoe UI',sans-serif}
+h1{margin:0 0 6px;font-size:20px}.lead{margin:0 0 18px;color:#b9a6d8;font-size:13px;max-width:900px}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.col h2{margin:0 0 8px;font-size:14px}
+.stage{position:relative;width:309px;height:400px;border-radius:14px;background:repeating-conic-gradient(#1d1230 0 25%,#170e27 0 50%) 0 0/24px 24px;border:1px solid #a77bff44;overflow:hidden}
+.stage>img.ref{width:100%;height:100%;object-fit:contain}
+.overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.45;pointer-events:none}
+button{margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#d4ff7a,#5fe6b6);color:#062018;font:800 13px Manrope,sans-serif;cursor:pointer}
+label{display:block;margin-top:8px;font-size:12px;color:#b9a6d8}
+/* кукла: координаты образца 412×762, уменьшены до высоты 400 */
+.puppet{position:absolute;left:0;top:0;width:460px;height:762px;transform-origin:0 0}
+.body{position:absolute;inset:0;transform-origin:230px 740px}
+.grp{position:absolute;inset:0}
+.part{position:absolute;display:block;pointer-events:none}
+/* Парение: жнец медленно поднимается и опускается всем телом, подол колышется лоскутами, коса покачивается, глаза тлеют */
+.floating .body{animation:r-float 3.6s ease-in-out infinite}
+.floating .i-skirt{animation:r-hem 2.4s ease-in-out infinite}
+.floating .i-skirt-l{animation:r-hem-l 2.8s ease-in-out infinite}
+.floating .i-skirt-r{animation:r-hem-r 2.6s ease-in-out infinite}
+.floating .i-head{animation:r-head 3.6s ease-in-out infinite}
+.floating .i-scythe{animation:r-scythe 3.6s ease-in-out infinite}
+.floating .i-arm-l,.floating .i-arm-r{animation:r-arms 3.6s ease-in-out infinite}
+.floating .i-head img[src*="eyes"],.floating .i-head img[src*="mouth"]{animation:r-eyes 2.2s ease-in-out infinite}
+@keyframes r-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes r-hem{0%,100%{transform:none}50%{transform:skewX(3deg) scaleY(1.03)}}
+@keyframes r-hem-l{0%,100%{transform:none}50%{transform:rotate(4deg) skewX(-3deg)}}
+@keyframes r-hem-r{0%,100%{transform:none}50%{transform:rotate(-4deg) skewX(3deg)}}
+@keyframes r-head{0%,100%{transform:none}50%{transform:translateY(-3px) rotate(-1.5deg)}}
+@keyframes r-scythe{0%,100%{transform:none}50%{transform:rotate(-2deg)}}
+@keyframes r-arms{0%,100%{transform:none}50%{transform:translateY(-2px)}}
+@keyframes r-eyes{0%,100%{filter:none}50%{filter:brightness(1.6) drop-shadow(0 0 8px #d58bff)}}
+/* Удар: лоскуты балахона, капюшон и руки разлетаются от удара и, дрожа, стягиваются обратно; коса отлетает в сторону */
+.hit .body{animation:r-shake .55s linear}
+.hit .g-head{animation:r-hit-head .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-arm-l{animation:r-hit-arm-l .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-arm-r{animation:r-hit-arm-r .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-scythe{animation:r-hit-scythe .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-skirt{animation:r-hit-skirt .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-skirt-l{animation:r-hit-skirt-l .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-skirt-r{animation:r-hit-skirt-r .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-robe{animation:r-hit-robe .55s cubic-bezier(.2,.9,.3,1)}
+.hit .body img{animation:r-hit-flash .5s ease-out}
+@keyframes r-shake{0%,100%{transform:none}10%{transform:translateX(-10px)}20%{transform:translateX(9px)}30%{transform:translateX(-7px)}40%{transform:translateX(6px)}55%{transform:translateX(-3px)}70%{transform:translateX(2px)}}
+@keyframes r-hit-head{0%{transform:none}14%{transform:translateY(-30px) rotate(-7deg)}60%{transform:translateY(3px)}100%{transform:none}}
+@keyframes r-hit-arm-l{0%{transform:none}14%{transform:translate(-24px,-4px) rotate(10deg)}60%{transform:translate(3px,0)}100%{transform:none}}
+@keyframes r-hit-arm-r{0%{transform:none}14%{transform:translate(24px,-8px) rotate(-10deg)}60%{transform:translate(-3px,0)}100%{transform:none}}
+@keyframes r-hit-scythe{0%{transform:none}14%{transform:translate(18px,-14px) rotate(-9deg)}60%{transform:rotate(2deg)}100%{transform:none}}
+@keyframes r-hit-skirt{0%{transform:none}16%{transform:translateY(18px) scaleX(1.08)}60%{transform:translateY(-3px)}100%{transform:none}}
+@keyframes r-hit-skirt-l{0%{transform:none}16%{transform:translate(-26px,10px) rotate(-8deg)}60%{transform:translate(3px,0)}100%{transform:none}}
+@keyframes r-hit-skirt-r{0%{transform:none}16%{transform:translate(26px,10px) rotate(8deg)}60%{transform:translate(-3px,0)}100%{transform:none}}
+@keyframes r-hit-robe{0%{transform:none}14%{transform:scale(1.06,.96)}60%{transform:scale(.99,1.01)}100%{transform:none}}
+/* Вспышка удара ослаблена: лёгкое потемнение с фиолетовым отливом и короткий блик */
+@keyframes r-hit-flash{0%{filter:none}10%{filter:brightness(.82) saturate(1.25)}35%{filter:brightness(1.15)}100%{filter:none}}
+</style>
+</head>
+<body>
+<h1>Теневой жнец — сборка из частей</h1>
+<p class="lead">Слева образец, справа жнец, собранный из 13 частей. Свечение вокруг частей убрано; светятся только глаза и рот, как на образце.</p>
+<div class="row">
+ <div class="col"><h2>Образец</h2><div class="stage"><img class="ref" src="reference.png" alt=""></div></div>
+ <div class="col"><h2>Собран из частей</h2><div class="stage" id="still"></div><label><input type="checkbox" id="ov"> наложить образец</label></div>
+ <div class="col"><h2>Парит (стоит)</h2><div class="stage" id="idle"></div></div>
+ <div class="col"><h2>Парит + удары</h2><div class="stage" id="hits"></div><button id="hit">⚔ Ударить</button><label><input type="checkbox" id="loop" checked> бить каждые 1,2 с</label></div>
+</div>
+<script>
+// Части: файл, центр (в координатах образца), масштаб, поворот (°) и группа.
+const P='../../assets/bosses/shadow-reaper/',S=1;
+// Коса — за спиной (рисуется первой). Руки собраны цепочкой по шарнирам на самих частях:
+// плечо — к шарниру балахона, нижний рукав — к краю верхнего, кисть — к краю нижнего; без поворотов, висят ровно.
+const PARTS=[
+ ['scythe',268,372,1,24,'scythe'],
+ ['skirt-l',136,600,S,10,'skirt-l'],['skirt-r',324,600,S,-10,'skirt-r'],['skirt',230,618,S,0,'skirt'],
+ ['robe',230,440,S,0,'robe'],
+ // Рука: шарнир каждой части утоплен на ~25 px в край предыдущей; кисть и нижний рукав лежат под верхним, шарниры спрятаны.
+ ['hand-l',86,579,S,0,'arm-l'],['sleeve-lower-l',103,494,S,0,'arm-l'],['sleeve-upper-l',116,395,S,0,'arm-l'],
+ ['hand-r',387,577,S,0,'arm-r'],['sleeve-lower-r',367,492,S,0,'arm-r'],['sleeve-upper-r',351,394,S,0,'arm-r'],
+ // Голова — ровно по центру балахона (x = 230).
+ ['hood',230,216,S,0,'head'],['eyes',230,246,S,0,'head'],['mouth',230,286,S,0,'head']
+];
+const PIVOT={'head':[230,300],'robe':[230,560],'arm-l':[138,337],'arm-r':[328,337],'scythe':[268,420],'skirt':[234,520],'skirt-l':[164,520],'skirt-r':[304,520]};
+function build(stage){
+ const k=400/762,puppet=document.createElement('div');puppet.className='puppet';puppet.style.transform=`translateX(${(309-460*k)/2}px) scale(${k})`;
+ const body=document.createElement('div');body.className='body';puppet.append(body);const groups={};
+ for(const [file,cx,cy,s,rot,g] of PARTS){
+  if(!groups[g]){const el=document.createElement('div');el.className='grp g-'+g;const idle=document.createElement('div');idle.className='grp idle i-'+g;el.style.transformOrigin=idle.style.transformOrigin=PIVOT[g].map(v=>v+'px').join(' ');el.append(idle);body.append(el);groups[g]=idle;}
+  const img=new Image();img.className='part';img.src=P+file+'.png';img.onload=()=>{const w=img.naturalWidth*s,h=img.naturalHeight*s;Object.assign(img.style,{width:w+'px',height:h+'px',left:cx-w/2+'px',top:cy-h/2+'px',transform:`rotate(${rot}deg)`});};
+  groups[g].append(img);
+ }
+ stage.append(puppet);return puppet;
+}
+build(document.getElementById('still'));
+const ov=document.createElement('img');ov.className='overlay';ov.src='reference.png';ov.hidden=true;document.getElementById('still').append(ov);
+document.getElementById('ov').onchange=e=>ov.hidden=!e.target.checked;
+build(document.getElementById('idle')).classList.add('floating');
+const hits=build(document.getElementById('hits'));hits.classList.add('floating');
+const hit=()=>{hits.classList.remove('hit');void hits.offsetWidth;hits.classList.add('hit');};
+document.getElementById('hit').onclick=hit;setInterval(()=>{if(document.getElementById('loop').checked)hit();},1200);
+</script>
+</body>
+</html>

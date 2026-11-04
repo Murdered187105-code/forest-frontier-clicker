@@ -3,9 +3,9 @@
 (()=>{
 const RANKS_KEY='forest-frontier-hero-tree-v1',DRAFT_KEY='forest-frontier-hero-tree-draft-v1';
 const ORBITS=10,ORBIT_BASE=60,ORBIT_STEP=105,MARGIN=120,SIZE=2*(ORBIT_BASE+ORBIT_STEP*ORBITS+MARGIN),C=SIZE/2;
-const STATS={damageBonus:{label:'Урон удара',unit:''},attackSpeed:{label:'Скорость атаки',unit:'%'},critChance:{label:'Шанс крита',unit:' п.п.'},critDamage:{label:'Урон крита',unit:'%'},maxMana:{label:'Максимум маны',unit:''},goldBonus:{label:'Золото за убийство',unit:'%'}};
+const STATS={damageBonus:{label:'Урон удара',unit:''},attackSpeed:{label:'Скорость атаки',unit:'%'},critChance:{label:'Шанс крита',unit:' п.п.'},critDamage:{label:'Урон крита',unit:'%'},maxMana:{label:'Максимум маны',unit:''},manaRegen:{label:'Восстановление маны',unit:' / с'},goldBonus:{label:'Золото за убийство',unit:'%'}};
 const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX','X'];
-const ICONS=['⚔','🗡','💥','🛡','⚡','🎯','🌪','🏹','💧','🔮','💰','✦','🔥','❄','☠','👑','❤','⭐'];
+const ICONS=['⚔','🗡','💥','🛡','⚡','🎯','🌪','🏹','💧','🔮','💰','✦','🔥','❄','☠','👑','❤','⭐',...['sword','crosshair','sword-burst','sword-swift','mana-drop','mana-cycle','coins-up','laurel-star','sword-plain','hourglass','slashes','mana-hand','boots-swift','blade-whetstone','daggers-three','book-star','sword-rock','fist-gem','hourglass-cycle','mana-drops-up','sword-fire','sword-ice','sword-sun','sword-moon','book-crystal','mana-moon','chain-lightning','poison-dagger','spirit-flame','stars-cycle','eye-gem','gems-four','swords-crossed','dagger-gem','fist-swift','hourglass-slashes','sword-ring','laurel-red-star','sword-lightning','swords-whirl'].map(name=>`assets/hero-icons/${name}.webp`)];
 const editable=!window.IS_PUBLIC_SITE;
 const clone=value=>JSON.parse(JSON.stringify(value));
 const esc=text=>String(text??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -55,7 +55,7 @@ const style=document.createElement('style');
 style.textContent=`
 #heroTreeDialog{width:min(1180px,calc(100% - 20px));max-height:94dvh;overflow:auto}
 .ht-bar,.ht-editbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:10px}
-.ht-points{font-size:13px;font-weight:700;color:#ffcf6a}
+.ht-points{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:#ffcf6a}
 .ht-points small{color:#8fb8aa;font-weight:600;margin-left:8px}
 .ht-tools,.ht-editbar>div{display:flex;flex-wrap:wrap;gap:6px}
 html body #heroTreeDialog .ht-bar button,html body #heroTreeDialog .ht-editbar button{padding:6px 11px;font-size:12px}
@@ -86,6 +86,7 @@ html body #heroTreeDialog .ht-node.selected{outline:2px solid #fff6;outline-offs
 .ht-lock{position:absolute;right:-6px;top:-6px;font-size:13px;pointer-events:none}
 .ht-panel{padding:14px;border-radius:14px;background:#061214cc;border:1px solid #7fe6c222;overflow:auto;max-height:min(66dvh,640px)}
 .ht-panel h3{margin:0 0 4px;font-size:17px;color:#f6e7c4;display:flex;align-items:center;gap:8px}
+.ht-panel h3 img{display:block;width:26px;height:26px;object-fit:contain}
 .ht-panel .ht-sub{font-size:11px;font-weight:800;letter-spacing:1.5px;margin-bottom:10px}
 .ht-panel p{font-size:12.5px;line-height:1.5;margin:6px 0}
 .ht-rows{display:flex;flex-direction:column;gap:4px;margin:8px 0}
@@ -101,6 +102,7 @@ html body #heroTreeDialog .ht-learn:not(:disabled){color:#2a1d07!important;borde
 .ht-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ht-icons{display:flex;flex-wrap:wrap;gap:3px}
 html body #heroTreeDialog .ht-icons button{width:30px;height:30px;padding:0;font-size:16px}
+.ht-icons img{display:block;width:24px;height:24px;margin:auto;object-fit:contain;pointer-events:none}
 html body #heroTreeDialog .ht-icons button.on{border-color:#ffcf6a!important;background:#3a2e1c!important}
 .ht-stat{display:grid;grid-template-columns:1fr 70px 28px;gap:4px;margin-bottom:4px}
 .ht-stat select,.ht-stat input{font:600 12px Manrope,sans-serif;padding:5px 6px}
@@ -151,7 +153,7 @@ function draw(){
   const cls=['ht-node',rank?'on':'',!req.met&&!rank?'locked':'',state.ok&&!editing?'ready':'',node.id===selected?'selected':''].join(' ');
   return `<button type="button" class="${cls}" data-id="${esc(node.id)}" style="left:${p.x}px;top:${p.y}px;--c:${color}" aria-label="${esc(node.name)} ${rank} из ${node.maxRank}">${ring(node,rank,color)}<span class="ht-icon">${iconHtml(node.icon)}</span><span class="ht-lbl">${esc(node.name)}<i>${rank} / ${node.maxRank}</i></span>${!req.met&&!rank?'<span class="ht-lock">🔒</span>':''}</button>`;
  }).join('');
- $q('.ht-points').innerHTML=`Очки прокачки: ${heroPoints}<small>вложено в героя: ${spent()}</small>`;
+ $q('.ht-points').innerHTML=`${HERO_POINT_ICON}Очки прокачки: ${heroPoints}<small>вложено в героя: ${spent()}</small>`;
  viewport.classList.toggle('editing',editing);
  $q('.ht-editbar').hidden=!editing;$q('[data-a=edit]')?.classList.toggle('on',editing);
  if(editing)showState();
@@ -181,8 +183,10 @@ function learn(node){
  if(!learnState(node).ok)return;
  heroPoints-=node.cost;ranks[node.id]=rankOf(node)+1;saveRanks();render();draw();renderPanel();
 }
-function resetHero(){
- const refund=spent();if(!refund||!confirm(`Сбросить прокачку героя? Вернётся очков талантов: ${refund}.`))return;
+async function resetHero(){
+ const refund=spent();
+ if(!refund){$q('.ht-points').animate([{opacity:1},{opacity:.4},{opacity:1}],{duration:400});return;}
+ if(!await gameConfirm({title:'Сбросить прокачку героя?',text:`Вернётся очков прокачки: ${HERO_POINT_ICON}<b>${refund}</b>`,ok:'Сбросить'}))return;
  heroPoints+=refund;ranks={};saveRanks();render();draw();renderPanel();
 }
 
@@ -231,7 +235,7 @@ dialog.addEventListener('click',event=>{
   case 'edit':editing=!editing;draw();renderPanel();break;
   case 'add':addNode();break;
   case 'save':saveFile();break;
-  case 'revert':if(dirty&&!confirm('Отменить все изменения древа и вернуть версию из файла?'))break;try{localStorage.removeItem(DRAFT_KEY);}catch{}tree=normalize(window.HERO_TREE);dirty=false;selected=null;draw();renderPanel();break;
+  case 'revert':(async()=>{if(dirty&&!await gameConfirm({title:'Отменить изменения древа?',text:'Все правки пропадут, вернётся версия из файла.',ok:'Отменить правки'}))return;try{localStorage.removeItem(DRAFT_KEY);}catch{}tree=normalize(window.HERO_TREE);dirty=false;selected=null;draw();renderPanel();})();break;
   case 'export':download('hero-tree.json',JSON.stringify(tree,null,1),'application/json');break;
   case 'import':$q('input[type=file]').click();break;
  }
@@ -256,7 +260,7 @@ function renderEditor(){
  const others=tree.nodes.filter(n=>n.id!==node.id);
  panel.innerHTML=`<h3>Ячейка</h3>
  ${field('Название',`<input data-f="name" value="${esc(node.name)}" maxlength="30">`)}
- ${field('Иконка',`<div class="ht-icons">${ICONS.map(i=>`<button type="button" data-icon="${i}" class="${i===node.icon?'on':''}">${i}</button>`).join('')}</div><input data-f="icon" value="${esc(node.icon)}" placeholder="эмодзи или assets/…">`)}
+ ${field('Иконка',`<div class="ht-icons">${ICONS.map(i=>`<button type="button" data-icon="${i}" class="${i===node.icon?'on':''}">${iconHtml(i)}</button>`).join('')}</div><input data-f="icon" value="${esc(node.icon)}" placeholder="эмодзи или assets/…">`)}
  ${field('Описание',`<textarea data-f="desc" maxlength="200">${esc(node.desc)}</textarea>`)}
  <div class="ht-pair">${field('Ветка',`<select data-f="branch">${tree.branches.map(b=>`<option value="${b.id}" ${b.id===node.branch?'selected':''}>${esc(b.name)}</option>`).join('')}</select>`)}${field('Орбита',`<input data-f="orbit" type="number" min="1" max="${ORBITS}" value="${node.orbit}">`)}</div>
  ${field('Угол на орбите: <b data-angle-label>'+node.angle+'°</b>',`<input data-f="angle" type="range" min="-180" max="180" value="${node.angle}">`)}
@@ -295,13 +299,13 @@ panel.addEventListener('change',event=>{
  else if(t.dataset.req){const id=t.dataset.req;node.requires=t.checked?[...new Set([...node.requires,id])]:node.requires.filter(x=>x!==id);commit();}
  else if(t.dataset.statKey){const old=t.dataset.statKey,key=t.value;if(node.stats[key]!==undefined&&key!==old){t.value=old;return;}const value=node.stats[old];delete node.stats[old];node.stats[key]=value;commit();renderEditor();}
 });
-panel.addEventListener('click',event=>{
+panel.addEventListener('click',async event=>{
  const b=event.target.closest('button');if(!b)return;const node=nodeById(selected);
  if(b.dataset.icon&&node){node.icon=b.dataset.icon;commit();renderEditor();return;}
  if(b.dataset.statDel&&node){delete node.stats[b.dataset.statDel];commit();renderEditor();return;}
  if(b.dataset.a2==='addStat'&&node){const key=Object.keys(STATS).find(k=>node.stats[k]===undefined);if(key){node.stats[key]=1;commit();renderEditor();}return;}
  if(b.dataset.a2==='deselect'){selected=null;draw();renderPanel();return;}
- if(b.dataset.a2==='delete'&&node){if(!confirm(`Удалить ячейку «${node.name}»?`))return;tree.nodes=tree.nodes.filter(n=>n.id!==node.id);tree.nodes.forEach(n=>n.requires=n.requires.filter(id=>id!==node.id));if(ranks[node.id]){heroPoints+=ranks[node.id]*node.cost;delete ranks[node.id];saveRanks();}selected=null;commit();renderPanel();}
+ if(b.dataset.a2==='delete'&&node){if(!await gameConfirm({title:'Удалить ячейку?',text:`Ячейка «${node.name}» пропадёт из древа.`,ok:'Удалить'}))return;tree.nodes=tree.nodes.filter(n=>n.id!==node.id);tree.nodes.forEach(n=>n.requires=n.requires.filter(id=>id!==node.id));if(ranks[node.id]){heroPoints+=ranks[node.id]*node.cost;delete ranks[node.id];saveRanks();}selected=null;commit();renderPanel();}
 });
 $q('input[type=file]').addEventListener('change',async event=>{
  const file=event.target.files[0];event.target.value='';if(!file)return;

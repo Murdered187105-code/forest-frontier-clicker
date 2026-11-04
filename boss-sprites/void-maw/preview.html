@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Око Бездны — сборка и анимация</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;padding:24px;background:radial-gradient(ellipse at 50% 0,#2a1748,#0d0718 70%);color:#f0e6ff;font-family:Manrope,'Segoe UI',sans-serif}
+h1{margin:0 0 6px;font-size:20px}.lead{margin:0 0 18px;color:#b9a6d8;font-size:13px;max-width:900px}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start}
+.col h2{margin:0 0 8px;font-size:14px}
+.stage{position:relative;width:229px;height:400px;border-radius:14px;background:repeating-conic-gradient(#1d1230 0 25%,#170e27 0 50%) 0 0/24px 24px;border:1px solid #a77bff44;overflow:hidden}
+.stage.light{background:#f4f1ea}
+.stage>img.ref{width:100%;height:100%;object-fit:contain}
+.overlay{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.45;pointer-events:none}
+button{margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(135deg,#d4ff7a,#5fe6b6);color:#062018;font:800 13px Manrope,sans-serif;cursor:pointer}
+label{display:block;margin-top:8px;font-size:12px;color:#b9a6d8}
+/* кукла: координаты образца 563×984, уменьшены до высоты 400 */
+.puppet{position:absolute;left:0;top:0;width:563px;height:984px;transform-origin:0 0}
+.body,.grp,.mask{position:absolute;inset:0}
+.part{position:absolute;display:block;pointer-events:none}
+</style>
+<style id="anim">
+/* Парение: корпус плавно поднимается, щупальца качаются каждое в своей фазе, шипы чуть шевелятся, глаз оглядывается и моргает */
+.floating .body{animation:v-float 3.4s ease-in-out infinite}
+.floating .i-t1{animation:v-sway-l 3.1s ease-in-out infinite}
+.floating .i-t2{animation:v-sway-l 2.7s ease-in-out -.9s infinite}
+.floating .i-t3{animation:v-sway-c 2.9s ease-in-out -.4s infinite}
+.floating .i-t4{animation:v-sway-r 2.6s ease-in-out -1.3s infinite}
+.floating .i-t5{animation:v-sway-r 3.2s ease-in-out -.6s infinite}
+.floating .i-spike-l{animation:v-spike-l 3.4s ease-in-out infinite}
+.floating .i-spike-r{animation:v-spike-r 3.4s ease-in-out infinite}
+.floating .i-spike-c{animation:v-spike-c 3.4s ease-in-out infinite}
+.floating .p-iris{animation:v-look 6s ease-in-out infinite}
+.floating .i-eye{animation:v-blink 5.2s ease-in-out infinite}
+.floating .i-lid-u{animation:v-lid-blink 5.2s ease-in-out infinite}
+.floating .i-mouth{animation:v-mouth 3.4s ease-in-out infinite}
+@keyframes v-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+/* щупальце закреплено сверху: поворот + перекос — кончик ходит сильнее основания */
+@keyframes v-sway-l{0%,100%{transform:rotate(-3deg) skewX(2deg)}50%{transform:rotate(4deg) skewX(-3deg)}}
+@keyframes v-sway-c{0%,100%{transform:rotate(-2.5deg) skewX(2deg)}50%{transform:rotate(2.5deg) skewX(-2deg)}}
+@keyframes v-sway-r{0%,100%{transform:rotate(3deg) skewX(-2deg)}50%{transform:rotate(-4deg) skewX(3deg)}}
+@keyframes v-spike-l{0%,100%{transform:none}50%{transform:rotate(-3deg)}}
+@keyframes v-spike-r{0%,100%{transform:none}50%{transform:rotate(3deg)}}
+@keyframes v-spike-c{0%,100%{transform:none}50%{transform:translateY(-3px) rotate(1.5deg)}}
+@keyframes v-look{0%,12%,100%{transform:none}22%,40%{transform:translate(-16px,2px)}52%,70%{transform:translate(14px,-2px)}80%{transform:none}}
+@keyframes v-blink{0%,90%,100%{transform:none}94%{transform:scaleY(.06)}}
+@keyframes v-lid-blink{0%,90%,100%{transform:none}94%{transform:translateY(22px)}}
+@keyframes v-mouth{0%,100%{transform:none}50%{transform:scale(1.03,1.06)}}
+/* Удар: корпус отшатывается назад, шипы и веки разлетаются, щупальца разом вскидываются веером и, дрожа, возвращаются */
+.hit .body{animation:v-recoil .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-spike-l{animation:v-hit-spike-l .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-spike-r{animation:v-hit-spike-r .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-spike-c{animation:v-hit-spike-c .55s cubic-bezier(.2,.9,.3,1)}
+.hit .g-lid-u{animation:v-hit-lid-u .5s cubic-bezier(.2,.9,.3,1)}
+.hit .g-lid-d{animation:v-hit-lid-d .5s cubic-bezier(.2,.9,.3,1)}
+.hit .g-eye{animation:v-hit-eye .5s cubic-bezier(.2,.9,.3,1)}
+.hit .g-mouth{animation:v-hit-mouth .5s cubic-bezier(.2,.9,.3,1)}
+.hit .g-t1{animation:v-hit-t1 .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-t2{animation:v-hit-t2 .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-t3{animation:v-hit-t3 .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-t4{animation:v-hit-t4 .6s cubic-bezier(.2,.9,.3,1)}
+.hit .g-t5{animation:v-hit-t5 .6s cubic-bezier(.2,.9,.3,1)}
+.hit .body img:not(.p-iris){animation:v-hit-flash .5s ease-out}
+@keyframes v-recoil{0%,100%{transform:none}12%{transform:translateY(-10px) scale(.95)}24%{transform:translate(-8px,-6px) scale(.97)}36%{transform:translate(7px,-3px)}50%{transform:translateX(-4px)}68%{transform:translateX(2px)}}
+@keyframes v-hit-spike-l{0%{transform:none}14%{transform:translate(-22px,-14px) rotate(-12deg)}60%{transform:translate(2px,1px)}100%{transform:none}}
+@keyframes v-hit-spike-r{0%{transform:none}14%{transform:translate(22px,-14px) rotate(12deg)}60%{transform:translate(-2px,1px)}100%{transform:none}}
+@keyframes v-hit-spike-c{0%{transform:none}14%{transform:translateY(-26px) rotate(4deg)}60%{transform:translateY(2px)}100%{transform:none}}
+@keyframes v-hit-lid-u{0%{transform:none}14%{transform:translateY(-18px)}60%{transform:translateY(2px)}100%{transform:none}}
+@keyframes v-hit-lid-d{0%{transform:none}14%{transform:translateY(14px)}60%{transform:translateY(-2px)}100%{transform:none}}
+@keyframes v-hit-eye{0%{transform:none}14%{transform:scale(1.08)}60%{transform:scale(.98)}100%{transform:none}}
+@keyframes v-hit-mouth{0%{transform:none}14%{transform:translateY(12px) scale(1.1)}60%{transform:translateY(-2px)}100%{transform:none}}
+@keyframes v-hit-t1{0%{transform:none}16%{transform:rotate(14deg)}60%{transform:rotate(-2deg)}100%{transform:none}}
+@keyframes v-hit-t2{0%{transform:none}16%{transform:rotate(8deg)}60%{transform:rotate(-1.5deg)}100%{transform:none}}
+@keyframes v-hit-t3{0%{transform:none}16%{transform:translateY(16px) scaleY(.94)}60%{transform:translateY(-2px)}100%{transform:none}}
+@keyframes v-hit-t4{0%{transform:none}16%{transform:rotate(-8deg)}60%{transform:rotate(1.5deg)}100%{transform:none}}
+@keyframes v-hit-t5{0%{transform:none}16%{transform:rotate(-14deg)}60%{transform:rotate(2deg)}100%{transform:none}}
+@keyframes v-hit-flash{0%{filter:none}10%{filter:brightness(.82) saturate(1.25)}35%{filter:brightness(1.15)}100%{filter:none}}
+</style>
+</head>
+<body>
+<h1>Око Бездны — сборка из частей</h1>
+<p class="lead">Слева образец, дальше — враг, собранный из 14 деталей листа: на тёмном фоне, на светлой подложке для проверки краёв, в покое и с ударами.</p>
+<div class="row">
+ <div class="col"><h2>Образец</h2><div class="stage"><img class="ref" src="reference.png" alt=""></div></div>
+ <div class="col"><h2>Собран из частей</h2><div class="stage" id="still"></div><label><input type="checkbox" id="ov"> наложить образец</label></div>
+ <div class="col"><h2>Светлая подложка</h2><div class="stage light" id="light"></div></div>
+ <div class="col"><h2>Парит</h2><div class="stage" id="idle"></div></div>
+ <div class="col"><h2>Парит + удары</h2><div class="stage" id="hits"></div><button id="hit">⚔ Ударить</button><label><input type="checkbox" id="loop" checked> бить каждые 1,2 с</label></div>
+</div>
+<script>
+const P='../../assets/bosses/void-maw/',CW=563,CH=984;
+// Часть: файл, центр (в координатах образца), масштаб, поворот (°), группа, [маска — часть, по контуру которой обрезается].
+const PARTS=[
+ ['tentacle-1',155,688,1,0,'t1'],['tentacle-2',208,731,1,0,'t2'],['tentacle-5',451,688,1,0,'t5'],['tentacle-4',385,731,1,0,'t4'],['tentacle-3',292,776,1,0,'t3'],
+ ['spike-left',168,240,1,0,'spike-l'],['spike-right',434,240,1,0,'spike-r'],['spike-center',318,172,1,0,'spike-c'],
+ ['body',300,431,1,0,'core'],
+ ['eye-white',300,388,1,0,'eye'],['iris',300,390,1.05,0,'eye','eye-white'],
+ ['upper-lid',300,300,.8,0,'lid-u'],['lower-lid',300,448,.8,0,'lid-d'],
+ ['mouth',300,490,.7,0,'mouth']
+];
+const PIVOT={'t1':[215,540],'t2':[250,575],'t3':[300,600],'t4':[350,575],'t5':[385,540],'spike-l':[178,300],'spike-r':[424,300],'spike-c':[300,265],'core':[300,431],'eye':[300,388],'lid-u':[300,345],'lid-d':[300,440],'mouth':[300,480]};
+const SIZE={};
+async function sizes(){await Promise.all(PARTS.map(([f])=>new Promise(r=>{const i=new Image();i.onload=()=>{SIZE[f]=[i.naturalWidth,i.naturalHeight];r();};i.src=P+f+'.png';})));}
+function box(f,cx,cy,s){const [w,h]=SIZE[f];return {w:w*s,h:h*s,l:cx-w*s/2,t:cy-h*s/2};}
+function build(stage){
+ const k=400/CH,puppet=document.createElement('div');puppet.className='puppet';puppet.style.transform=`translateX(${(229-CW*k)/2}px) scale(${k})`;
+ const body=document.createElement('div');body.className='body';puppet.append(body);const groups={};
+ for(const [file,cx,cy,s,rot,g,mask] of PARTS){
+  if(!groups[g]){const el=document.createElement('div');el.className='grp g-'+g;const idle=document.createElement('div');idle.className='grp i-'+g;el.style.transformOrigin=idle.style.transformOrigin=PIVOT[g].map(v=>v+'px').join(' ');el.append(idle);body.append(el);groups[g]=idle;}
+  const b=box(file,cx,cy,s),img=new Image();img.className='part p-'+file;img.src=P+file+'.png';
+  Object.assign(img.style,{width:b.w+'px',height:b.h+'px',left:b.l+'px',top:b.t+'px',transform:rot?`rotate(${rot}deg)`:''});
+  let host=groups[g];
+  if(mask){const m=PARTS.find(p=>p[0]===mask),mb=box(mask,m[1],m[2],m[3]),wrap=document.createElement('div');wrap.className='mask';
+   wrap.style.cssText+=`;-webkit-mask:url(${P}${mask}.png) ${mb.l}px ${mb.t}px/${mb.w}px ${mb.h}px no-repeat;mask:url(${P}${mask}.png) ${mb.l}px ${mb.t}px/${mb.w}px ${mb.h}px no-repeat`;host.append(wrap);host=wrap;}
+  host.append(img);
+ }
+ stage.append(puppet);return puppet;
+}
+sizes().then(()=>{
+ build(document.getElementById('still'));
+ const ov=document.createElement('img');ov.className='overlay';ov.src='reference.png';ov.hidden=true;document.getElementById('still').append(ov);
+ document.getElementById('ov').onchange=e=>ov.hidden=!e.target.checked;
+ build(document.getElementById('light'));
+ build(document.getElementById('idle')).classList.add('floating');
+ const hits=build(document.getElementById('hits'));hits.classList.add('floating');
+ const hit=()=>{hits.classList.remove('hit');void hits.offsetWidth;hits.classList.add('hit');};
+ document.getElementById('hit').onclick=hit;setInterval(()=>{if(document.getElementById('loop').checked)hit();},1200);
+});
+</script>
+</body>
+</html>
