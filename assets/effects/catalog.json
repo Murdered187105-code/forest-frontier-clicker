@@ -1,0 +1,2449 @@
+{
+  "packs": [
+    {
+      "id": "particle-pack",
+      "label": "Частицы",
+      "count": 80,
+      "source": "https://kenney.nl/assets/particle-pack",
+      "license": "assets/effects/kenney-particle-pack/License.txt"
+    },
+    {
+      "id": "smoke-particles",
+      "label": "Дым и взрывы",
+      "count": 77,
+      "source": "https://kenney.nl/assets/smoke-particles",
+      "license": "assets/effects/kenney-smoke-particles/license.txt"
+    },
+    {
+      "id": "light-masks",
+      "label": "Свет и сияние",
+      "count": 152,
+      "source": "https://kenney.nl/assets/light-masks",
+      "license": "assets/effects/kenney-light-masks/License.txt"
+    },
+    {
+      "id": "splat-pack",
+      "label": "Брызги и пятна",
+      "count": 36,
+      "source": "https://kenney.nl/assets/splat-pack",
+      "license": "assets/effects/kenney-splat-pack/License.txt"
+    }
+  ],
+  "items": [
+    {
+      "name": "circle_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/circle_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "circle_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/circle_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "circle_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/circle_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "circle_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/circle_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "circle_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/circle_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "dirt_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/dirt_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "dirt_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/dirt_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "dirt_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/dirt_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "fire_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/fire_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "fire_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/fire_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flame_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flame_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flame_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flame_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flame_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flame_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flame_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flame_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flame_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flame_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flame_06",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flame_06.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "flare_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/flare_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "light_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/light_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "light_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/light_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "light_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/light_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "magic_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/magic_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "magic_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/magic_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "magic_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/magic_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "magic_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/magic_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "magic_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/magic_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "muzzle_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/muzzle_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "muzzle_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/muzzle_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "muzzle_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/muzzle_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "muzzle_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/muzzle_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "muzzle_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/muzzle_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "scorch_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/scorch_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "scorch_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/scorch_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "scorch_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/scorch_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "scratch_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/scratch_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "slash_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/slash_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "slash_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/slash_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "slash_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/slash_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "slash_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/slash_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_06",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_06.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_07",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_07.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_08",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_08.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_09",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_09.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "smoke_10",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/smoke_10.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_06",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_06.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "spark_07",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/spark_07.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_06",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_06.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_07",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_07.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_08",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_08.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "star_09",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/star_09.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "symbol_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/symbol_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "symbol_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/symbol_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_05",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_05.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_06",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_06.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "trace_07",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/trace_07.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "twirl_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/twirl_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "twirl_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/twirl_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "twirl_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/twirl_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "window_01",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/window_01.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "window_02",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/window_02.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "window_03",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/window_03.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "window_04",
+      "url": "assets/effects/kenney-particle-pack/PNG (Transparent)/window_04.png",
+      "pack": "particle-pack",
+      "label": "Частицы",
+      "category": "PNG (Transparent)"
+    },
+    {
+      "name": "blackSmoke00",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke00.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke01",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke01.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke02",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke02.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke03",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke03.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke04",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke04.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke05",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke05.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke06",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke06.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke07",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke07.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke08",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke08.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke09",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke09.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke10",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke10.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke11",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke11.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke12",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke12.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke13",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke13.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke14",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke14.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke15",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke15.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke16",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke16.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke17",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke17.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke18",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke18.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke19",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke19.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke20",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke20.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke21",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke21.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke22",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke22.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke23",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke23.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "blackSmoke24",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Black smoke/blackSmoke24.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Black smoke"
+    },
+    {
+      "name": "explosion00",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion00.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion01",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion01.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion02",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion02.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion03",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion03.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion04",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion04.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion05",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion05.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion06",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion06.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion07",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion07.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "explosion08",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Explosion/explosion08.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Explosion"
+    },
+    {
+      "name": "fart00",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart00.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart01",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart01.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart02",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart02.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart03",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart03.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart04",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart04.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart05",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart05.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart06",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart06.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart07",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart07.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "fart08",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Fart/fart08.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Fart"
+    },
+    {
+      "name": "flash00",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash00.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash01",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash01.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash02",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash02.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash03",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash03.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash04",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash04.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash05",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash05.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash06",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash06.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash07",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash07.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "flash08",
+      "url": "assets/effects/kenney-smoke-particles/PNG/Flash/flash08.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "Flash"
+    },
+    {
+      "name": "whitePuff00",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff00.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff01",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff01.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff02",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff02.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff03",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff03.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff04",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff04.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff05",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff05.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff06",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff06.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff07",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff07.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff08",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff08.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff09",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff09.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff10",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff10.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff11",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff11.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff12",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff12.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff13",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff13.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff14",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff14.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff15",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff15.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff16",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff16.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff17",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff17.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff18",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff18.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff19",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff19.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff20",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff20.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff21",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff21.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff22",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff22.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff23",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff23.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "whitePuff24",
+      "url": "assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff24.png",
+      "pack": "smoke-particles",
+      "label": "Дым и взрывы",
+      "category": "White puff"
+    },
+    {
+      "name": "circle_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_a_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_a_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_a_streaks_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_a_streaks_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_b_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_b_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_b_streaks_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_b_streaks_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_c_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_c_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_c_streaks_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_c_streaks_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_d_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_d_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_d_streaks_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_d_streaks_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_a_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_a_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_b_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_b_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_c_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_c_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "circle_rings_d_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/circle_rings_d_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_a_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_a_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_a_blur_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_a_blur_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_b_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_b_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_b_blur_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_b_blur_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_c_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_c_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_c_blur_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_c_blur_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_e",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_e.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_e_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_e_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_f",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_f.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_composed_f_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_composed_f_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_d_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_d_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_d_blur_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_d_blur_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_e",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_e.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_e_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_e_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_e_blur_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_e_blur_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "cone_e_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/cone_e_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_a_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_a_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_a_gradient",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_a_gradient.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_b_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_b_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_b_gradient",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_b_gradient.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_c_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_c_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_c_gradient",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_c_gradient.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_d_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_d_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "fan_d_gradient",
+      "url": "assets/effects/kenney-light-masks/Transparent/fan_d_gradient.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_a_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_a_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_b_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_b_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_c_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_c_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "foliage_canopy_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/foliage_canopy_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_a_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_a_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_b_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_b_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "ring_c_streaks",
+      "url": "assets/effects/kenney-light-masks/Transparent/ring_c_streaks.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_e",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_e.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_f",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_f.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "shape_g",
+      "url": "assets/effects/kenney-light-masks/Transparent/shape_g.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_e",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_e.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_e_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_e_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_f",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_f.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_f_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_f_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_g",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_g.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_g_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_g_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_h",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_h.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "streaks_composed_h_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/streaks_composed_h_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "water_caustics_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/water_caustics_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "water_caustics_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/water_caustics_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "water_caustics_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/water_caustics_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "water_caustics_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/water_caustics_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_a",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_a.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_a_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_a_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_a_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_a_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_b",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_b.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_b_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_b_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_b_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_b_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_c",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_c.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_c_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_c_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_c_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_c_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_d",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_d.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_d_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_d_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_d_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_d_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_e",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_e.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_e_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_e_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_e_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_e_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_f",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_f.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_f_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_f_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_f_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_f_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_g",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_g.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_g_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_g_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_g_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_g_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_h",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_h.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_h_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_h_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_h_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_h_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_i",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_i.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_i_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_i_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_i_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_i_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_j",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_j.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_j_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_j_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_j_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_j_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_k",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_k.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_k_blur",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_k_blur.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "window_k_noise",
+      "url": "assets/effects/kenney-light-masks/Transparent/window_k_noise.png",
+      "pack": "light-masks",
+      "label": "Свет и сияние",
+      "category": "Transparent"
+    },
+    {
+      "name": "splat00",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat00.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat01",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat01.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat02",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat02.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat03",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat03.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat04",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat04.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat05",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat05.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat06",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat06.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat07",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat07.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat08",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat08.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat09",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat09.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat10",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat10.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat11",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat11.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat12",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat12.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat13",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat13.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat14",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat14.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat15",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat15.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat16",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat16.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat17",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat17.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat18",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat18.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat19",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat19.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat20",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat20.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat21",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat21.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat22",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat22.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat23",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat23.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat24",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat24.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat25",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat25.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat26",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat26.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat27",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat27.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat28",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat28.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat29",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat29.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat30",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat30.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat31",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat31.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat32",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat32.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat33",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat33.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat34",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat34.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    },
+    {
+      "name": "splat35",
+      "url": "assets/effects/kenney-splat-pack/PNG/Double (512px)/splat35.png",
+      "pack": "splat-pack",
+      "label": "Брызги и пятна",
+      "category": "Double (512px)"
+    }
+  ]
+}

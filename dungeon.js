@@ -1,9 +1,15 @@
-// Подземелья: врата открываются ключами из магазина, за каждыми — босс одной из четырёх стихий.
-// На босса даётся 3 попытки по 60 с; здоровье босса между попытками сохраняется, мана и навыки — обновляются.
+// Подземелья: этажи. На каждом этаже — карта с развилками: клетки со случайными боссами обычного мира
+// (бой за «Ключ подземелья», сундук с 1 предметом и 20% шансом на самоцвет) ведут к боссу этажа одной из
+// четырёх стихий (бой за «Ключ в неизведанное», большой сундук и душа босса). Пройденный босс этажа открывает следующий этаж.
+// На каждый бой 3 попытки по 60 с; здоровье противника между попытками сохраняется, мана и навыки — обновляются.
 // Бой идёт на той же арене, что и лес: состояние леса откладывается при входе и возвращается при выходе.
 (()=>{
 const DUNGEON_KEY='forest-frontier-dungeon-v1';
-const UNLOCK_LEVEL=10,ATTEMPTS=3,ATTEMPT_MS=60000,REPLAY_PRICE=50,BOSS_CHEST_ITEMS=3;
+// REPLAY_PRICE и поле replayKeys — цена и запас «Ключа подземелья» (раньше «Ключ былых врат»; имя поля сохранено ради старых сохранений).
+const UNLOCK_LEVEL=10,ATTEMPTS=3,ATTEMPT_MS=60000,REPLAY_PRICE=25,BOSS_CHEST_ITEMS=3;
+const FLOOR_BOSS_HP=3,MOB_CHEST_ITEMS=1,MOB_GEM_CHANCE=.2;
+// Карта этажа: число клеток в каждом шаге. 0 — вход, последний — босс этажа; самый длинный путь — 8 клеток.
+const MAP_WIDTHS=[1,3,4,3,4,3,4,3,1],MAP_W=760,MAP_H=320;
 const ELEMENTS={
  dark:{name:'Тьма',color:'#a77bff',deep:'#1d0f38',light:'#e4d4ff'},
  fire:{name:'Огонь',color:'#ff6a2a',deep:'#3a0e06',light:'#ffd9b8'},
@@ -26,8 +32,11 @@ const BOSSES=[
 ];
 // Редкость предметов из сундука босса: обычные и необычные исключены.
 const CHEST_RARITY_WEIGHTS={Uncommon:60,Rare:29.5,Epic:8,Legendary:2,Divine:.5};
+// Сундук босса мира на клетке карты: от обычного до эпического (шансы в процентах).
+const MOB_CHEST_RARITY_WEIGHTS={Common:50,Uncommon:30,Rare:15,Epic:5};
 
-const fresh=()=>({version:1,cleared:0,keys:0,replayKeys:0,redSouls:0,lastBoss:null,run:null,chest:null});
+// map: карта текущего этажа {floor, seed, boss — босс этажа, visited:[id клеток], current:id}. Сама карта строится заново из seed.
+const fresh=()=>({version:1,cleared:0,keys:0,replayKeys:0,redSouls:0,lastBoss:null,run:null,chest:null,map:null});
 let state=fresh();
 // Режим экрана (не сохраняется): off — лес; gate — у врат; fight — бой; pause — между попытками; victory — сундук; busy — анимация.
 let mode='off',forest=null,deadline=0,savedRunAt=0,bannerTimer=null,zoneHtml='';
@@ -35,6 +44,16 @@ let mode='off',forest=null,deadline=0,savedRunAt=0,bannerTimer=null,zoneHtml='';
 // Подземелья, ключи в магазине и души боссов открываются с 10 уровня героя.
 function unlocked(){return playerLevel>=UNLOCK_LEVEL;}
 function bossById(id){return BOSSES.find(b=>b.id===id)||null;}
+// Боссы обычного мира (по одному на каждый вид врагов пяти локаций) — противники на клетках карты.
+let worldCache=null;
+function worldBosses(){
+ if(worldCache)return worldCache;
+ const groups=[[forestEnemies,'svg'],[fieldEnemies,'webp'],[wasteEnemies,'webp'],[mineEnemies,'webp'],[desertEnemies,'webp']];
+ return worldCache=groups.flatMap(([list,ext])=>list.map(e=>({id:e.id,name:eliteNames[e.id]?.[1]||e.name,color:e.color,light:e.light,img:`assets/monster-${e.id}-boss.${ext}`,mob:true,element:'dark'})));
+}
+function mobById(id){return worldBosses().find(m=>m.id===id)||null;}
+// Противник боя или сундука: босс этажа (стихия) или босс мира с клетки карты.
+function foeOf(r){return r?(r.mob?mobById(r.mob):bossById(r.bossId)):null;}
 function isInt(v,min=0){return Number.isSafeInteger(v)&&v>=min;}
 function load(){
  try{
@@ -43,15 +62,50 @@ function load(){
   for(const k of ['cleared','keys','replayKeys','redSouls'])if(isInt(s[k]))next[k]=s[k];
   if(bossById(s.lastBoss))next.lastBoss=s.lastBoss;
   const r=s.run;
-  if(r&&isInt(r.level,1)&&bossById(r.bossId)&&Number.isFinite(r.maxHp)&&r.maxHp>0&&Number.isFinite(r.hp)&&r.hp>0&&r.hp<=r.maxHp&&isInt(r.used)&&r.used<=ATTEMPTS)
-   next.run={level:r.level,bossId:r.bossId,maxHp:r.maxHp,hp:r.hp,used:r.used,replay:r.replay===true};
-  if(s.chest&&isInt(s.chest.level,1)&&bossById(s.chest.bossId))next.chest={level:s.chest.level,bossId:s.chest.bossId};
+  // Старые сохранения: бой с боссом стихии без клетки карты считается боем с боссом этажа.
+  if(r&&isInt(r.level,1)&&(bossById(r.bossId)||mobById(r.mob))&&Number.isFinite(r.maxHp)&&r.maxHp>0&&Number.isFinite(r.hp)&&r.hp>0&&r.hp<=r.maxHp&&isInt(r.used)&&r.used<=ATTEMPTS)
+   next.run=r.mob&&mobById(r.mob)?{level:r.level,mob:r.mob,node:isInt(r.node)?r.node:null,maxHp:r.maxHp,hp:r.hp,used:r.used}:{level:r.level,bossId:r.bossId,maxHp:r.maxHp,hp:r.hp,used:r.used};
+  const c=s.chest;
+  if(c&&isInt(c.level,1)&&(c.mob?mobById(c.mob):bossById(c.bossId)))next.chest=c.mob?{level:c.level,mob:c.mob}:{level:c.level,bossId:c.bossId};
+  const m=s.map;
+  if(m&&isInt(m.floor,1)&&isInt(m.seed)&&Array.isArray(m.visited)&&m.visited.every(v=>isInt(v))&&isInt(m.current)&&bossById(m.boss))next.map={floor:m.floor,seed:m.seed,boss:m.boss,visited:[...new Set([0,...m.visited])],current:m.current};
   state=next;
  }catch{}
 }
 function save(){try{localStorage.setItem(DUNGEON_KEY,JSON.stringify(state));}catch{}}
-function keyPrice(){return 50+10*state.cleared;}
+function keyPrice(){return 100+10*state.cleared;}
+// Здоровье боссов мира на клетках — прежняя формула боссов подземелья; у босса этажа — в FLOOR_BOSS_HP раз больше.
 function bossHealth(level){return Math.max(1,Math.round(100*(playerLevel/10)*level));}
+function floorBossHealth(level){return bossHealth(level)*FLOOR_BOSS_HP;}
+
+// ── Карта этажа ──────────────────────────────────────────────────────────
+function seededRng(seed){let s=seed|0;return()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+// Строит карту из seed: клетки по шагам (x — доля высоты карты), связи между соседними шагами и два обхода через шаг.
+// Клетки одного шага стоят на равных расстояниях, поэтому значки не накладываются.
+function buildMap(floor,seed,bossId){
+ const r=seededRng(seed),layers=[],edges=[],last=MAP_WIDTHS.length-1;let id=0;
+ const mobs=worldBosses();
+ MAP_WIDTHS.forEach((w,k)=>{layers[k]=Array.from({length:w},(_,i)=>({id:id++,layer:k,y:(i+1)/(w+1),kind:k===0?'start':k===last?'boss':'mob',mob:k>0&&k<last?mobs[Math.floor(r()*mobs.length)].id:null}));});
+ const link=(a,b)=>{if(!edges.some(e=>e.a===a.id&&e.b===b.id))edges.push({a:a.id,b:b.id});};
+ const nearest=(list,y)=>[...list].sort((p,q)=>Math.abs(p.y-y)-Math.abs(q.y-y));
+ for(let k=0;k<last;k++){
+  const A=layers[k],B=layers[k+1];
+  A.forEach(a=>{const near=nearest(B,a.y);link(a,near[0]);if(k===0||B.length===1)B.forEach(b=>link(a,b));else if(r()<.55&&near[1])link(a,near[1]);});
+  B.forEach(b=>{if(!edges.some(e=>e.b===b.id))link(nearest(A,b.y)[0],b);});
+ }
+ [[2,0],[4,layers[4].length-1]].forEach(([k,i])=>{const a=layers[k][i];link(a,nearest(layers[k+2],a.y)[0]);});
+ return {floor,bossId,nodes:layers.flat(),edges};
+}
+let mapCache=null;
+// Карта текущего этажа; новый этаж получает новую карту.
+function floorMap(){
+ const floor=state.cleared+1;
+ if(!state.map||state.map.floor!==floor){state.map={floor,seed:Math.floor(Math.random()*2**31),boss:pickBoss().id,visited:[0],current:0};save();}
+ if(!mapCache||mapCache.floor!==floor||mapCache.seed!==state.map.seed)mapCache={...buildMap(floor,state.map.seed,state.map.boss),seed:state.map.seed};
+ return mapCache;
+}
+const nodeOf=id=>floorMap().nodes.find(n=>n.id===id)||null;
+const nextNodes=()=>floorMap().edges.filter(e=>e.a===state.map.current).map(e=>e.b);
 
 // Сопротивление: 50% к урону своей стихии, 25% к урону без стихии, иначе 0%.
 function damageElements(){return [...new Set(Object.values(equipped).filter(Boolean).map(i=>i.element).filter(e=>e&&e!=='none'))];}
@@ -144,6 +198,33 @@ html.hud-fit #arena.dungeon-fight #monster{width:clamp(300px,calc(var(--hud-h)*.
 .dungeon-panel button:disabled{opacity:.45;cursor:not-allowed}
 .dungeon-panel button.dg-primary{border:0;color:#1a0b2e;background:linear-gradient(135deg,#f0c6ff,#a77bff)}
 .dungeon-panel button img{width:22px;height:22px}
+/* Картинки ключей не квадратные: вписываются в ячейку целиком. */
+.dungeon-panel img[src*="assets/key-"]{object-fit:contain;filter:drop-shadow(0 1px 2px #000a)}
+.dungeon-panel.dg-wide{width:min(780px,96%);bottom:3%;max-height:90%}
+/* Карта этажа: лента шагов слева направо. Размеры клеток — в % ширины карты, поэтому значки не накладываются при любом масштабе. */
+.dgm-map{position:relative;width:100%;aspect-ratio:${MAP_W}/${MAP_H};margin:8px 0 4px;border-radius:12px;background:linear-gradient(90deg,#1e1530,#2a1c40 50%,#1e1530);border:1px solid #7a5fc044;overflow:hidden}
+.dgm-map svg.dgm-edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.dgm-edge{fill:none;stroke-linecap:round;stroke:#5b4a7d;stroke-width:3}
+.dgm-edge.done{stroke:#c9a6ff;stroke-width:4;filter:drop-shadow(0 0 4px #a878ff)}
+.dgm-edge.open{stroke:#e6d6ff;stroke-dasharray:8 6;animation:dgmFlow 1s linear infinite}
+@keyframes dgmFlow{to{stroke-dashoffset:-14}}
+.dgm-col{position:absolute;top:2.5%;translate:-50% 0;font-size:9.5px;letter-spacing:.08em;color:#a99dbf88;pointer-events:none;white-space:nowrap}
+.dungeon-panel button.dgm-node{position:absolute;translate:-50% -50%;width:5.8%;aspect-ratio:44/50;height:auto;padding:0;gap:0;display:grid;place-items:center;border-radius:10px 10px 22px 22px;background:linear-gradient(#3c2c5c,#22183a);border:2px solid #9a7fd0;transition:transform .15s,filter .2s,opacity .2s;--glow:#c9a6ffaa}
+.dungeon-panel button.dgm-node img{width:112%;height:112%;object-fit:contain;pointer-events:none;filter:drop-shadow(0 2px 2px #000a)}
+.dungeon-panel button.dgm-node.boss{width:10%;aspect-ratio:78/86;border-radius:16px 16px 40px 40px;border:3px solid #ffcf6a;background:linear-gradient(#5a2a40,#2a1020);box-shadow:0 0 24px #ff7a4a66}
+.dungeon-panel button.dgm-node.start{width:4.6%;aspect-ratio:1;border-radius:50%;font-size:15px;color:#e6d6ff}
+.dungeon-panel button.dgm-node.available{animation:dgmPulse 1.4s ease-in-out infinite}
+.dungeon-panel button.dgm-node.available:hover{transform:scale(1.15);background:linear-gradient(#4c3a70,#2a1d46)}
+.dungeon-panel button.dgm-node.selected{outline:3px solid #fff;outline-offset:2px}
+.dungeon-panel button.dgm-node.locked{opacity:.55;filter:grayscale(.75) brightness(.75);cursor:default}
+.dungeon-panel button.dgm-node.done{filter:grayscale(.2) brightness(.85);cursor:default}
+.dungeon-panel button.dgm-node.done::after{content:'✓';position:absolute;right:-4px;bottom:-4px;width:16px;height:16px;border-radius:50%;background:#2f9e57;color:#fff;font:700 11px/16px sans-serif;text-align:center;box-shadow:0 0 0 2px #0008}
+.dungeon-panel button.dgm-node.here{border-color:#fff;box-shadow:0 0 12px #fff8}
+@keyframes dgmPulse{50%{box-shadow:0 0 0 5px var(--glow),0 0 18px var(--glow)}}
+@media (prefers-reduced-motion:reduce){.dungeon-panel button.dgm-node.available,.dgm-edge.open{animation:none}}
+.dgm-pick{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:6px}
+.dgm-pick .dg-boss-card{margin:0}
+.dungeon-panel button img.dg-price-soul{width:24px;height:24px;padding:3px;margin-left:-2px;box-sizing:border-box;border-radius:50%;background:radial-gradient(circle,#1a1030 55%,#0b0618);box-shadow:0 0 0 1px #6a4fb099,0 0 6px #4fd8ff55}
 .dungeon-panel .dg-keys{display:flex;justify-content:center;gap:14px;margin:4px 0 2px;font-weight:800;color:#e4d4ff}
 .dungeon-panel .dg-keys span{display:flex;align-items:center;gap:5px}.dungeon-panel .dg-keys img{width:24px;height:24px}
 .dungeon-panel select{padding:9px 10px;border-radius:10px;border:1px solid #b88cff55;background:#120a1f;color:#f0e6ff;font:700 12.5px Manrope,sans-serif}
@@ -334,13 +415,13 @@ function chestSvg(){
 }
 
 // ── Отрисовка состояния ─────────────────────────────────────────────────
-function currentBoss(){return bossById(state.run?.bossId||state.chest?.bossId);}
+function currentBoss(){return foeOf(state.run||state.chest);}
 function nextLevel(){return state.run?state.run.level:state.cleared+1;}
 function updateToggle(){
  const inside=mode!=='off',ready=state.keys+(state.chest?1:0)+(state.run?1:0);
  toggle.hidden=!inside&&!unlocked();
  toggle.classList.toggle('in-forest-return',inside);
- const html=inside?TREE_ICON+'<span>В лес</span>':GATE_ICON+'<span>Подземелья</span>'+(ready?`<b>${ready}</b>`:'');
+ const html=inside?TREE_ICON+'<span>В приключение</span>':GATE_ICON+'<span>Подземелья</span>'+(ready?`<b>${ready}</b>`:'');
  if(toggle.dataset.view!==html){toggle.innerHTML=html;toggle.dataset.view=html;}
  toggle.title=inside?'Вернуться: '+locationName():'Подземелья: врата и боссы стихий';
  toggle.setAttribute('aria-label',toggle.title);
@@ -351,10 +432,12 @@ function updateWallet(){
  placeRedWallet();
 }
 function setScene(html){scene.innerHTML=html;scene.hidden=false;}
-function setPanel(html,center=false){panel.innerHTML=html;panel.hidden=!html;panel.classList.toggle('center',center);}
-function bossSprite(boss){if(window.bossPuppets?.has(boss.id))return window.bossPuppets.html(boss.id,boss.name);return `<svg viewBox="0 0 200 175" role="img" aria-label="${boss.name}" style="overflow:hidden"><image href="assets/monster-dungeon-${boss.id}.svg" width="200" height="175" preserveAspectRatio="xMidYMid meet"/></svg>`;}
+function setPanel(html,center=false,wide=false){panel.innerHTML=html;panel.hidden=!html;panel.classList.toggle('center',center);panel.classList.toggle('dg-wide',wide);}
+// Цвета противника: у босса этажа — его стихия, у босса мира — цвета его вида.
+function foeColors(boss){return boss.mob?{color:boss.color,light:boss.light}:ELEMENTS[boss.element];}
+function bossSprite(boss){if(boss.mob)return `<svg viewBox="0 0 200 175" role="img" aria-label="${boss.name}" style="overflow:hidden"><image href="${boss.img}" width="200" height="175" preserveAspectRatio="xMidYMid meet"/></svg>`;if(window.bossPuppets?.has(boss.id))return window.bossPuppets.html(boss.id,boss.name);return `<svg viewBox="0 0 200 175" role="img" aria-label="${boss.name}" style="overflow:hidden"><image href="assets/monster-dungeon-${boss.id}.svg" width="200" height="175" preserveAspectRatio="xMidYMid meet"/></svg>`;}
 function paintBossColors(boss){
- const el=ELEMENTS[boss.element];
+ const el=foeColors(boss);
  arena.style.setProperty('--boss-glow',el.color);arena.style.setProperty('--boss-light',el.light);
  $('enemyName').style.setProperty('--enemy-base',el.color);$('enemyName').style.setProperty('--enemy-light',el.light);
 }
@@ -368,21 +451,22 @@ function renderEnemy(){
   if(renderedEnemyId!=='dungeon-'+boss.id){const old=document.querySelector('#monster > svg:not(.slash-effect)');if(old)old.outerHTML=bossSprite(boss);renderedEnemyId='dungeon-'+boss.id;}
   paintBossColors(boss);
   $('enemyName').textContent=boss.name;
-  document.querySelector('.enemy-type').firstChild.textContent='БОСС ПОДЗЕМЕЛЬЯ · '+ELEMENTS[boss.element].name.toUpperCase()+' · УР. ';
+  document.querySelector('.enemy-type').firstChild.textContent=(boss.mob?'БОСС МИРА':'БОСС ЭТАЖА · '+ELEMENTS[boss.element].name.toUpperCase())+' · ЭТАЖ ';
   $('level').textContent=state.run.level;
-  info.hidden=false;info.innerHTML=`<i>◆</i> ${resistText(boss)}`;
+  // У боссов мира на клетках нет стихии и сопротивления.
+  info.hidden=!!boss.mob;if(!boss.mob)info.innerHTML=`<i>◆</i> ${resistText(boss)}`;
  }else info.hidden=true;
  const lvl=nextLevel();
  document.querySelector('.stage-heading').textContent='ПОДЗЕМЕЛЬЕ';
  $('wave').textContent=lvl;$('previousStage').textContent=lvl>1?lvl-1:'—';$('previousStage').style.visibility=lvl>1?'visible':'hidden';$('previousStageDot').style.visibility=lvl>1?'visible':'hidden';$('nextStage').textContent=lvl+1;
- $('wave').classList.add('boss-stage-glow');$('nextStage').classList.add('boss-stage-glow');$('wave').setAttribute('aria-label','Уровень подземелья '+lvl);
+ $('wave').classList.add('boss-stage-glow');$('nextStage').classList.add('boss-stage-glow');$('wave').setAttribute('aria-label','Этаж подземелья '+lvl);
  updateToggle();updateWallet();
 }
 // Каждые 100 мс вместо таймера лесного босса.
 function tick(){
  const fighting=mode==='fight'&&state.run;
  const timer=$('bossTimerBar');timer.hidden=!fighting;$('bossCountdown').hidden=!fighting;$('retreatBoss').hidden=!fighting||locked||hp<=0;
- if(!fighting){$('zoneProgress').textContent=mode==='off'?'':mode==='pause'&&state.run?'Попыток осталось: '+(ATTEMPTS-state.run.used||ATTEMPTS):state.run?'Врата открыты':'Врата закрыты';return;}
+ if(!fighting){$('zoneProgress').textContent=mode==='off'?'':mode==='pause'&&state.run?'Попыток осталось: '+(ATTEMPTS-state.run.used||ATTEMPTS):state.run?'Бой начат':'Этаж '+(state.cleared+1);return;}
  const left=deadline?Math.max(0,deadline-Date.now()):ATTEMPT_MS,seconds=left/1000;
  $('zoneProgress').textContent='Попытка '+state.run.used+' / '+ATTEMPTS;
  $('retreatBoss').textContent='Покинуть зал';
@@ -414,6 +498,7 @@ function enter(){
  document.querySelector('.topbar .zone').innerHTML='✦ &nbsp; Подземелье';
  arena.classList.add('in-dungeon');
  for(const b of BOSSES){for(const s of ['','-hurt'])new Image().src=`assets/monster-dungeon-${b.id}${s}.svg`;window.bossPuppets?.preload(b.id);}
+ for(const n of floorMap().nodes){const m=mobById(n.mob);if(m){new Image().src=m.img;new Image().src=m.img.replace(/(\.\w+)$/,'-hurt$1');}}
  showGate(false);
 }
 function leave(){
@@ -428,9 +513,10 @@ function leave(){
  renderedEnemyId='';updateAttackButton();render();checkBossTimer();updateToggle();updateWallet();
  $('message').textContent='Ты вернулся: '+locationName()+'.';
 }
-function keyRow(){return `<div class="dg-keys"><span title="Ключ в неизведанное"><img src="assets/key-unknown.svg" alt="">${state.keys}</span><span title="Ключ былых врат"><img src="assets/key-replay.svg" alt="">${state.replayKeys}</span></div>`;}
-// Иконка босса — его кукла в покое, собранная в одну картинку (assets/bosses/icons/<id>.png).
-function bossCard(boss,extra){const el=ELEMENTS[boss.element];return `<div class="dg-boss-card" style="--c:${el.color};--l:${el.light}"><img src="assets/bosses/icons/${boss.id}.png" alt=""><div><b>${boss.name}</b><small>Стихия: ${el.name}</small><small>${extra}</small></div></div>`;}
+function keyRow(){return `<div class="dg-keys"><span title="Ключ в неизведанное"><img src="assets/key-unknown.webp" alt="">${state.keys}</span><span title="Ключ подземелья"><img src="assets/key-dungeon.webp" alt="">${state.replayKeys}</span></div>`;}
+// Иконка босса этажа — его кукла в покое, собранная в одну картинку (assets/bosses/icons/<id>.png); у босса мира — его картинка.
+function bossIcon(boss){return boss.mob?boss.img:`assets/bosses/icons/${boss.id}.png`;}
+function bossCard(boss,extra){const el=foeColors(boss);return `<div class="dg-boss-card" style="--c:${el.color};--l:${el.light}"><img src="${bossIcon(boss)}" alt=""><div><b>${boss.name}</b><small>${boss.mob?'Босс мира':'Босс этажа · стихия: '+el.name}</small><small>${extra}</small></div></div>`;}
 function showGate(approach){
  mode='gate';locked=true;deadline=0;
  const open=!!state.run;
@@ -441,46 +527,75 @@ function showGate(approach){
  }
  renderGatePanel();render();
 }
+// Выбранная на карте клетка (id); если она перестала быть доступной, выбирается первая доступная.
+let selectedNode=null;
+// Координаты клетки в системе карты MAP_W×MAP_H.
+function nodePos(n){return [40+n.layer*(MAP_W-80)/(MAP_WIDTHS.length-1),MAP_H*(.06+.94*n.y)];}
+function mapHtml(){
+ const map=floorMap(),path=state.map.visited,visited=new Set(path),open=new Set(nextNodes()),last=MAP_WIDTHS.length-1;
+ const edges=map.edges.map(e=>{
+  const [x1,y1]=nodePos(nodeOf(e.a)),[x2,y2]=nodePos(nodeOf(e.b)),mx=(x1+x2)/2,i=path.indexOf(e.a);
+  const cls=i>=0&&path[i+1]===e.b?'done':e.a===state.map.current&&open.has(e.b)?'open':'';
+  return `<path class="dgm-edge ${cls}" d="M${x1} ${y1}C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}"/>`;
+ }).join('');
+ const cols=MAP_WIDTHS.map((_,k)=>`<span class="dgm-col" style="left:${nodePos({layer:k,y:0})[0]/MAP_W*100}%">${k===0?'ВХОД':k===last?'БОСС ЭТАЖА':'ШАГ '+k}</span>`).join('');
+ const nodes=map.nodes.map(n=>{
+  const [x,y]=nodePos(n),foe=n.kind==='boss'?bossById(map.bossId):mobById(n.mob);
+  const st=n.id===state.map.current?(n.kind==='start'?'here':'here done'):visited.has(n.id)?'done':open.has(n.id)?'available':'locked';
+  const title=n.kind==='start'?'Вход на этаж':foe.name+(n.kind==='boss'?' — босс этажа':' — босс мира');
+  const inner=n.kind==='start'?'⚑':`<img src="${bossIcon(foe)}" alt="">`;
+  return `<button type="button" class="dgm-node ${n.kind} ${st}${n.id===selectedNode?' selected':''}" data-a="node" data-n="${n.id}" style="left:${x/MAP_W*100}%;top:${y/MAP_H*100}%" title="${title}" aria-label="${title}"${st==='available'?'':' aria-disabled="true"'}>${inner}</button>`;
+ }).join('');
+ return `<div class="dgm-map"><svg class="dgm-edges" viewBox="0 0 ${MAP_W} ${MAP_H}" preserveAspectRatio="none" aria-hidden="true">${edges}</svg>${cols}${nodes}</div>`;
+}
+function soulPrice(n){return `${n} <img class="dg-price-soul" src="assets/soul.svg" alt="душ">`;}
 function renderGatePanel(){
- const lvl=nextLevel(),run=state.run,boss=run?bossById(run.bossId):null;
- let html=`<div class="dg-eyebrow">ВРАТА В НЕИЗВЕДАННОЕ</div><h3>Уровень ${lvl}</h3>`;
+ const lvl=nextLevel(),run=state.run;
+ let html=`<div class="dg-eyebrow">ПОДЗЕМЕЛЬЕ</div><h3>Этаж ${lvl}</h3>`;
  if(state.chest){
-  const cb=bossById(state.chest.bossId);
-  html+=`<p>Сундук ${cb?'«'+cb.name+'»':'босса'} ещё не открыт.</p><div class="dg-row"><button class="dg-primary" data-a="chest">🎁 Открыть сундук босса</button></div>`;
+  const cb=foeOf(state.chest);
+  html+=`<p>Сундук ${cb?'«'+cb.name+'»':'босса'} ещё не открыт.</p><div class="dg-row"><button class="dg-primary" data-a="chest">🎁 Открыть сундук</button></div>`;
  }else if(run){
+  const boss=foeOf(run);
   html+=bossCard(boss,`Здоровье: ${fmt(run.hp)} / ${fmt(run.maxHp)} · попыток: ${ATTEMPTS-run.used} из ${ATTEMPTS}`)
-   +`<p>${run.replay?'Повторный проход. ':''}Врата открыты — босс ждёт в зале.</p><div class="dg-row"><button class="dg-primary" data-a="hall">⚔ Войти в зал</button></div>`;
+   +`<p>Бой начат — ${boss.name} ждёт в зале.</p><div class="dg-row"><button class="dg-primary" data-a="hall">⚔ Войти в зал</button></div>`;
  }else{
-  html+=`<p>За вратами ждёт случайный босс одной из четырёх стихий. Здоровье: <b>${fmt(bossHealth(lvl))}</b>.<br>Чтобы открыть врата, нужен «Ключ в неизведанное».</p>${keyRow()}
-  <div class="dg-row"><button class="dg-primary" data-a="open" ${state.keys?'':'disabled'}><img src="assets/key-unknown.svg" alt="">Открыть ключом</button><button data-a="shop">🛒 Ключи в магазине</button></div>`;
+  const open=nextNodes();if(!open.includes(selectedNode))selectedNode=open[0]??null;
+  const node=nodeOf(selectedNode),map=floorMap();
+  html+=mapHtml();
+  if(node){
+   const boss=node.kind==='boss',foe=boss?bossById(map.bossId):mobById(node.mob);
+   const have=boss?state.keys:state.replayKeys,keyName=boss?'Ключ в неизведанное':'Ключ подземелья';
+   html+=`<div class="dgm-pick">${bossCard(foe,`Здоровье: ${fmt(boss?floorBossHealth(lvl):bossHealth(lvl))}`)}<button class="dg-primary" data-a="fight" ${have?'':'disabled'} title="${have?'Потратить':'Нужен'} «${keyName}»"><img src="assets/${boss?'key-unknown':'key-dungeon'}.webp" alt="">В бой</button></div>`;
+  }
+  const kp=keyPrice(),canKey=state.keys<MAX_UNKNOWN_KEYS&&souls>=kp;
+  html+=`<p class="dg-note">Боссы мира на клетках — за «Ключ подземелья», босс этажа — за «Ключ в неизведанное».</p>${keyRow()}
+  <div class="dg-row"><button data-a="buyKey" ${canKey?'':'disabled'} title="${state.keys>=MAX_UNKNOWN_KEYS?'В запасе может быть только один такой ключ':souls>=kp?'':'Не хватает душ'}"><img src="assets/key-unknown.webp" alt="">Ключ в неизведанное · ${soulPrice(kp)}</button><button data-a="buyReplay" ${souls>=REPLAY_PRICE?'':'disabled'} title="${souls>=REPLAY_PRICE?'':'Не хватает душ'}"><img src="assets/key-dungeon.webp" alt="">Ключ подземелья · ${soulPrice(REPLAY_PRICE)}</button></div>`;
  }
- if(state.cleared>0&&!run&&!state.chest){
-  const opts=Array.from({length:state.cleared},(_,i)=>`<option value="${i+1}">Уровень ${i+1}</option>`).join('');
-  html+=`<div class="dg-sep"></div><div class="dg-note">Пройденные врата можно открыть снова «Ключом былых врат».</div>
-  <div class="dg-row"><select data-f="replay">${opts}</select><button data-a="replay" ${state.replayKeys?'':'disabled'}><img src="assets/key-replay.svg" alt="">Открыть снова (${state.replayKeys})</button></div>`;
- }
- html+=`<div class="dg-row"><button data-a="leave">🌲 Вернуться в лес</button></div>`;
- setPanel(html);
+ html+=`<div class="dg-row"><button data-a="leave">Вернуться в приключение</button></div>`;
+ setPanel(html,false,!run&&!state.chest);
 }
 function fmt(n){return Number(n).toLocaleString('ru-RU',{maximumFractionDigits:1});}
 function pickBoss(){const pool=BOSSES.filter(b=>b.id!==state.lastBoss);return pool[Math.floor(Math.random()*pool.length)];}
-function openGate(level,replay){
- const boss=pickBoss(),maxHpBoss=bossHealth(level);
- state.run={level,bossId:boss.id,maxHp:maxHpBoss,hp:maxHpBoss,used:0,replay};state.lastBoss=boss.id;save();
+// Начинает бой на клетке карты (ключ уже потрачен): босс мира или босс этажа с утроенным здоровьем.
+function openFight(node){
+ const floor=state.cleared+1,boss=node.kind==='boss',hpMax=boss?floorBossHealth(floor):bossHealth(floor);
+ state.run=boss?{level:floor,bossId:floorMap().bossId,maxHp:hpMax,hp:hpMax,used:0}:{level:floor,mob:node.mob,node:node.id,maxHp:hpMax,hp:hpMax,used:0};
+ selectedNode=null;save();
  const gate=scene.querySelector('.dg-gate');setPanel('');
  if(gate&&settings.animations){mode='busy';gate.classList.add('open');setTimeout(()=>startAttempt(),1500);}
  else startAttempt();
 }
 function startAttempt(){
- const run=state.run,boss=bossById(run.bossId);if(!run||!boss)return showGate(false);
+ const run=state.run,boss=foeOf(run);if(!run||!boss)return showGate(false);
  clearBattle();
  run.used++;save();
- mana=maxMana();manaUpdatedAt=Date.now();powerReadyAt=0;rapidReadyAt=0;aimReadyAt=0;cooldownUntil=0;renderMana();
+ mana=maxMana();manaUpdatedAt=Date.now();powerReadyAt=0;rapidReadyAt=0;aimReadyAt=0;cooldownUntil=0;window.manaBurnFx?.resetCooldowns();renderMana();
  hp=run.hp;maxHp=run.maxHp;
  setScene(hallSvg(boss));setPanel('');
  if(settings.animations)scene.querySelector('svg').animate([{opacity:0,transform:'scale(1.08)'},{opacity:1,transform:'scale(1)'}],{duration:600,easing:'ease-out'});
  mode='fight';locked=true;deadline=0;render();
- const el=ELEMENTS[boss.element];
+ const el=foeColors(boss);
  const banner=document.createElement('div');banner.className='dg-banner';banner.style.setProperty('--c',el.color);banner.textContent=`Попытка ${run.used} из ${ATTEMPTS}`;arena.append(banner);
  clearTimeout(bannerTimer);bannerTimer=setTimeout(()=>{banner.remove();if(mode!=='fight')return;locked=false;deadline=Date.now()+ATTEMPT_MS;updateAttackButton();$('message').textContent=boss.name+' ждёт. В бой!';},settings.animations?1100:0);
  updateAttackButton();
@@ -488,26 +603,34 @@ function startAttempt(){
 function endAttempt(reason){
  const run=state.run;if(!run)return;
  run.hp=Math.max(.01,hp);clearBattle();locked=true;deadline=0;mode='pause';
- const boss=bossById(run.bossId);
+ const boss=foeOf(run);
  if(run.used>=ATTEMPTS){
   run.hp=run.maxHp;run.used=0;save();render();
-  setPanel(`<div class="dg-eyebrow">ПОПЫТКИ ЗАКОНЧИЛИСЬ</div><h3>${boss.name} устоял</h3><p>Здоровье босса восстановилось. Ключ не сгорел — врата остаются открытыми, можно начать заново с тремя новыми попытками.</p>
-  <div class="dg-row"><button class="dg-primary" data-a="again">⚔ Начать заново</button><button data-a="gate">К вратам</button></div>`,true);
+  setPanel(`<div class="dg-eyebrow">ПОПЫТКИ ЗАКОНЧИЛИСЬ</div><h3>${boss.name} устоял</h3><p>Здоровье босса восстановилось. Ключ не сгорел — можно начать заново с тремя новыми попытками.</p>
+  <div class="dg-row"><button class="dg-primary" data-a="again">⚔ Начать заново</button><button data-a="gate">К карте</button></div>`,true);
  }else{
   save();render();
   setPanel(`<div class="dg-eyebrow">${reason==='time'?'ВРЕМЯ ВЫШЛО':'ТЫ ПОКИНУЛ ЗАЛ'}</div><h3>Попытка ${run.used} из ${ATTEMPTS}</h3>
   <p>Здоровье босса сохранится: <b>${fmt(run.hp)} / ${fmt(run.maxHp)}</b>.<br>В следующей попытке мана и навыки восстановятся. Осталось попыток: ${ATTEMPTS-run.used}.</p>
-  <div class="dg-row"><button class="dg-primary" data-a="next">⚔ Следующая попытка</button><button data-a="gate">К вратам</button></div>`,true);
+  <div class="dg-row"><button class="dg-primary" data-a="next">⚔ Следующая попытка</button><button data-a="gate">К карте</button></div>`,true);
  }
  $('message').textContent=reason==='time'?'Время вышло!':'Ты покинул зал.';
 }
 // Вызывается из attack() игры, когда здоровье босса подземелья падает до нуля.
 function onBossKilled(){
- const run=state.run,boss=bossById(run.bossId);
+ const run=state.run,boss=foeOf(run);
  locked=true;deadline=0;mode='victory';
  gainExperience(maxHp);
- if(!run.replay&&run.level===state.cleared+1)state.cleared++;
- state.chest={level:run.level,bossId:run.bossId};state.run=null;save();
+ if(run.mob){
+  // Босс мира: клетка пройдена, герой встаёт на неё; сундук — 1 предмет и шанс на самоцвет.
+  const m=state.map;if(m&&m.floor===run.level&&Number.isInteger(run.node)&&!m.visited.includes(run.node)){m.visited.push(run.node);m.current=run.node;}
+  state.chest={level:run.level,mob:run.mob};
+ }else{
+  // Босс этажа открывает следующий этаж (новая карта строится при следующем показе врат).
+  if(run.level===state.cleared+1)state.cleared++;
+  state.lastBoss=run.bossId;state.chest={level:run.level,bossId:run.bossId};
+ }
+ state.run=null;save();
  $('message').textContent=boss.name+' повержен! С него выпал сундук.';
  setTimeout(()=>showChest(boss),settings.animations?750:0);
 }
@@ -525,35 +648,39 @@ function showChest(boss){
  btn.addEventListener('click',()=>openChest(btn),{once:true});
  setPanel('');
 }
-function rollBossItem(){
- const eligible=lootPool().filter(i=>CHEST_RARITY_WEIGHTS[i.rarity]);if(!eligible.length)return null;
- const present=Object.entries(CHEST_RARITY_WEIGHTS).filter(([r])=>eligible.some(i=>i.rarity===r));
+function rollBossItem(weights=CHEST_RARITY_WEIGHTS){
+ const eligible=lootPool().filter(i=>weights[i.rarity]);if(!eligible.length)return null;
+ const present=Object.entries(weights).filter(([r])=>eligible.some(i=>i.rarity===r));
  let roll=Math.random()*present.reduce((s,[,w])=>s+w,0),rarity=present[0][0];
  for(const [r,w] of present){if((roll-=w)<0){rarity=r;break;}}
  const pool=eligible.filter(i=>i.rarity===rarity);return {...pool[Math.floor(Math.random()*pool.length)]};
 }
 function openChest(btn){
- const space=INVENTORY_LIMIT-inventoryItems.length;
+ // У босса этажа в сундуке BOSS_CHEST_ITEMS предметов, у босса мира — MOB_CHEST_ITEMS.
+ const space=INVENTORY_LIMIT-inventoryItems.length,mob=!!state.chest?.mob,need=mob?MOB_CHEST_ITEMS:BOSS_CHEST_ITEMS;
  // Нет места — сундук остаётся на месте закрытым, подсказка на нём и панель с кнопкой инвентаря; после освобождения места его можно открыть снова.
- if(space<BOSS_CHEST_ITEMS){
-  const hint=btn.querySelector('.dg-chest-hint');if(hint)hint.textContent='Нужно мест в инвентаре: '+BOSS_CHEST_ITEMS+' · свободно '+Math.max(0,space);
+ if(space<need){
+  const hint=btn.querySelector('.dg-chest-hint');if(hint)hint.textContent='Нужно мест в инвентаре: '+need+' · свободно '+Math.max(0,space);
   if(settings.animations)btn.animate([{rotate:'0deg'},{rotate:'-6deg'},{rotate:'6deg'},{rotate:'-3deg'},{rotate:'0deg'}],{duration:420});
   btn.addEventListener('click',()=>openChest(btn),{once:true});
-  setPanel(`<h3>Инвентарь заполнен</h3><p>В сундуке ${BOSS_CHEST_ITEMS} предмета — освободи ${BOSS_CHEST_ITEMS-Math.max(0,space)} мест${BOSS_CHEST_ITEMS-Math.max(0,space)===1?'о':'а'} в инвентаре и нажми на сундук снова.</p>
-  <div class="dg-row"><button class="dg-primary" data-a="inventory">🎒 Открыть инвентарь</button><button data-a="gate">К вратам</button></div>`,true);
+  setPanel(`<h3>Инвентарь заполнен</h3><p>В сундуке ${need} предмет${need===1?'':'а'} — освободи ${need-Math.max(0,space)} мест${need-Math.max(0,space)===1?'о':'а'} в инвентаре и нажми на сундук снова.</p>
+  <div class="dg-row"><button class="dg-primary" data-a="inventory">🎒 Открыть инвентарь</button><button data-a="gate">К карте</button></div>`,true);
   return;
  }
- const items=[];for(let i=0;i<BOSS_CHEST_ITEMS;i++){const it=starterWeapon(rollBossItem());if(it)items.push(it);}
+ const items=[];for(let i=0;i<need;i++){const it=starterWeapon(rollBossItem(mob?MOB_CHEST_RARITY_WEIGHTS:CHEST_RARITY_WEIGHTS));if(it)items.push(it);}
  inventoryItems.push(...items);renderEquipment();persistLoot();
- state.redSouls++;const reward=state.chest;state.chest=null;save();
+ // Самоцветы для инкрустации (gems.js) — сразу в запас: у босса этажа 1–3 случайных, у босса мира — один камень с шансом MOB_GEM_CHANCE; душа босса — только с босса этажа.
+ const gemsWon=(mob?(Math.random()<MOB_GEM_CHANCE?window.gems?.grantChestGems(1):[]):window.gems?.grantChestGems())||[];
+ if(!mob)state.redSouls++;const reward=state.chest;state.chest=null;save();
  btn.classList.add('open');btn.querySelector('.dg-chest-hint')?.remove();
- flyRedSoul(btn);
+ if(!mob)flyRedSoul(btn);
  const cards=items.map((it,i)=>`<div class="dg-reward" data-i="${i}" style="--c:${rarityFlashColors[it.rarity]||'#edc77b'};animation-delay:${.15+i*.12}s"><small>${rarityLabel(it.rarity)}</small><img src="${it.image}" alt=""><strong>${it.name}</strong></div>`).join('')
-  +`<div class="dg-reward" style="--c:#ff4a4a;animation-delay:${.15+items.length*.12}s"><small>Валюта</small><img src="assets/soul-boss.svg" alt=""><strong>Душа босса +1</strong></div>`;
+  +gemsWon.map(([id,count],i)=>{const g=window.gems.GEMS[id];return `<div class="dg-reward" style="--c:${g.color};animation-delay:${.15+(items.length+i)*.12}s"><small>Самоцвет</small><span class="dg-gem">${window.gems.gemSvg(id)}</span><strong>${g.name}${count>1?' ×'+count:''}</strong></div>`;}).join('')
+  +(mob?'':`<div class="dg-reward" style="--c:#ff4a4a;animation-delay:${.15+(items.length+gemsWon.length)*.12}s"><small>Валюта</small><img src="assets/soul-boss.svg" alt=""><strong>Душа босса +1</strong></div>`);
  setTimeout(()=>{
-  setPanel(`<div class="dg-eyebrow">НАГРАДА · УРОВЕНЬ ${reward.level}</div><h3>Сундук босса</h3><div class="dg-rewards">${cards}</div>
-  ${items.length?'<p class="dg-note">Предметы добавлены в инвентарь.</p>':'<p class="dg-note">Подходящих предметов в игре пока нет.</p>'}
-  <div class="dg-row"><button class="dg-primary" data-a="onward">Дальше → к следующим вратам</button><button data-a="leave">🌲 В лес</button></div>`,true);
+  setPanel(`<div class="dg-eyebrow">НАГРАДА · ЭТАЖ ${reward.level}</div><h3>${mob?'Сундук босса мира':'Сундук босса этажа'}</h3><div class="dg-rewards">${cards}</div>
+  ${items.length?'<p class="dg-note">Предметы добавлены в инвентарь'+(gemsWon.length?', самоцветы — в запас ювелира в кузнице':'')+'.</p>':'<p class="dg-note">Подходящих предметов в игре пока нет.</p>'}
+  <div class="dg-row"><button class="dg-primary" data-a="onward">${mob?'Дальше → к карте этажа':'Дальше → на этаж '+(state.cleared+1)}</button><button data-a="leave">Вернуться в приключение</button></div>`,true);
   panel.querySelectorAll('.dg-reward[data-i]').forEach(card=>{addLevelPlate(card,items[Number(card.dataset.i)]);attachItemTooltip(card,items[Number(card.dataset.i)]);});
  },settings.animations?650:0);
  render();
@@ -573,13 +700,15 @@ panel.addEventListener('click',event=>{
  const b=event.target.closest('button[data-a]');if(!b||b.disabled)return;
  const a=b.dataset.a;
  if(a==='leave')leave();
- else if(a==='shop'){shopActiveTab='dungeon';$('shopStatus').textContent='';renderShop();$('shopDialog').showModal();}
- else if(a==='open'){if(state.keys<1)return;state.keys--;save();openGate(state.cleared+1,false);}
- else if(a==='replay'){if(state.replayKeys<1)return;const level=Number(panel.querySelector('[data-f="replay"]').value)||1;if(level<1||level>state.cleared)return;state.replayKeys--;save();openGate(level,true);}
+ else if(a==='buyReplay'){if(souls<REPLAY_PRICE)return;souls-=REPLAY_PRICE;state.replayKeys++;save();saveProgress();render();updateWallet();$('message').textContent='Куплен «Ключ подземелья» за '+REPLAY_PRICE+' душ.';renderGatePanel();}
+ else if(a==='node'){const id=Number(b.dataset.n);if(nextNodes().includes(id)&&id!==selectedNode){selectedNode=id;renderGatePanel();}}
+ // Босс мира тратит «Ключ подземелья», босс этажа — «Ключ в неизведанное».
+ else if(a==='fight'){const node=nodeOf(selectedNode);if(!node||state.run||state.chest||!nextNodes().includes(node.id))return;const k=node.kind==='boss'?'keys':'replayKeys';if(state[k]<1)return;state[k]--;updateToggle();openFight(node);}
+ else if(a==='buyKey'){const price=keyPrice();if(state.keys>=MAX_UNKNOWN_KEYS||souls<price)return;souls-=price;state.keys++;save();saveProgress();render();updateToggle();updateWallet();$('message').textContent='Куплен «Ключ в неизведанное» за '+price+' душ.';renderGatePanel();}
  else if(a==='hall'||a==='next'||a==='again'){if(a==='hall'&&settings.animations){const g=scene.querySelector('.dg-gate');mode='busy';setPanel('');g?.classList.add('open');setTimeout(startAttempt,g?.classList.contains('open')?700:0);}else startAttempt();}
  else if(a==='gate'){arena.querySelectorAll('.dg-chest-btn').forEach(n=>n.remove());showGate(false);}
  else if(a==='inventory')$('openInventory').click();
- else if(a==='chest'){const boss=bossById(state.chest.bossId);if(boss)showChest(boss);}
+ else if(a==='chest'){const boss=foeOf(state.chest);if(boss)showChest(boss);}
  else if(a==='onward'){arena.querySelectorAll('.dg-chest-btn').forEach(n=>n.remove());setPanel('');showGate(true);}
 });
 toggle.addEventListener('click',()=>mode==='off'?enter():leave());
@@ -598,13 +727,10 @@ function capKeys(){
 SHOP_EFFECTS.dungeonKey={label:'Ключ в неизведанное',amount:true,hint:a=>'Ключ в неизведанное × '+Math.max(1,a),apply:a=>{
  if(state.keys>=MAX_UNKNOWN_KEYS)return 'В запасе может быть только '+MAX_UNKNOWN_KEYS+' ключ в неизведанное';
  state.keys=Math.min(MAX_UNKNOWN_KEYS,state.keys+Math.max(1,a));save();updateToggle();return true;}};
-SHOP_EFFECTS.replayKey={label:'Ключ былых врат',amount:true,hint:a=>'Ключ былых врат × '+Math.max(1,a),apply:a=>{state.replayKeys+=Math.max(1,a);save();return true;}};
+SHOP_EFFECTS.replayKey={label:'Ключ подземелья',amount:true,hint:a=>'Ключ подземелья × '+Math.max(1,a),apply:a=>{state.replayKeys+=Math.max(1,a);save();return true;}};
+// Ключи больше не продаются в магазине: оба покупаются кнопками прямо у врат (renderGatePanel).
 function shopTabs(){
- if(!unlocked())return [];
- return [{id:'dungeon',title:'Подземелье',icon:'assets/key-unknown.svg',items:[
-  {id:'dungeon-key-unknown',name:'Ключ в неизведанное',desc:'Открывает новые врата подземелья.',owned:state.keys,maxed:state.keys>=MAX_UNKNOWN_KEYS,icon:'assets/key-unknown.svg',price:keyPrice(),discount:0,stock:null,currency:'souls',effect:{type:'dungeonKey',amount:1}},
-  {id:'dungeon-key-replay',name:'Ключ былых врат',desc:'Повторно открывает пройденные врата с той же наградой.',owned:state.replayKeys,icon:'assets/key-replay.svg',price:REPLAY_PRICE,discount:0,stock:null,currency:'souls',effect:{type:'replayKey',amount:1}}
- ]}];
+ return [];
 }
 
 // ── Сброс прогресса и админка ───────────────────────────────────────────
@@ -614,7 +740,7 @@ function restore(s){if(!s)return;if(mode!=='off')leave();localStorage.setItem(DU
 const admin=document.getElementById('adminPanel');
 if(admin){
  const row=document.createElement('div');row.style.cssText='display:flex;gap:6px;flex-wrap:wrap;margin-top:10px';
- row.innerHTML='<button type="button" data-k="keys">+1 ключ в неизведанное</button><button type="button" data-k="replayKeys">+1 ключ былых врат</button><button type="button" data-k="redSouls">+1 душа босса</button>';
+ row.innerHTML='<button type="button" data-k="keys">+1 ключ в неизведанное</button><button type="button" data-k="replayKeys">+1 ключ подземелья</button><button type="button" data-k="redSouls">+1 душа босса</button>';
  row.addEventListener('click',e=>{const k=e.target.closest('button')?.dataset.k;if(!k)return;state[k]++;save();updateToggle();updateWallet();if(mode==='gate')renderGatePanel();});
  admin.append(row);
 }
@@ -623,7 +749,7 @@ load();capKeys();updateToggle();updateWallet();
 window.dungeonApi={
  active:()=>mode!=='off',
  forest:()=>mode!=='off'?forest:null,
- damageFactor:()=>{const boss=bossById(state.run?.bossId);return mode==='fight'&&boss?1-resistance(boss):1;},
+ damageFactor:()=>{const boss=bossById(state.run?.bossId);return mode==='fight'&&boss&&!state.run.mob?1-resistance(boss):1;},
  attackLabel:()=>mode==='off'?null:mode==='fight'?'Готовься…':'Подземелье',
  refresh:()=>{updateToggle();updateWallet();},
  renderEnemy,tick,onBossKilled,shopTabs,snapshot,reset,restore,

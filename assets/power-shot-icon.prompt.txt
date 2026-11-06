@@ -1,0 +1,3 @@
+Asset: power-shot-icon.png
+Mode: image_gen, new image, opaque background.
+Prompt: Create one square fantasy RPG skill icon, painterly polished game inventory art, readable at 64 pixels. A single powerful icy arrow diagonally from lower left to upper right, long silver-blue shaft and large sharp crystalline arrowhead breaking into a few ice shards, trailing flowing pale cyan frost smoke. Dark deep teal background, strong silhouette, bright cold highlights, centered composition with room for circular crop. No text, letters, numbers, interface, border or watermark. This is the skill Powerful Shot for a forest fantasy RPG.

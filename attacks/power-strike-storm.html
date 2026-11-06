@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>«Мощный удар» — Клинок бури</title>
+<style>
+:root{--bg:#0b140e;--text:#e9dfc2;--muted:#9c9478;--line:#2c4433}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at top,#173222,var(--bg) 70%) fixed;color:var(--text);font:15px/1.4 system-ui,"Segoe UI",sans-serif;padding:24px 16px 60px}
+h1{margin:0 0 4px;font-size:24px}
+.lead{color:var(--muted);margin:0 0 16px;max-width:900px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 20px}
+button{background:#13261a;color:var(--text);border:1px solid #3a5a44;border-radius:999px;padding:7px 14px;font:inherit;cursor:pointer}
+button.main{background:#ffd85a;color:#2a1f00;border-color:#ffd85a;font-weight:700}
+label{color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+select{background:#13261a;color:var(--text);border:1px solid #3a5a44;border-radius:8px;padding:5px 8px;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:16px}
+.variant{background:#0f1d15cc;border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.variant h2{margin:0;font-size:17px}
+.variant p{margin:0;color:var(--muted);font-size:13.5px;min-height:56px}
+.stage{position:relative;width:100%;aspect-ratio:300/220;border-radius:12px;overflow:hidden;cursor:pointer;
+ background:radial-gradient(ellipse 70% 40% at 50% 92%,#2d4a2a,#0000 70%),linear-gradient(#183526,#0e2117 70%,#14261a)}
+.stage .monster{position:absolute;left:50%;top:56.8%;width:42%;transform:translate(-50%,-50%);transform-origin:50% 90%;user-select:none;pointer-events:none}
+.stage .monster.shake{animation:shake .32s ease-out}
+@keyframes shake{15%{rotate:calc(var(--sh,1) * 1deg);translate:calc(var(--sh,1) * -3px) 0}30%{rotate:calc(var(--sh,1) * -1deg);translate:calc(var(--sh,1) * 3px) 0}45%{rotate:calc(var(--sh,1) * .7deg)}65%{rotate:calc(var(--sh,1) * -.5deg)}}
+.stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.stage .overlay{position:absolute;inset:0;pointer-events:none;opacity:0}
+.hint{position:absolute;right:8px;bottom:6px;font-size:11px;color:#ffffff70;pointer-events:none}
+.variant .row{display:flex;gap:8px;align-items:center}
+.tag{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<h1>«Мощный удар» — перерисованный: «Клинок бури»</h1>
+<p class="lead">Принцип тот же, что в игре: призрачный меч появляется сбоку, замахивается, копит силу, бьёт дугой через врага, оставляет след-полумесяц и исчезает. Тайминги и дуга не менялись. Вся картинка удара собрана из текстур Kenney (дым, искры, световые маски), перекрашенных скриптом <code>tools/make_power_strike_fx.py</code>. Слева — текущий вариант для сравнения. Нажми на сцену, чтобы ударить; для разбора поставь замедление.</p>
+<div class="controls">
+ <button class="main" id="playAll">▶ Ударить всеми</button>
+ <label><input type="checkbox" id="loop"> повторять</label>
+ <label>скорость <select id="speed"><option value="1">обычная</option><option value="2">замедленно ×2</option><option value="4">замедленно ×4</option></select></label>
+</div>
+<div class="grid" id="grid"></div>
+<script>
+const NS='http://www.w3.org/2000/svg';
+const T={appear:140,windup:260,hold:150,strike:95,hitstop:55,follow:110,fade:260};
+const rnd=(a,b)=>a+Math.random()*(b-a);
+let seq=0;
+const tint=(hex,m)=>{const n=parseInt(hex.slice(1),16),c=[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v+(255-v)*m));return `rgb(${c})`;};
+// Молния-ломаная между двумя точками.
+function jag(x0,y0,x1,y1,n,amp){const pts=[[x0,y0]];const dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy)||1,nx=-dy/len,ny=dx/len;for(let i=1;i<n;i++){const f=i/n,o=rnd(-amp,amp)*(1-Math.abs(f-.5));pts.push([x0+dx*f+nx*o,y0+dy*f+ny*o]);}pts.push([x1,y1]);return pts.map(p=>p.map(v=>v.toFixed(1)).join(' ')).join(' L');}
+// Кадры полёта с гравитацией: старт, скорость, ускорение вниз.
+function ballistic(vx,vy,g,n=9){const f=[];for(let i=0;i<=n;i++){const t=i/n;f.push({transform:`translate(${vx*t}px,${vy*t+g*t*t}px) rotate(${t*rnd(120,320)}deg)`,opacity:i<n*.7?1:1-(i-n*.7)/(n*.3),offset:t});}return f;}
+
+// ===== Общий замах — копия игровой логики playCustomPowerSwing =====
+function swing(stage,th,k){
+ const id='v'+(++seq),MX=150,MY=125,color=th.color,core=th.core||tint(color,.72);
+ const dir=Math.random()<.5?1:-1,px=dir>0?210:90,py=215,R=172,TIP=125,mir=a=>dir>0?a:180-a;
+ const A0=mir(-85),AW=mir(-58),A1=mir(-188),sgn=Math.sign(A1-AW);
+ let AH=Math.atan2(MY-py,MX-px)*180/Math.PI;while(AH<Math.min(AW,A1))AH+=360;while(AH>Math.max(AW,A1))AH-=360;
+ const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 300 220');
+ svg.innerHTML=`<defs><filter id="${id}g" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.6"/></filter>
+  <filter id="${id}b" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="6"/></filter>
+  <radialGradient id="${id}f"><stop offset="0" stop-color="${th.flashCenter||'#fff'}"/><stop offset=".45" stop-color="${core}" stop-opacity=".8"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></radialGradient></defs>`;
+ stage.append(svg);
+ const el=(tag,attrs,parent=svg)=>{const e=document.createElementNS(NS,tag);for(const a in attrs)e.setAttribute(a,attrs[a]);parent.append(e);return e;};
+ const ease={lin:t=>t,out:t=>1-(1-t)**2,in:t=>t*t*t},rad=a=>a*Math.PI/180,at=(r,a)=>[px+r*Math.cos(rad(a)),py+r*Math.sin(rad(a))];
+ const segs=[[T.appear,A0,'lin'],[T.windup,AW,'out'],[T.hold,AW,'lin',true],[T.strike,AH,'in'],[T.hitstop,AH,'lin'],[T.follow,A1,'out'],[T.fade,A1+sgn*3,'out']];
+ const mark=[];let acc=0;segs.forEach(g=>{mark.push(acc);acc+=g[0]*k;});
+ const total=acc,strikeStart=mark[3],hitAt=mark[4],fadeStart=mark[6],off=t=>t/total;
+ const pts=[{t:0,a:A0}];let prev=A0;
+ segs.forEach(([ms,to,ez,tr],i)=>{const n=tr||ms>120?10:6;for(let j=1;j<=n;j++){const f=j/n;let a=prev+(to-prev)*ease[ez](f);if(tr)a+=Math.sin(f*Math.PI*6)*1.6*(1-f*.3);pts.push({t:mark[i]+ms*k*f,a});}prev=to;});
+ const motion=pts.map(p=>({transform:`translate(${px}px,${py}px) rotate(${p.a}deg)`,offset:off(p.t)}));
+ const flip=sgn<0?-1:1,sc=v=>`scale(1,${flip*v})`,anims=[],timers=[];
+ const run=(node,frames,opts)=>{const a=node.animate(frames,opts);anims.push(a);return a;};
+ const ctx={svg,el,run,k,id,color,core,at,rad,px,py,R,AW,A1,AH,sgn,dir,MX,MY,strikeStart,hitAt,fadeStart,total,mark,stage,timers};
+ const makeBlade=(lag,ghost)=>{
+  const g=el('g',{}),inner=el('g',{},g),body=el('g',{transform:`translate(${R-TIP} 0)`},inner);
+  body.innerHTML=(ghost?'':`<ellipse class="glow" cx="48" cy="0" rx="92" ry="18" fill="${th.glow||color}" opacity=".2" filter="url(#${id}g)"/>`)+
+   `<image href="../assets/spectral-sword.png" x="-41.5" y="-20.6" width="166.3" height="41.1" style="filter:${th.sword||''} drop-shadow(0 0 3px ${color})"/>`;
+  run(g,motion,{duration:total,delay:lag,fill:'both'});
+  if(ghost)run(inner,[{transform:sc(1),opacity:0,offset:0},{transform:sc(1),opacity:0,offset:off(strikeStart)},{transform:sc(1),opacity:ghost,offset:off(strikeStart+20*k)},{transform:sc(1),opacity:ghost*.8,offset:off(fadeStart)},{transform:sc(1),opacity:0,offset:1}],{duration:total,delay:lag,fill:'both'});
+  else{
+   run(inner,[{transform:sc(.7),opacity:0,offset:0},{transform:sc(1.06),opacity:1,offset:off(T.appear*k*.6)},{transform:sc(1),opacity:1,offset:off(T.appear*k)},{transform:sc(1),opacity:1,offset:off(fadeStart)},{transform:sc(1),opacity:0,offset:1}],{duration:total,fill:'both'});
+   run(body.querySelector('.glow'),[{opacity:.15,offset:0},{opacity:.2,offset:off(mark[1])},{opacity:.55,offset:off(mark[2])},{opacity:.95,offset:off(strikeStart)},{opacity:1,offset:off(hitAt)},{opacity:.3,offset:off(fadeStart)},{opacity:0,offset:1}],{duration:total,fill:'both'});
+  }
+ };
+ // След дорисовывается ровно за мечом.
+ const arcD=r=>{const [x0,y0]=at(r,AW),[x1,y1]=at(r,A1);return `M${x0} ${y0}A${r} ${r} 0 ${Math.abs(A1-AW)>180?1:0} ${sgn>0?1:0} ${x1} ${y1}`;};
+ const dash=pts.map(p=>({strokeDashoffset:p.t<strikeStart?100:100*(1-Math.min(1,Math.max(0,(p.a-AW)/(A1-AW)))),offset:off(p.t)}));
+ ctx.reveal=(path,op,fadeMs=T.fade+200)=>{path.setAttribute('pathLength',100);path.setAttribute('stroke-dasharray',100);path.setAttribute('stroke-dashoffset',100);run(path,dash,{duration:total,fill:'forwards'});run(path,[{opacity:op},{opacity:0}],{duration:fadeMs*k,delay:fadeStart-60*k,fill:'forwards'});};
+ ctx.band=(r,w,col,op,blur)=>{const p=el('path',{d:arcD(r),fill:'none',stroke:col,'stroke-width':w,'stroke-linecap':'round',opacity:op});if(blur)p.setAttribute('filter',`url(#${id}g)`);ctx.reveal(p,op);return p;};
+ (th.bands||(c=>{c.band(R-48,76,color,.22,true);c.band(R-16,22,color,.6,true);c.band(R-6,4,'#fff',1,false);}))(ctx);
+ th.trail?.(ctx);
+ for(let i=4;i>=1;i--)makeBlade(i*16*k,.5/i);
+ makeBlade(0,0);
+ const [tx,ty]=at(R-12,AW);ctx.tx=tx;ctx.ty=ty;
+ th.charge(ctx);
+ timers.push(setTimeout(()=>{
+  const g=el('g',{transform:`translate(${MX} ${MY})`});ctx.hitG=g;th.hit(ctx);
+  const m=stage.querySelector('.monster');m.style.setProperty('--sh',th.shake||1);m.src=th.hurtSrc;m.classList.remove('shake');void m.offsetWidth;m.classList.add('shake');
+  setTimeout(()=>{m.classList.remove('shake');m.src=th.monsterSrc;},350*k);
+ },hitAt));
+ const end=Math.max(total,hitAt+(th.tail||760)*k)+60;
+ timers.push(setTimeout(()=>svg.remove(),end));
+ return end;
+}
+
+// ===== Общие кусочки эффектов =====
+// Искры, стягивающиеся к острию во время паузы (как в игре).
+function gatherSparks(c,n,cols,dist=[30,56],r=[1.4,3.2]){for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,d=rnd(...dist),s=c.el('circle',{cx:c.tx,cy:c.ty,r:rnd(...r),fill:cols[i%cols.length]});c.run(s,[{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`,opacity:0},{transform:`translate(${Math.cos(a)*d*.6}px,${Math.sin(a)*d*.6}px)`,opacity:1,offset:.3},{transform:'translate(0,0)',opacity:0}],{duration:(T.hold+T.windup*.5)*c.k,delay:c.mark[1]+T.windup*c.k*.5+i*12*c.k,easing:'ease-in',fill:'both'});}}
+function glint(c,fill='#fff',size=14){const g=c.el('path',{d:`M0 -${size}L3 -3L${size} 0L3 3L0 ${size}L-3 3L-${size} 0L-3 -3Z`,fill},c.el('g',{transform:`translate(${c.tx} ${c.ty})`}));c.run(g,[{transform:'scale(0) rotate(0deg)',opacity:0},{transform:'scale(1.3) rotate(45deg)',opacity:1,offset:.5},{transform:'scale(.2) rotate(90deg)',opacity:0}],{duration:170*c.k,delay:c.strikeStart-130*c.k,fill:'both'});}
+function flash(c,r=34,dur=300,scale=1.7){const f=c.el('circle',{r,fill:`url(#${c.id}f)`},c.hitG);c.run(f,[{transform:'scale(.3)',opacity:1},{transform:`scale(${scale})`,opacity:0}],{duration:dur*c.k,easing:'ease-out',fill:'forwards'});}
+function ring(c,stroke,w,from,to,dur,delay=0){const r=c.el('circle',{r:16,fill:'none',stroke,'stroke-width':w},c.hitG);c.run(r,[{transform:`scale(${from})`,opacity:1},{transform:`scale(${to})`,opacity:0}],{duration:dur*c.k,delay:delay*c.k,easing:'cubic-bezier(.2,.8,.3,1)',fill:'both'});}
+function overlay(c,bg,peak,dur){const o=document.createElement('div');o.className='overlay';o.style.background=bg;c.stage.append(o);o.animate([{opacity:peak},{opacity:0}],{duration:dur*c.k,easing:'ease-out'}).onfinish=()=>o.remove();}
+
+const MON='../assets/monster-field-wolf.webp',HURT='../assets/monster-field-wolf-hurt.webp';
+const VARIANTS=[
+{name:'Сейчас — «Ледяной взмах»',desc:'Текущий вариант из игры: голубой след, ледяные искры стягиваются к острию, при попадании — вспышка, два кольца и осколки.',
+ color:'#9fdcff',
+ charge(c){gatherSparks(c,9,[c.core,c.core,'#fff']);glint(c);},
+ hit(c){flash(c);ring(c,c.color,6,.4,4.4,480);ring(c,'#fff',2.5,.4,4.4,480,90);
+  for(let i=0;i<10;i++){const d=rnd(46,76),s=c.el('path',{d:'M0 -6L3 0L0 6L-3 0Z',fill:i%2?'#fff':c.core,stroke:c.color,'stroke-width':.8},c.hitG);s.style.rotate=(i*36+rnd(0,20))+'deg';c.run(s,[{transform:'translateX(8px) scale(.6)',opacity:1},{transform:`translateX(${d}px) scale(1.3)`,opacity:1,offset:.55},{transform:`translateX(${d+12}px) scale(.4)`,opacity:0}],{duration:560*c.k,easing:'cubic-bezier(.15,.85,.35,1)',fill:'forwards'});}}},
+
+{name:'1. Пламенный разлом',desc:'Огненный клинок: во время замаха с острия срываются угли, след горит языками пламени и тлеет. При попадании — огненный взрыв, угли разлетаются и падают, на враге остаётся след ожога.',
+ color:'#ff7a2a',core:'#ffd27a',glow:'#ff5a1a',sword:'sepia(1) saturate(5) hue-rotate(-25deg) brightness(1.1)',flashCenter:'#fff4c0',tail:900,
+ trail(c){ // языки пламени поднимаются над следом
+  for(let i=0;i<12;i++){const f=i/11,a=c.AW+(c.A1-c.AW)*f,[x,y]=c.at(c.R-20+rnd(-8,8),a),t=c.strikeStart+(c.hitAt-c.strikeStart+T.follow*c.k)*f;
+   const fl=c.el('path',{d:'M0 0C-5 -6 -3 -12 0 -20C3 -12 5 -6 0 0Z',fill:i%2?'#ffb347':'#ff6a1a',transform:`translate(${x} ${y})`,opacity:0});
+   c.run(fl,[{transform:`translate(${x}px,${y}px) scale(.4)`,opacity:0},{transform:`translate(${x}px,${y-4}px) scale(1.1)`,opacity:.95,offset:.25},{transform:`translate(${x+rnd(-4,4)}px,${y-22}px) scale(.3)`,opacity:0}],{duration:520*c.k,delay:t,easing:'ease-out',fill:'both'});}},
+ charge(c){for(let i=0;i<12;i++){const e=c.el('circle',{cx:c.tx,cy:c.ty,r:rnd(1.2,2.6),fill:i%3?'#ffb347':'#fff1b0'});c.run(e,[{transform:'translate(0,0)',opacity:0},{transform:`translate(${rnd(-6,6)}px,-6px)`,opacity:1,offset:.2},{transform:`translate(${rnd(-14,14)}px,${rnd(-34,-22)}px)`,opacity:0}],{duration:420*c.k,delay:c.mark[1]+i*28*c.k,easing:'ease-out',fill:'both'});}glint(c,'#fff3c4',16);},
+ hit(c){overlay(c,'radial-gradient(circle at 50% 57%,#ff8a3a99,#0000 60%)',1,380);
+  const sc=c.el('circle',{r:26,fill:'#2a0d00',opacity:.0,filter:`url(#${c.id}b)`},c.hitG);c.run(sc,[{opacity:.55,transform:'scale(.6)'},{opacity:.5,transform:'scale(1)',offset:.2},{opacity:0,transform:'scale(1.1)'}],{duration:900*c.k,fill:'forwards'});
+  flash(c,40,360,2);ring(c,'#ff7a2a',8,.5,3.6,420);ring(c,'#ffd27a',2,.4,4.6,520,60);
+  for(let i=0;i<16;i++){const a=rnd(0,Math.PI*2),v=rnd(40,80),e=c.el('circle',{r:rnd(1.4,3),fill:i%3?'#ffb347':'#fff1b0'},c.hitG);c.run(e,ballistic(Math.cos(a)*v,Math.sin(a)*v-20,70),{duration:rnd(600,850)*c.k,easing:'linear',fill:'forwards'});}}},
+
+{name:'2. Громовой удар',desc:'Клинок в молниях: во время паузы вокруг острия трещат разряды, по следу бежит молния. При попадании — белая вспышка всей сцены и разряды, бьющие из врага во все стороны.',
+ color:'#6fb0ff',core:'#e6f2ff',sword:'hue-rotate(-10deg) saturate(1.6) brightness(1.25)',tail:620,shake:1.4,
+ bands(c){c.band(c.R-48,60,c.color,.18,true);c.band(c.R-16,14,c.color,.7,true);c.band(c.R-6,2.5,'#fff',1,false);},
+ trail(c){for(let n=0;n<2;n++){const pts=[];const N=16;for(let i=0;i<=N;i++){const a=c.AW+(c.A1-c.AW)*i/N,[x,y]=c.at(c.R-14+(i&&i<N?rnd(-9,9):0),a);pts.push(x.toFixed(1)+' '+y.toFixed(1));}
+   const p=c.el('path',{d:'M'+pts.join(' L'),fill:'none',stroke:n?'#fff':c.color,'stroke-width':n?1.4:3.5,'stroke-linejoin':'bevel',opacity:1});c.reveal(p,1,180);}},
+ charge(c){for(let i=0;i<7;i++){const a=rnd(0,Math.PI*2),d=rnd(14,26),p=c.el('path',{d:'M'+jag(c.tx,c.ty,c.tx+Math.cos(a)*d,c.ty+Math.sin(a)*d,4,5),fill:'none',stroke:i%2?'#fff':c.color,'stroke-width':1.4,opacity:0});
+   c.run(p,[{opacity:0},{opacity:1,offset:.1},{opacity:0,offset:.25},{opacity:1,offset:.4},{opacity:0}],{duration:160*c.k,delay:c.mark[2]-40*c.k+i*30*c.k,fill:'both'});}glint(c,'#fff',18);},
+ hit(c){overlay(c,'#eaf4ff',.75,220);flash(c,30,220,2.2);ring(c,'#fff',3,.3,5,360);
+  for(let i=0;i<7;i++){const a=i/7*Math.PI*2+rnd(-.3,.3),d=rnd(70,110);for(let n=0;n<2;n++){const p=c.el('path',{d:'M'+jag(0,0,Math.cos(a)*d,Math.sin(a)*d,7,14),fill:'none',stroke:n?'#fff':c.color,'stroke-width':n?1.2:3.2,'stroke-linecap':'round',opacity:0},c.hitG);
+   c.run(p,[{opacity:1},{opacity:.2,offset:.3},{opacity:1,offset:.45},{opacity:0}],{duration:rnd(260,380)*c.k,delay:i*14*c.k,fill:'both'});}}}},
+
+{name:'3. Теневой разрез',desc:'Клинок пустоты: тьма стягивается к острию, сцена на миг темнеет, след — тёмная рана с фиолетовой каймой. При попадании пространство схлопывается в чёрную точку и взрывается фиолетовыми осколками и щупальцами.',
+ color:'#9a5cff',core:'#d8c2ff',glow:'#5a1fbf',sword:'brightness(.55) sepia(1) hue-rotate(220deg) saturate(3)',flashCenter:'#120022',tail:820,
+ bands(c){c.band(c.R-48,70,c.color,.25,true);c.band(c.R-16,22,'#14001f',.9,true);c.band(c.R-16,8,'#05000a',1,false);c.band(c.R-6,2,'#d8c2ff',1,false);},
+ charge(c){const o=document.createElement('div');o.className='overlay';o.style.background='radial-gradient(circle at 50% 50%,#0000 20%,#05000aee 90%)';c.stage.append(o);
+   o.animate([{opacity:0},{opacity:.85,offset:.6},{opacity:.85,offset:.85},{opacity:0}],{duration:(T.windup+T.hold+T.strike+T.hitstop+200)*c.k,delay:c.mark[1],fill:'both'}).onfinish=()=>o.remove();
+   gatherSparks(c,14,['#1a0030','#9a5cff','#2a0050'],[40,80],[1.6,3.6]);glint(c,'#d8c2ff',12);},
+ hit(c){for(let i=0;i<3;i++)ring(c,i?'#9a5cff':'#d8c2ff',3,5-i,.2,220,i*30);
+  const orb=c.el('circle',{r:14,fill:'#05000a',stroke:'#9a5cff','stroke-width':2},c.hitG);c.run(orb,[{transform:'scale(0)',opacity:1},{transform:'scale(1.2)',opacity:1,offset:.35},{transform:'scale(.6)',opacity:1,offset:.5},{transform:'scale(2.6)',opacity:0}],{duration:620*c.k,easing:'ease-out',fill:'forwards'});
+  c.timers.push(setTimeout(()=>{ring(c,'#9a5cff',6,.6,4.6,460);
+   for(let i=0;i<8;i++){const a=i/8*360+rnd(-12,12),len=rnd(50,80),t=c.el('path',{d:`M0 0 Q ${len*.5} ${rnd(-22,22)} ${len} ${rnd(-10,10)}`,fill:'none',stroke:i%2?'#9a5cff':'#3a0a6a','stroke-width':3,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100,'stroke-dashoffset':100},c.hitG);t.style.rotate=a+'deg';
+    c.run(t,[{strokeDashoffset:100,opacity:1},{strokeDashoffset:0,opacity:1,offset:.5},{strokeDashoffset:-100,opacity:0}],{duration:520*c.k,easing:'ease-out',fill:'forwards'});}
+   for(let i=0;i<10;i++){const d=rnd(50,80),s=c.el('path',{d:'M0 -5L2.5 0L0 5L-2.5 0Z',fill:i%2?'#d8c2ff':'#1a0030',stroke:'#9a5cff','stroke-width':.8},c.hitG);s.style.rotate=(i*36+rnd(0,20))+'deg';c.run(s,[{transform:'translateX(6px)',opacity:1},{transform:`translateX(${d}px) scale(1.2)`,opacity:1,offset:.6},{transform:`translateX(${d+10}px) scale(.3)`,opacity:0}],{duration:540*c.k,easing:'cubic-bezier(.15,.85,.35,1)',fill:'forwards'});}
+  },220*c.k));}},
+
+{name:'4. Солнечный приговор',desc:'Клинок света: вокруг острия собирается золотой нимб, след сияет как солнце. При попадании — солнечный взрыв с вращающимися лучами, крестообразный блик и медленно оседающие золотые искорки.',
+ color:'#ffc93a',core:'#fff3c4',glow:'#ffb000',sword:'sepia(.7) saturate(3) hue-rotate(-5deg) brightness(1.2)',tail:1000,
+ bands(c){c.band(c.R-48,80,c.color,.25,true);c.band(c.R-16,24,'#ffe07a',.65,true);c.band(c.R-6,4,'#fffdf0',1,false);},
+ charge(c){const h=c.el('circle',{cx:c.tx,cy:c.ty,r:18,fill:'none',stroke:'#ffe07a','stroke-width':2});c.run(h,[{transform:'scale(2.2)',opacity:0},{transform:'scale(1)',opacity:1,offset:.7},{transform:'scale(.2)',opacity:0}],{duration:(T.hold+T.windup*.6)*c.k,delay:c.mark[1]+T.windup*c.k*.4,easing:'ease-in',fill:'both',transformOrigin:'center'});h.style.transformOrigin=`${c.tx}px ${c.ty}px`;h.style.transformBox='view-box';
+   gatherSparks(c,10,['#fff3c4','#ffc93a','#fff']);glint(c,'#fffdf0',20);},
+ hit(c){overlay(c,'radial-gradient(circle at 50% 57%,#fff3c4cc,#ffc93a44 35%,#0000 65%)',1,500);
+  const rays=c.el('g',{},c.hitG);for(let i=0;i<12;i++){const r=c.el('path',{d:`M-3 0L0 -${i%2?70:100}L3 0Z`,fill:i%2?'#fff3c4':'#ffc93a',opacity:.9},rays);r.style.rotate=i*30+'deg';}
+  c.run(rays,[{transform:'scale(.2) rotate(0deg)',opacity:1},{transform:'scale(1) rotate(20deg)',opacity:.9,offset:.4},{transform:'scale(1.15) rotate(40deg)',opacity:0}],{duration:700*c.k,easing:'ease-out',fill:'forwards'});
+  flash(c,36,380,2);ring(c,'#ffc93a',5,.4,4,520);
+  const cross=c.el('path',{d:'M0 -40L4 -4L40 0L4 4L0 40L-4 4L-40 0L-4 -4Z',fill:'#fff'},c.hitG);c.run(cross,[{transform:'scale(0) rotate(0deg)',opacity:1},{transform:'scale(1) rotate(15deg)',opacity:1,offset:.3},{transform:'scale(.3) rotate(45deg)',opacity:0}],{duration:420*c.k,fill:'forwards'});
+  for(let i=0;i<14;i++){const x=rnd(-60,60),s=c.el('path',{d:'M0 -4L1 -1L4 0L1 1L0 4L-1 1L-4 0L-1 -1Z',fill:i%2?'#fff3c4':'#ffc93a'},c.hitG);c.run(s,[{transform:`translate(${x*.3}px,${rnd(-20,0)}px) scale(.2)`,opacity:0},{transform:`translate(${x}px,${rnd(-50,-25)}px) scale(1)`,opacity:1,offset:.3},{transform:`translate(${x+rnd(-10,10)}px,${rnd(30,60)}px) scale(.6)`,opacity:0}],{duration:rnd(800,1000)*c.k,delay:120*c.k,easing:'ease-out',fill:'both'});}}},
+
+{name:'5. Каменный сокрушитель',desc:'Тяжёлый земляной удар: к острию стягиваются камешки и пыль, след — пыльная дуга. При попадании — облако пыли, разлетающиеся по дуге и падающие обломки, трещины под врагом и усиленная тряска.',
+ color:'#c58f52',core:'#f2d9b0',glow:'#8a5a2a',sword:'sepia(1) saturate(1.4) brightness(.8) contrast(1.15)',tail:1000,shake:2,
+ bands(c){c.band(c.R-48,76,'#a07850',.25,true);c.band(c.R-16,22,'#c58f52',.55,true);c.band(c.R-6,3,'#f2d9b0',.9,false);},
+ charge(c){for(let i=0;i<10;i++){const a=rnd(0,Math.PI*2),d=rnd(30,60),s=rnd(2,4),p=c.el('path',{d:`M${-s} ${-s*.6}L${s*.4} ${-s}L${s} ${s*.3}L${-s*.2} ${s}Z`,fill:i%2?'#8a6a48':'#5a4430',transform:`translate(${c.tx} ${c.ty})`});
+   c.run(p,[{transform:`translate(${c.tx+Math.cos(a)*d}px,${c.ty+Math.sin(a)*d}px) rotate(0deg)`,opacity:0},{transform:`translate(${c.tx+Math.cos(a)*d*.5}px,${c.ty+Math.sin(a)*d*.5}px) rotate(180deg)`,opacity:1,offset:.5},{transform:`translate(${c.tx}px,${c.ty}px) rotate(360deg)`,opacity:0}],{duration:(T.hold+T.windup*.5)*c.k,delay:c.mark[1]+T.windup*c.k*.5+i*14*c.k,easing:'ease-in',fill:'both'});}
+   gatherSparks(c,6,['#d9c4a0'],[24,40],[2,4]);},
+ hit(c){overlay(c,'#00000055',1,160);
+  for(let i=0;i<6;i++){const d=c.el('circle',{cx:rnd(-30,30),cy:rnd(10,40),r:rnd(14,24),fill:i%2?'#b49470':'#8a7050',opacity:0,filter:`url(#${c.id}b)`},c.hitG);c.run(d,[{transform:'scale(.3)',opacity:.85},{transform:`scale(2.2) translate(${rnd(-10,10)}px,${rnd(-12,-4)}px)`,opacity:0}],{duration:rnd(800,1000)*c.k,easing:'ease-out',fill:'forwards'});}
+  ring(c,'#c58f52',7,.4,3.4,380);
+  const crack=c.el('g',{transform:'translate(0 62)'},c.hitG);for(let i=0;i<5;i++){const a=180+i*45+rnd(-10,10),len=rnd(28,50),p=c.el('path',{d:'M'+jag(0,0,Math.cos(a*Math.PI/180)*len,Math.sin(a*Math.PI/180)*len*.35+ (a>360?0:0),4,4),fill:'none',stroke:'#2a1a0c','stroke-width':2.2,'stroke-linecap':'round',pathLength:100,'stroke-dasharray':100,'stroke-dashoffset':100},crack);
+   c.run(p,[{strokeDashoffset:100,opacity:1},{strokeDashoffset:0,opacity:1,offset:.2},{strokeDashoffset:0,opacity:1,offset:.7},{strokeDashoffset:0,opacity:0}],{duration:1000*c.k,fill:'forwards'});}
+  for(let i=0;i<12;i++){const a=rnd(-Math.PI,0),v=rnd(45,85),s=rnd(3,6),r=c.el('path',{d:`M${-s} ${-s*.6}L${s*.4} ${-s}L${s} ${s*.3}L${-s*.2} ${s}Z`,fill:i%3?'#7a5c3e':'#a88460',stroke:'#3a2a1a','stroke-width':.8},c.hitG);c.run(r,ballistic(Math.cos(a)*v,Math.sin(a)*v,140),{duration:rnd(700,900)*c.k,easing:'linear',fill:'forwards'});}}}
+];
+// Когда меч проходит угол a: тот же закон движения, что в swing (удар ease-in до врага, доводка ease-out).
+function timeAt(c,a){const k=c.k;if((a-c.AW)*c.sgn<=(c.AH-c.AW)*c.sgn){const f=Math.max(0,Math.min(1,(a-c.AW)/(c.AH-c.AW)));return c.strikeStart+T.strike*k*Math.cbrt(f);}const g=Math.max(0,Math.min(1,(a-c.AH)/(c.A1-c.AH)));return c.mark[5]+T.follow*k*(1-Math.sqrt(1-g));}
+// Текстура Kenney (перекрашена tools/make_power_strike_fx.py) по центру точки x,y; анимируется сама картинка вокруг этой точки.
+const TEX='../assets/effects/power-strike/';
+function tex(c,name,x,y,size,parent=c.svg,rot=0){const g=c.el('g',{transform:`translate(${x} ${y}) rotate(${rot})`},parent);return c.el('image',{href:TEX+name+'.png',x:-size/2,y:-size/2,width:size,height:size,style:'mix-blend-mode:screen;opacity:0'},g);}
+const STORM={name:'Новый — «Клинок бури»',desc:'Перерисован на текстурах Kenney. Призыв — светящаяся руна, на острие закручивается вихрь с молниями и вспыхивает звезда. Удар оставляет световые полосы и искры вдоль дуги. Попадание — вспышка, морозное облако, двойная ударная волна, трещина-молния и следы разреза на враге.',
+ color:'#9fdcff',core:'#e6f6ff',glow:'#bfe8ff',shake:1.3,tail:950,
+ bands(c){c.band(c.R-50,80,'#b996ff',.08,true);c.band(c.R-30,44,c.color,.12,true);c.band(c.R-14,12,c.core,.5,true);c.band(c.R-5,3,'#fff',1,false);},
+ trail(c){const k=c.k;
+  // Руна призыва за мечом в момент появления.
+  const [rx,ry]=c.at(c.R-70,c.AW),rune=tex(c,'magic_02-ice',rx,ry,96);
+  c.run(rune,[{transform:'scale(.4) rotate(0deg)',opacity:0},{transform:'scale(1) rotate(60deg)',opacity:.9,offset:.35},{transform:'scale(1.15) rotate(120deg)',opacity:0}],{duration:(T.appear+T.windup)*k,fill:'both'});
+  // Световые полосы вдоль дуги: ложатся по касательной ровно за мечом.
+  for(let i=0;i<16;i++){const f=(i+.5)/16,a=c.AW+(c.A1-c.AW)*f,[x,y]=c.at(c.R-rnd(6,44),a),s=tex(c,i%2?'trace_03-white':'trace_06-ice',x,y,rnd(95,135),c.svg,a);
+   c.run(s,[{transform:'scale(.6,.2)',opacity:0},{transform:'scale(1,1.2)',opacity:.95,offset:.2},{transform:'scale(.7,1.6)',opacity:0}],{duration:360*k,delay:timeAt(c,a),fill:'both'});}
+  for(let i=0;i<7;i++){const a=c.AW+(c.A1-c.AW)*rnd(.1,.95),[x,y]=c.at(c.R-rnd(0,40),a),s=tex(c,'star_06-white',x,y,rnd(16,26));
+   c.run(s,[{transform:'scale(0)',opacity:0},{transform:'scale(1.2)',opacity:1,offset:.3},{transform:'translate(0,10px) scale(.3)',opacity:0}],{duration:rnd(500,700)*k,delay:timeAt(c,a)+40*k,fill:'both'});}
+  // Дымка там, где меч растворяется.
+  const [fx,fy]=c.at(c.R-40,c.A1),puff=tex(c,'whitePuff05-ice',fx,fy,90);
+  c.run(puff,[{transform:'scale(.5)',opacity:0},{transform:'scale(1)',opacity:.35,offset:.3},{transform:'scale(1.6)',opacity:0}],{duration:(T.fade+260)*k,delay:c.fadeStart-40*k,fill:'both'});},
+ charge(c){const k=c.k,start=c.mark[1]+T.windup*k*.35,len=c.strikeStart-start;
+  const tw=tex(c,'twirl_01-ice',c.tx,c.ty,110),tw2=tex(c,'twirl_01-white',c.tx,c.ty,74);
+  c.run(tw,[{transform:'scale(1.5) rotate(0deg)',opacity:0},{transform:'scale(1.1) rotate(-200deg)',opacity:.9,offset:.5},{transform:'scale(.5) rotate(-420deg)',opacity:0}],{duration:len,delay:start,easing:'ease-in',fill:'both'});
+  c.run(tw2,[{transform:'scale(1.4) rotate(40deg)',opacity:0},{transform:'scale(1) rotate(300deg)',opacity:.8,offset:.55},{transform:'scale(.4) rotate(560deg)',opacity:0}],{duration:len,delay:start+40*k,easing:'ease-in',fill:'both'});
+  for(let i=0;i<3;i++){const z=tex(c,'spark_05-white',c.tx+rnd(-6,6),c.ty+rnd(-6,6),rnd(48,64),c.svg,rnd(0,360)),at=start+len*(.35+i*.2);
+   c.run(z,[{opacity:0},{opacity:1,offset:.1},{opacity:.2,offset:.4},{opacity:.9,offset:.55},{opacity:0}],{duration:120*k,delay:at,fill:'both'});}
+  const st=tex(c,'star_08-white',c.tx,c.ty,60);
+  c.run(st,[{transform:'scale(0) rotate(0deg)',opacity:0},{transform:'scale(1.3) rotate(30deg)',opacity:1,offset:.5},{transform:'scale(.2) rotate(70deg)',opacity:0}],{duration:200*k,delay:c.strikeStart-150*k,fill:'both'});},
+ hit(c){const k=c.k,G=c.hitG,ang=c.AH+c.sgn*90;
+  const once=(name,size,frames,dur,delay=0,rot=0,x=0,y=0)=>c.run(tex(c,name,x,y,size,G,rot),frames,{duration:dur*k,delay:delay*k,easing:'cubic-bezier(.2,.8,.3,1)',fill:'both'});
+  once('flash03-white',170,[{transform:'scale(.3)',opacity:1},{transform:'scale(1.5)',opacity:0}],260);
+  once('light_01-ice',240,[{transform:'scale(.6)',opacity:1},{transform:'scale(1.3)',opacity:0}],520);
+  once('spark_01-white',180,[{opacity:1},{opacity:.3,offset:.3},{opacity:1,offset:.45},{opacity:0}],300,0,rnd(0,360));
+  once('scratch_01-white',170,[{transform:'scale(.4,1)',opacity:0},{transform:'scale(1.1,1)',opacity:1,offset:.25},{transform:'scale(1,1)',opacity:0}],460,20,ang-45);
+  once('circle_rings_b-ice',120,[{transform:'scale(.3)',opacity:1},{transform:'scale(2.6)',opacity:0}],520,30);
+  once('ring_a_streaks-white',120,[{transform:'scale(.4)',opacity:1},{transform:'scale(2.8)',opacity:0}],480,60);
+  once('ring_a_streaks-violet',120,[{transform:'scale(.4)',opacity:.8},{transform:'scale(3.3)',opacity:0}],620,130);
+  for(let i=0;i<5;i++){const a=rnd(0,Math.PI*2),d=rnd(20,40);once('explosion02-ice',rnd(90,125),[{transform:'translate(0,0) scale(.4)',opacity:.8},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(1.4)`,opacity:0}],rnd(650,850),40,rnd(0,360));}
+  for(let i=0;i<10;i++){const a=i*36+rnd(-12,12),r=Math.PI/180*a,d=rnd(50,85);once(i%2?'star_06-white':'star_06-ice',rnd(14,22),[{transform:'translate(0,0) scale(.5)',opacity:1},{transform:`translate(${Math.cos(r)*d}px,${Math.sin(r)*d}px) scale(1.2)`,opacity:1,offset:.6},{transform:`translate(${Math.cos(r)*(d+12)}px,${Math.sin(r)*(d+12)+8}px) scale(.3)`,opacity:0}],rnd(550,750),20);}}};
+VARIANTS.splice(1,VARIANTS.length-1,STORM);
+VARIANTS.forEach(v=>{v.monsterSrc=MON;v.hurtSrc=HURT;});
+const grid=document.getElementById('grid'),speed=document.getElementById('speed'),loop=document.getElementById('loop');
+const stages=VARIANTS.map((v,i)=>{
+ const card=document.createElement('section');card.className='variant';
+ card.innerHTML=`<h2>${v.name}</h2><p>${v.desc}</p><div class="stage" title="Нажми, чтобы ударить"><img class="monster" src="${MON}" alt=""><span class="hint">нажми, чтобы ударить</span></div><div class="row"><button>▶ Ударить</button><span class="tag"></span></div>`;
+ grid.append(card);const stage=card.querySelector('.stage'),go=()=>play(i);
+ stage.onclick=go;card.querySelector('button').onclick=go;return stage;});
+const busy=[];
+function play(i){if(busy[i])return;busy[i]=true;const end=swing(stages[i],VARIANTS[i],+speed.value);setTimeout(()=>{busy[i]=false;if(loop.checked)setTimeout(()=>play(i),500);},end);}
+document.getElementById('playAll').onclick=()=>VARIANTS.forEach((_,i)=>play(i));
+new Image().src=HURT;
+</script>
+</body>
+</html>

@@ -60,7 +60,7 @@ dialog{background:#1b241d;color:#f2f1e7;border:1px solid #697754;border-radius:1
 .equipment-slot{cursor:pointer;transition:border-color .15s,background .15s}.equipment-slot:hover{border-color:#edc77b;background:#304032}.equipment-slot:focus-visible{outline:2px solid #edc77b;outline-offset:3px}.inventory-back{margin-top:18px}.inventory-cell{overflow:hidden;overflow-wrap:anywhere;font-size:11px;color:#edc77b}.inventory-cell:not(:empty):after{display:none}
 .monster .slash-effect{position:absolute;inset:-20%;width:140%;height:140%;z-index:4;pointer-events:none;overflow:visible;animation:slash-fade .4s ease-out forwards;filter:drop-shadow(0 0 5px #fff2ae)}
 .slash-effect .slash-trail{stroke-dasharray:320;stroke-dashoffset:320;animation:slash-draw .22s ease-out forwards}
-.slash-effect.critical{filter:drop-shadow(0 0 8px #ffac53)}
+.slash-effect.critical{filter:drop-shadow(0 0 8px #ffac53)}.monster .slash-effect.rapid-slash{animation:none;filter:drop-shadow(0 0 5px #4f8cffaa)}.monster .slash-effect.rapid-slash.critical{filter:drop-shadow(0 0 8px #cfe0ff)}
 @keyframes slash-draw{to{stroke-dashoffset:0}}
 @keyframes slash-fade{0%{opacity:0;transform:scale(.9)}12%{opacity:1}65%{opacity:1}100%{opacity:0;transform:scale(1.08)}}
 .monster .slash-effect{animation:sword-fade .48s ease-out forwards;filter:drop-shadow(0 0 4px #fff2ae88)}
@@ -71,6 +71,7 @@ dialog{background:#1b241d;color:#f2f1e7;border:1px solid #697754;border-radius:1
 .equipment-slot[data-slot="weapon1"]{grid-column:1;grid-row:4 / 6;align-self:stretch}
 .equipment-slot[data-slot="weapon2"]{grid-column:3;grid-row:4 / 6;align-self:stretch}
 .equipment-slot[data-slot="weapon1"] svg,.equipment-slot[data-slot="weapon2"] svg{width:46px;height:64px}
+.equipment-slot[data-slot="weapon1"] .equipped-picture,.equipment-slot[data-slot="weapon2"] .equipped-picture{width:min(100px,90%);height:min(140px,66%)}
 @media(max-width:540px){.equipment-slot[data-slot="weapon1"] strong,.equipment-slot[data-slot="weapon2"] strong{font-size:9px}}
 
 .inventory-cell.item-card{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;cursor:pointer;aspect-ratio:auto;min-height:125px}.item-card img{width:54px;height:54px;object-fit:contain;background:#eed9af;border-radius:5px}.item-card strong{font-size:10px;text-align:center}.item-rarity{font-size:9px}
@@ -107,7 +108,7 @@ html body .item-tooltip-night .tooltip-diff .diff-down b{color:#ff8a7a}
 .item-tooltip .tooltip-stat{grid-template-columns:32px 1fr auto;gap:9px;min-height:30px}
 .item-tooltip .stat-symbol{font-size:26px;line-height:1.1}
 
-.character-stats-button{position:absolute;left:24px;bottom:20px;z-index:5;background:#22352bed}.character-stats-button .feature-label{font-size:12px}.character-stats-button:hover{z-index:6}#characterStatsDialog{width:min(540px,calc(100% - 28px));max-height:85dvh;overflow:auto}.character-stats-intro{margin:12px 0 20px;color:#9ead93;font-size:12px}#characterStatsList{display:grid;gap:3px}#characterStatsList .tooltip-stat{grid-template-columns:32px 1fr auto;gap:10px;min-height:43px;border-bottom:1px solid #ffffff0a;font-size:12px}#characterStatsList .stat-symbol{font-size:24px}#characterStatsList b{color:#f0d49b;font-size:13px;text-align:right}.effects-title{font-size:15px;color:#edc77b;margin:24px 0 12px}.no-effects{font-size:12px;color:#93a18d}.character-effect{padding:12px 15px;background:#c49d4510;border:1px solid #c49d4533;border-radius:9px;margin-bottom:10px}.character-effect strong{font-size:12px;color:#edc77b}.character-effect p{margin:7px 0 0;font-size:12px}@media(max-width:540px){.character-stats-button{left:16px;bottom:12px}.hint{left:76px}}
+.character-stats-button{position:absolute;left:24px;bottom:20px;z-index:5;background:#22352bed}.character-stats-button .feature-label{font-size:12px}.character-stats-button:hover{z-index:6}#characterStatsDialog{width:min(580px,calc(100% - 28px));max-height:85dvh;overflow:auto}.cs-hero{display:flex;gap:16px;align-items:center;margin:14px 0 12px;padding:12px 14px;background:linear-gradient(90deg,#22352b,#17231c);border:1px solid #ffffff12;border-radius:14px}.cs-ring{--p:0%;width:104px;height:104px;flex:none;border-radius:50%;background:conic-gradient(#edc77b 0 var(--p),#ffffff12 var(--p));display:grid;place-items:center;position:relative;filter:drop-shadow(0 0 10px #edc77b33)}.cs-ring::before{content:"";position:absolute;inset:9px;border-radius:50%;background:radial-gradient(#1d2c23,#111a14)}.cs-ring>div{position:relative;text-align:center;line-height:1.1}.cs-ring b{display:block;font:28px "Russo One",sans-serif;color:#f0d49b}.cs-ring small{color:#9ead93;font-size:10px;letter-spacing:.08em}.cs-hero-info{flex:1;min-width:0}.cs-name{font:17px "Russo One",sans-serif;color:#fff;overflow-wrap:anywhere}.cs-muted{color:#9ead93;font-size:12px}.cs-muted b,.cs-chip b,.cs-xp-label b{color:#f0d49b}.cs-xp{margin-top:8px}.cs-xp-label{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:#9ead93;margin-bottom:4px}.cs-xp-track{height:8px;border-radius:9px;background:#ffffff10;overflow:hidden}.cs-xp-track i{display:block;height:100%;background:linear-gradient(90deg,#9a7a3a,#edc77b);box-shadow:0 0 8px #edc77b88;border-radius:9px}.cs-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.cs-chip{background:#ffffff0c;border:1px solid #ffffff10;border-radius:999px;padding:3px 10px;font-size:11.5px}.cs-sections{display:grid;grid-template-columns:1fr 1fr;gap:10px}.cs-sec{background:#17231c;border:1px solid #ffffff12;border-top:3px solid var(--c);border-radius:12px;padding:10px 12px}.cs-title{margin:0 0 6px;font:13px "Russo One",sans-serif;letter-spacing:.04em;color:var(--c)}.cs-row{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px dashed #ffffff0d;font-size:12px}.cs-row:last-child{border:0}.cs-row b{color:#f0d49b;text-align:right}.cs-full{grid-column:1/-1}.cs-full .character-effect:last-child{margin-bottom:0}@media(max-width:560px){.cs-sections{grid-template-columns:1fr}.cs-hero{flex-direction:column;text-align:center}.cs-chips{justify-content:center}}.no-effects{font-size:12px;color:#93a18d}.character-effect{padding:12px 15px;background:#c49d4510;border:1px solid #c49d4533;border-radius:9px;margin-bottom:10px}.character-effect strong{font-size:12px;color:#edc77b}.character-effect p{margin:7px 0 0;font-size:12px}@media(max-width:540px){.character-stats-button{left:16px;bottom:12px}.hint{left:76px}}
 .equipment-slot{position:relative}
 .equipment-slot.equip-flash::after{content:'';position:absolute;inset:-2px;border:2px solid var(--equip-flash-color);border-radius:inherit;background:radial-gradient(ellipse at center,var(--equip-flash-color),transparent 75%);pointer-events:none;z-index:3;animation:equip-slot-flash .65s ease-out both}
 @keyframes equip-slot-flash{0%{opacity:0;box-shadow:0 0 0 transparent}15%{opacity:.85;box-shadow:0 0 26px var(--equip-flash-color),inset 0 0 20px var(--equip-flash-color)}100%{opacity:0;box-shadow:0 0 4px transparent}}
@@ -123,7 +124,8 @@ html body .item-tooltip-night .tooltip-diff .diff-down b{color:#ff8a7a}
 .skill-slot.skill-hidden{pointer-events:none;filter:none!important;cursor:default}
 .skill-slot.skill-hidden::before,.skill-slot.skill-hidden::after{display:none!important}
 .skill-slot.skill-revealed{animation:skill-reveal .7s cubic-bezier(.2,1.5,.4,1)}
-@keyframes skill-reveal{0%{transform:scale(.4);filter:brightness(2.2)}60%{transform:scale(1.12);filter:brightness(1.4)}100%{transform:none;filter:none}}.skill-number{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);font-size:10px;color:#d5c18b;background:#19261d;border:1px solid #766d47;border-radius:9px;padding:1px 6px}
+@keyframes skill-reveal{0%{transform:scale(.4);filter:brightness(2.2)}60%{transform:scale(1.12);filter:brightness(1.4)}100%{transform:none;filter:none}}.rapid-cooldown-text,.power-cooldown-text,.aim-cooldown-text,.rage-time,.mana-burn-time{-webkit-text-stroke:4px #000;paint-order:stroke fill;font-weight:800}
+.skill-number{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);font-size:10px;color:#d5c18b;background:#19261d;border:1px solid #766d47;border-radius:9px;padding:1px 6px}
 .arena{padding-bottom:115px;min-height:440px}
 @media(max-width:760px){.skill-bar{gap:8px;bottom:24px}.skill-slot{width:54px;height:54px}.arena{padding-bottom:150px}.chest-area{bottom:94px}.character-stats-button{bottom:94px}}
 @media(max-width:420px){.skill-bar{gap:7px}.skill-slot{width:46px;height:46px}.skill-placeholder{font-size:25px}}
@@ -140,7 +142,7 @@ html body .item-tooltip-night .tooltip-diff .diff-down b{color:#ff8a7a}
 
 .rapid-talent #unlockRapid{width:43px;height:43px;min-width:43px;margin:0;padding:0;border-radius:50%;display:grid;place-items:center;font-size:23px;background:#1c281e;color:var(--talent-color);border:1px solid var(--talent-color);cursor:pointer}.rapid-talent #unlockRapid:hover{background:#354431;box-shadow:0 0 18px #edc77b33}.rapid-talent #unlockRapid.talent-learned{background:#4c4528;box-shadow:0 0 16px #edc77b33}.rapid-talent #rapidTreeIcon{cursor:help}.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden;clip-path:inset(50%);white-space:nowrap}.skill-info-tooltip h3{margin:0 0 18px;color:#edc77b;font-size:17px}.skill-info-tooltip .tooltip-stat{margin:10px 0}.skill-info-tooltip p{font-size:12px;line-height:1.7;color:#b1bea7}.skill-info-tooltip .skill-info-state{color:#edc77b;border-top:1px solid #ffffff19;padding-top:12px;margin-bottom:0}
 
-.rapid-slashes-icon{width:100%;height:100%;display:block;pointer-events:none}.rapid-icon-wrap{position:absolute;inset:10px;pointer-events:none}#rapidTreeIcon .rapid-slashes-icon{width:31px;height:31px}#unlockRapid .rapid-slashes-icon{width:34px;height:34px}#rapidSkill .rapid-cooldown-text{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;pointer-events:none;text-shadow:0 1px 5px #000,0 0 5px #000}#rapidSkill.skill-cooling .rapid-icon-wrap{opacity:.35}#rapidSkill:not(.skill-unlocked) .rapid-icon-wrap{opacity:.4}
+.rapid-slashes-icon{width:100%;height:100%;display:block;pointer-events:none}.rapid-icon-wrap{position:absolute;inset:0;pointer-events:none}#rapidTreeIcon .rapid-slashes-icon{width:31px;height:31px}#unlockRapid .rapid-slashes-icon{width:34px;height:34px}#rapidSkill .rapid-cooldown-text{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;pointer-events:none;text-shadow:0 1px 5px #000,0 0 5px #000}#rapidSkill.skill-cooling .rapid-icon-wrap{opacity:.35}#rapidSkill:not(.skill-unlocked) .rapid-icon-wrap{opacity:.4}
 
 .item-tooltip.tooltip-active{pointer-events:auto;border-color:#e3bc77;box-shadow:0 20px 70px #000c,0 0 0 1px #e3bc7722}.tooltip-actions{display:flex;gap:10px;border-top:1px solid #ffffff19;padding-top:14px;margin-top:14px}.tooltip-actions button,.tooltip-slot-actions button{border:1px solid #8e7849;border-radius:9px;background:#2d3a2b;color:#edc77b;cursor:pointer}.tooltip-actions button{width:46px;height:42px;font-size:24px}.tooltip-actions button:last-child{margin-left:auto}.tooltip-actions button:hover,.tooltip-slot-actions button:hover{background:#4b5734}.tooltip-slot-actions:not([hidden]){display:flex;flex-direction:column;gap:8px;margin-top:12px}.tooltip-slot-actions button{padding:9px;font-size:22px;display:flex;align-items:center;gap:10px;text-align:left}.tooltip-slot-actions small{font-size:11px;color:#dfd7bd}
 .item-tooltip .tooltip-actions button{display:flex;align-items:center;justify-content:center;flex:0 0 46px;width:46px;height:42px;min-width:46px;padding:0;margin-top:0;margin-bottom:0;line-height:1;font-family:"Segoe UI Symbol","Segoe UI",sans-serif;font-size:24px;box-sizing:border-box}
@@ -207,7 +209,7 @@ html body .item-tooltip-night .tooltip-diff .diff-down b{color:#ff8a7a}
 
 .arena{min-height:700px;padding-top:0;padding-bottom:0}
 .enemy-info{position:absolute;top:32px;left:50%;translate:-50% 0;width:min(740px,calc(100% - 180px));display:flex;flex-direction:column;align-items:center;text-align:center;z-index:2}
-.enemy-info #enemyName{margin:0 0 8px;min-height:42px;line-height:1.25}.enemy-info .enemy-type{min-height:16px}.enemy-info .zone-objective{height:45px;margin-top:12px;justify-content:flex-start}.enemy-info .hp{margin-top:14px;width:min(630px,95%)}
+.enemy-info #enemyName{margin:0 0 8px;min-height:42px;line-height:1.25}.enemy-info .enemy-type{display:none}.enemy-info .zone-objective{height:45px;margin-top:12px;justify-content:flex-start}.enemy-info .hp{margin-top:14px;width:min(630px,95%)}
 .arena #monster{position:absolute;top:248px;left:50%;translate:-50% 0;margin-top:0}
 .arena .float{top:290px}
 @media(max-width:760px){.arena{min-height:760px}.enemy-info{top:180px;width:calc(100% - 32px)}.enemy-info #enemyName{font-size:26px;min-height:33px}.enemy-info .hp{margin-top:8px}.arena #monster{top:375px;width:190px;height:170px}.arena.boss-fight #monster{width:220px;height:195px}.arena .float{top:405px}}
@@ -424,6 +426,40 @@ html body .item-tooltip-night .tooltip-mystery b{display:block;font-size:13px;co
 html body .item-tooltip-night .tooltip-pool-caption{margin-top:4px;font-size:10px;font-weight:800;letter-spacing:.06em;color:#6f9488;text-transform:uppercase}
 html body .item-tooltip-night .tooltip-pool{gap:5px;padding:8px 0 12px}html body .item-tooltip-night .tooltip-pool .tooltip-stat>span:not(.stat-symbol),html body .item-tooltip-night .tooltip-pool .tooltip-stat b{color:#8fb8aa;font-weight:600}
 html body .item-tooltip-night .tooltip-price{padding-top:10px;border-top:1px solid #7fe6c222}html body .item-tooltip-night .tooltip-price b{color:#ffd970}
+/* Размер подсказки предмета: все величины увеличены на четверть */
+html body .item-tooltip.item-tooltip-night{width:min(365px,calc(100vw - 24px));padding:18px}
+html body .item-tooltip-night .tooltip-header{gap:15px;padding-bottom:15px}
+html body .item-tooltip-night .tooltip-frame{width:72px;height:72px}
+html body .item-tooltip-night .tooltip-frame img{width:55px;height:55px}
+html body .item-tooltip-night .tooltip-rarity{font-size:12px}
+html body .item-tooltip-night .tooltip-header strong{font-size:19px}
+html body .item-tooltip-night .tooltip-header small{font-size:14px}
+html body .item-tooltip-night .tooltip-stats{gap:9px;padding:15px 0}
+html body .item-tooltip-night .tooltip-stat{gap:10px;font-size:15px}
+html body .item-tooltip-night .tooltip-stat .stat-symbol{width:23px;font-size:18px}
+html body .item-tooltip-night .tooltip-stat b{font-size:15px}
+html body .item-tooltip-night .tooltip-stat-icon,html body .item-tooltip-night .stat-symbol .gold-coin{width:23px;height:23px}
+html body .item-tooltip-night .tooltip-property{margin-bottom:12px;font-size:15px}
+html body .item-tooltip-night .tooltip-mystery{gap:12px;padding:11px 12px}
+html body .item-tooltip-night .tooltip-mystery-q{width:35px;height:35px;font-size:20px}
+html body .item-tooltip-night .tooltip-mystery b{font-size:16px}
+html body .item-tooltip-night .tooltip-mystery span{font-size:14px}
+html body .item-tooltip-night .tooltip-pool-caption{font-size:12px}
+html body .item-tooltip-night .tooltip-pool{gap:6px;padding:10px 0 15px}
+html body .item-tooltip-night .tooltip-diff{gap:9px;padding:12px 0 15px}
+html body .item-tooltip-night .tooltip-diff p{font-size:15px}
+html body .item-tooltip-night .tooltip-price{padding-top:12px}
+/* Подсказку нельзя прокрутить: на невысоком экране длинное сравнение предметов должно помещаться целиком */
+@media(max-height:780px){
+html body .item-tooltip.item-tooltip-night{padding:12px 18px}
+html body .item-tooltip-night .tooltip-header{padding-bottom:8px}
+html body .item-tooltip-night .tooltip-frame{width:54px;height:54px}
+html body .item-tooltip-night .tooltip-frame img{width:42px;height:42px}
+html body .item-tooltip-night :is(.tooltip-stats,.tooltip-pool,.tooltip-diff){gap:3px;padding:7px 0}
+html body .item-tooltip-night .tooltip-stat,html body .item-tooltip-night .tooltip-stat b{font-size:13px}
+html body .item-tooltip-night .tooltip-stat-icon,html body .item-tooltip-night .stat-symbol .gold-coin{width:18px;height:18px}
+html body .item-tooltip-night .tooltip-price{padding-top:7px}
+}
 body #adminPanel{border-right:0!important;border-radius:3px 0 0 3px!important}
 @media(max-width:650px){body #inventoryDialog .inventory-grid{grid-template-columns:repeat(4,minmax(0,1fr))}body dialog{padding:18px}body dialog>.equipment-heading h2{font-size:21px}}
 @media(max-width:400px){body #inventoryDialog .inventory-grid,body #equipmentDialog>#inventoryDialog .inventory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -436,7 +472,7 @@ body #adminPanel{border-right:0!important;border-radius:3px 0 0 3px!important}
 #arena.dungeon-fight #retreatBoss{top:76%;color:#ecdcff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 170 30' preserveAspectRatio='none'%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop stop-color='%23120a20'/%3E%3Cstop offset='.45' stop-color='%2322123b'/%3E%3Cstop offset='.85' stop-color='%234f3278'/%3E%3Cstop offset='1' stop-color='%238f6cc0'/%3E%3C/linearGradient%3E%3Cpath d='M2 0H168L152 28Q151 29 149 29H21Q19 29 18 28Z' fill='url(%23g)' stroke='%231a0d2e' stroke-width='1.5'/%3E%3Cpath d='M19 27H151' stroke='%23f0dcff' stroke-opacity='.55'/%3E%3C/svg%3E")}
 #retreatBoss:hover{filter:brightness(1.3) drop-shadow(0 3px 3px #000a)}#retreatBoss:active{translate:-50% 1px}#retreatBoss:focus-visible{outline:2px solid #e1cdd0;outline-offset:2px}#retreatBoss[hidden]{display:none}
 
-.power-icon{font-size:36px;transform:rotate(-25deg)}.power-cooldown-text{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;text-shadow:0 1px 4px #000}
+.power-icon{position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px);border-radius:50%;object-fit:cover;pointer-events:none}.talent-skill-icon .power-tree-img,.detail-root .power-tree-img{width:100%;height:100%;border-radius:50%;object-fit:cover;pointer-events:none}.power-cooldown-text{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;text-shadow:0 1px 4px #000}
 #powerSkill.skill-cooling .power-icon{opacity:.35}
 .power-sword-view{position:absolute;left:50%;top:22%;width:min(340px,55%);height:75%;z-index:10;pointer-events:none;transform-origin:50% 100%;animation:power-first-person .9s cubic-bezier(.3,.05,.45,1) forwards}
 .power-sword-view svg{width:100%;height:100%;filter:drop-shadow(0 0 9px #e5f7ff44)}
@@ -452,7 +488,7 @@ body #adminPanel{border-right:0!important;border-radius:3px 0 0 3px!important}
 .power-impact-trail{position:absolute;left:50%;top:42%;width:310px;height:170px;border-top:13px solid #eefaff99;border-radius:50%;filter:blur(2px) drop-shadow(0 0 8px #c5e6ff88);pointer-events:none;z-index:9;opacity:0;transform:translate(-50%,-50%) rotate(-45deg);animation:power-cut-trail .9s linear forwards}
 @keyframes power-cut-trail{0%,48%{opacity:0;transform:translate(-35%,-75%) rotate(-55deg) scale(.4)}60%{opacity:.75;transform:translate(-50%,-50%) rotate(-35deg) scale(1)}80%{opacity:0;transform:translate(-60%,-25%) rotate(-15deg) scale(1.2)}100%{opacity:0}}
 
-/* «Мощный удар»: ледяной меч с замахом рубит моба, оставляя след-полумесяц */
+/* «Мощный удар» («Клинок бури»): ледяной меч с замахом рубит моба, след и попадание — текстуры Kenney */
 .power-strike-fx{position:absolute;z-index:11;pointer-events:none;overflow:visible}
 .no-animations .power-strike-fx{display:none}
 
@@ -465,28 +501,31 @@ html.hud-fit .monster{width:clamp(190px,calc(var(--hud-h)*.23),300px);height:cla
 html.hud-fit .boss-fight #monster{width:clamp(210px,calc(var(--hud-h)*.27),330px);height:clamp(185px,calc(var(--hud-h)*.24),295px)}
 html.hud-fit h1{font-size:clamp(23px,calc(var(--hud-h)*.03),34px)}
 /* На телефоне кнопка атаки занимает весь низ — настройки уходят иконкой в правый верхний угол */
-/* Древо навыка «Живое дерево»: ветви рисуются SVG под узлами, по прокачанным течёт сок. */
-#talentTreeContent{position:relative;isolation:isolate;margin-top:14px;padding:24px 8px 28px;border:1px solid #5d4a2c;border-radius:14px;background:radial-gradient(ellipse at 50% 12%,#3a4a2a,transparent 60%),linear-gradient(#1d2618,#141a10);box-shadow:inset 0 0 30px #0008}
+/* Древо навыка «Звёздная гравюра»: ночное небо в двойной рамке, навык — круг, таланты — ромбы.
+   Связи рисует drawTalentBranches прямыми линиями с точками на развилках; к вложенным талантам ведёт светящаяся линия. */
+#talentTreeContent{position:relative;isolation:isolate;margin-top:14px;padding:24px 8px 28px;border:1px solid #2b4470;border-radius:14px;background:radial-gradient(1px 1px at 12% 18%,#fff9,transparent),radial-gradient(1px 1px at 72% 34%,#fff8,transparent),radial-gradient(1.5px 1.5px at 38% 62%,#fffa,transparent),radial-gradient(1px 1px at 85% 80%,#fff7,transparent),radial-gradient(1px 1px at 22% 88%,#fff8,transparent),radial-gradient(1px 1px at 58% 8%,#fff6,transparent),radial-gradient(1px 1px at 93% 52%,#fff8,transparent),radial-gradient(1px 1px at 5% 45%,#fff6,transparent),radial-gradient(1.5px 1.5px at 30% 30%,#cfe6ffaa,transparent),radial-gradient(1px 1px at 66% 72%,#fff6,transparent),radial-gradient(circle at 50% 10%,#1d3358,#0a1222 70%);box-shadow:inset 0 0 0 6px #0a1222,inset 0 0 0 7px #9cc8ff33,inset 0 0 30px #0008}
 #talentTreeContent .tree-branches{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none;overflow:visible}
 #talentTreeContent .detail-tree-connector{height:56px;background:none}
 #talentTreeContent .detail-tree-connector:before,#talentTreeContent .detail-tree-connector:after{display:none}
-#talentTreeContent .detail-root{width:84px;height:84px;border-radius:50%;border:5px solid #6b4a2b;background:radial-gradient(circle at 40% 35%,#4a3622,#1b120a);box-shadow:0 0 0 2px #24180d,inset 0 0 12px #000;transition:box-shadow .2s,border-color .2s}
-#talentTreeContent .detail-root.talent-learned{border-color:#9bc25a;box-shadow:0 0 0 2px #24180d,0 0 24px #a6d45f88,inset 0 0 12px #000}
+#talentTreeContent .detail-root{width:84px;height:84px;border-radius:50%;overflow:hidden;border:2px solid #7fa6e0aa;background:radial-gradient(circle,#1b2c4c,#0e1830);color:#cfe0ff;box-shadow:0 0 0 4px #0a1222,0 0 0 5px #7fa6e055;transition:box-shadow .2s,border-color .2s}
+#talentTreeContent .detail-root.talent-learned{border-color:#e6f2ff;box-shadow:0 0 0 4px #0a1222,0 0 0 5px #d9ecffaa,0 0 26px #9cc8ffaa}
 #talentTreeContent .detail-root>svg{width:50px;height:50px}
 #talentTreeContent .detail-talent{gap:8px}
-#talentTreeContent .detail-talent .talent-node{position:relative;isolation:isolate;display:grid;place-items:center;width:64px;height:64px;border-radius:50%;border:4px solid #6b4a2b;background:radial-gradient(circle at 40% 35%,#4a3622,#1b120a);box-shadow:0 0 0 2px #24180d,inset 0 0 12px #000;color:#d9c080;transition:box-shadow .2s,border-color .2s}
-#talentTreeContent .detail-talent .talent-node:before,#talentTreeContent .detail-talent .talent-node:after{content:'';position:absolute;z-index:-1;top:-7px;left:-7px;width:20px;height:11px;border-radius:0 100% 0 100%;background:linear-gradient(#5d8a3a,#3b5f25);rotate:-25deg}
-#talentTreeContent .detail-talent .talent-node:after{left:auto;right:-7px;rotate:205deg;scale:1 -1}
-#talentTreeContent .detail-talent:hover .talent-node{border-color:#8a6a3e}
-#talentTreeContent .detail-talent.talent-invested .talent-node{border-color:#9bc25a;background:radial-gradient(circle at 40% 35%,#4a3622,#1b120a);box-shadow:0 0 0 2px #24180d,0 0 22px #a6d45f88,inset 0 0 12px #000}
-#talentTreeContent .detail-talent.talent-invested:hover .talent-node{border-color:#c3e483}
-#talentTreeContent .detail-talent:not(.rapid-damage-talent) .talent-node{font-size:0;border-color:#3c2c1b;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237d705a' stroke-width='1.8' stroke-linecap='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/26px no-repeat,radial-gradient(#2a2118,#120d08)}
-#talentTreeContent .detail-talent:not(.rapid-damage-talent) .talent-node:before,#talentTreeContent .detail-talent:not(.rapid-damage-talent) .talent-node:after{background:#3a3a26}
-#talentTreeContent .detail-talent .heavy-strikes-icon{width:34px;height:34px}
-#talentTreeContent .detail-talent .talent-node>svg{width:34px;height:34px}
-#talentTreeContent .detail-talent>span:last-child{padding:2px 8px;border-radius:7px;background:#141a10d9;color:#efe3c2;text-shadow:0 1px 3px #000;line-height:1.5;text-align:center}
-#talentTreeContent .detail-talent:not(.rapid-damage-talent)>span:last-child{color:#8a8068}
-#talentTreeContent .detail-talent.talent-invested>span:last-child{color:#d9f59a}
+#talentTreeContent .detail-talent .talent-node{position:relative;isolation:isolate;display:grid;place-items:center;width:64px;height:64px;border:0;border-radius:0;background:none;box-shadow:none;color:#bcd6ff;transition:scale .2s}
+#talentTreeContent .detail-talent .talent-node:before{content:'';position:absolute;z-index:-1;inset:10px;rotate:45deg;border:1.5px solid #bcd6ff99;background:radial-gradient(circle,#1b2c4c,#0e1830);box-shadow:0 0 0 3px #0a1222;transition:border-color .2s,box-shadow .2s,background .2s}
+#talentTreeContent .detail-talent .talent-node:after{content:none}
+#talentTreeContent .detail-talent:hover .talent-node{scale:1.08}
+#talentTreeContent .detail-talent:hover .talent-node:before{border-color:#e6f2ff}
+#talentTreeContent .detail-talent.talent-invested .talent-node{color:#fff}
+#talentTreeContent .detail-talent.talent-invested .talent-node:before{border-color:#e6f2ff;background:linear-gradient(135deg,#4d7dc8,#14244a);box-shadow:0 0 0 3px #0a1222,0 0 0 4px #9cc8ff88,0 0 16px #9cc8ffaa}
+#talentTreeContent .detail-talent:not(.rapid-damage-talent) .talent-node{font-size:0}
+#talentTreeContent .detail-talent:not(.rapid-damage-talent) .talent-node:before{border-color:#7fa6e040;background:#0c1528}
+#talentTreeContent .detail-talent:not(.rapid-damage-talent) .talent-node:after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236a7fa3' stroke-width='1.8' stroke-linecap='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/22px no-repeat}
+#talentTreeContent .detail-talent .heavy-strikes-icon{width:28px;height:28px}
+#talentTreeContent .detail-talent .talent-node>svg,#talentTreeContent .detail-talent .talent-node>img{width:28px;height:28px}
+#talentTreeContent .detail-talent>span:last-child{padding:2px 8px;border-radius:4px;background:#0a1222d9;color:#cfe0ff;text-shadow:0 1px 3px #000;line-height:1.5;text-align:center;letter-spacing:.04em;text-transform:uppercase;font-size:9.5px}
+#talentTreeContent .detail-talent:not(.rapid-damage-talent)>span:last-child{color:#6a7fa3}
+#talentTreeContent .detail-talent.talent-invested>span:last-child{color:#fff;text-shadow:0 0 6px #9cc8ff,0 1px 3px #000}
 /* Вкладка «Древо талантов»: навыки — деревянные медальоны, кольцо вокруг заполняется по мере прокачки. */
 #talentsDialog .talents-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 10px;padding:18px 0 8px;border-radius:14px;background:radial-gradient(ellipse at 50% 40%,#3a4a2a,transparent 70%)}
 body #talentsDialog .talent-section{position:relative;padding:14px 4px 6px;background:none!important;border:0!important;border-radius:14px}
@@ -557,8 +596,8 @@ html body dialog .character-stat,html body dialog .character-effect{background:#
 .dp-main{display:flex;align-items:center;gap:8px}.dp-main img{width:40px;height:40px}
 .dp-main span{display:block;font-size:9px;font-weight:700;letter-spacing:.06em;color:#8fb8aa}
 .dp-main b{display:block;font-size:28px;line-height:1.05;color:#f0fff8;font-variant-numeric:tabular-nums}
-.dp-subs{display:flex;justify-content:space-between;gap:6px;padding-top:7px;border-top:1px solid #7fe6c222}
-.dp-minor{display:flex;align-items:center;gap:3px;font-size:13px;font-weight:800;color:#cfe9df;font-variant-numeric:tabular-nums}
+.dp-subs{display:flex;justify-content:space-between;gap:4px;padding-top:7px;border-top:1px solid #7fe6c222}
+.dp-main b{white-space:nowrap}.dp-minor{display:flex;flex-shrink:0;white-space:nowrap;align-items:center;gap:2px;font-size:13px;font-weight:800;color:#cfe9df;font-variant-numeric:tabular-nums}
 .dp-minor img{width:22px;height:22px}.dp-crit{color:#ffb38a}
 .arena #attack{left:calc(50% + 261px);width:170px;padding:10px 12px;font-size:17px;line-height:1.25}
 .arena #attack:active{transform:translateY(3px)}
@@ -592,7 +631,7 @@ html body dialog .character-stat,html body dialog .character-effect{background:#
 #arena .hero-level b{color:inherit}
 html.public-site #openAdmin,html.public-site #adminPanel{display:none!important}
 /* Навык «Меткий выстрел»: слот, мишени и множитель урона под монстром */
-#aimSkill .aim-icon{width:62%;height:62%;pointer-events:none}
+#aimSkill .aim-icon{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}img.aim-icon{display:block;border-radius:50%;object-fit:cover}#talentTreeContent .detail-root>img.aim-icon{flex:none;width:100%;height:100%;margin:0}.skill-dock-icon>img.aim-icon{width:100%;height:100%}img.rapid-slashes-icon{border-radius:50%;object-fit:cover}.skill-dock-icon>img.rapid-slashes-icon{width:100%;height:100%}#talentsDialog #rapidTreeIcon img.rapid-slashes-icon,#talentsDialog .talent-category #rapidTreeIcon img.rapid-slashes-icon{width:100%;height:100%}#talentTreeContent .detail-root>img.rapid-slashes-icon{flex:none;width:100%;height:100%;margin:0}#talentsDialog .talent-category #aimTreeIcon img.aim-icon{width:100%;height:100%}
 #aimSkill:not(.skill-unlocked) .aim-icon{opacity:.4;filter:grayscale(.6)}
 #aimSkill.skill-cooling .aim-icon{opacity:.35}
 #aimSkill .aim-cooldown-text{position:absolute;inset:0;display:grid;place-items:center;font-size:18px;color:#fff;text-shadow:0 1px 4px #000,0 0 5px #000;pointer-events:none}
@@ -619,7 +658,7 @@ html.public-site #openAdmin,html.public-site #adminPanel{display:none!important}
 .aim-multiplier.aim-break{animation:aim-break .35s ease-out}
 @keyframes aim-pulse{40%{scale:1.35}}
 @keyframes aim-break{25%{translate:calc(-50% - 6px) 0}50%{translate:calc(-50% + 6px) 0}75%{translate:calc(-50% - 3px) 0}}
-#talentsDialog #aimTreeIcon .aim-icon{width:62px;height:62px}
+#talentsDialog #aimTreeIcon .aim-icon{width:100%;height:100%}
 #talentsDialog .talent-section.skill-open .talent-skill-icon{filter:none;border-color:#9bc25a;box-shadow:0 0 0 3px #24180d,0 0 26px #a6d45f66,inset 0 0 18px #000}
 #talentsDialog .talent-section.skill-open .talent-skill-icon:before,#talentsDialog .talent-section.skill-open .talent-skill-icon:after{background:linear-gradient(#5d8a3a,#3b5f25)}
 #talentsDialog .talent-section.skill-open .talent-section-heading small{color:#b9d77a}
@@ -657,10 +696,28 @@ html.hud-mobile #arena .gold-wallet-icon,html.hud-mobile #arena .gold-wallet-ico
 .talent-category-count{margin-left:auto;font-size:11px;font-weight:700;color:#8fb8aa;white-space:nowrap}
 .talent-category-row{display:flex;flex-wrap:wrap;gap:6px 22px;padding:8px 14px 12px}
 #talentsDialog .talent-category .talent-section{width:150px;padding-top:12px}
+#talentsDialog .talent-category .talent-category-row{flex-wrap:nowrap;gap:6px 12px}#talentsDialog .talent-category .talent-section{flex:0 1 150px;min-width:0}
 #talentsDialog .talent-category .talent-section:before{width:120px;height:120px}
 #talentsDialog .talent-category .talent-skill-icon{width:96px;height:96px;font-size:38px}
 #talentsDialog .talent-category #rapidTreeIcon .rapid-slashes-icon,#talentsDialog .talent-category #aimTreeIcon .aim-icon{width:50px;height:50px}
 @media(max-width:540px){.talent-category-head small{display:none}.talent-category-row{justify-content:center}}
+/* Вкладка «Древо талантов» в стиле «Звёздные медальоны» (как окно древа): ночное небо в двойной рамке,
+   навык — круг с двойным кольцом, вокруг — светящаяся дуга прогресса. Перекрывает «Живое дерево» выше. */
+#talentsDialog .talents-grid{padding:12px;border:1px solid #2b4470;border-radius:14px;background:radial-gradient(1px 1px at 12% 18%,#fff9,transparent),radial-gradient(1px 1px at 72% 34%,#fff8,transparent),radial-gradient(1.5px 1.5px at 38% 62%,#fffa,transparent),radial-gradient(1px 1px at 85% 80%,#fff7,transparent),radial-gradient(1px 1px at 22% 88%,#fff8,transparent),radial-gradient(1px 1px at 58% 8%,#fff6,transparent),radial-gradient(1px 1px at 93% 52%,#fff8,transparent),radial-gradient(1px 1px at 5% 45%,#fff6,transparent),radial-gradient(circle at 50% 0,#1d3358,#0a1222 75%);box-shadow:inset 0 0 0 6px #0a1222,inset 0 0 0 7px #9cc8ff33}
+#talentsDialog .talent-category{margin:6px;border:1px solid #7fa6e033;background:#0a122299}
+#talentsDialog .talent-category-head{margin:0 12px;padding:9px 0 8px;background:none;border-bottom:1px solid #7fa6e026}
+#talentsDialog .talent-category-icon{width:26px;height:26px;border:1px solid color-mix(in srgb,var(--cat-color) 70%,#fff);background:color-mix(in srgb,var(--cat-color) 25%,#0a1222);box-shadow:none}
+#talentsDialog .talent-category-head b{font-size:13px;color:#cfe0ff}
+#talentsDialog .talent-category-head small,#talentsDialog .talent-category-count{color:#9cb4d8}
+#talentsDialog .talent-category .talent-section:before{top:0;width:104px;height:104px;background:conic-gradient(#d9ecff var(--talent-progress,0%),#7fa6e026 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 3px));filter:drop-shadow(0 0 4px #9cc8ff)}
+#talentsDialog .talent-category .talent-skill-icon{width:80px;height:80px;margin-top:0;border:2px solid #7fa6e0aa;background:radial-gradient(circle,#1b2c4c,#0e1830);box-shadow:0 0 0 4px #0a1222,0 0 0 5px #7fa6e055;overflow:hidden}
+#talentsDialog .talent-category .talent-skill-icon:before,#talentsDialog .talent-category .talent-skill-icon:after{content:none}
+#talentsDialog .talent-category .talent-section.skill-2 .talent-skill-icon,#talentsDialog .talent-category .talent-section.skill-open .talent-skill-icon,#talentsDialog .talent-category .talent-section:has(.talent-learned) .talent-skill-icon{border-color:#e6f2ff;box-shadow:0 0 0 4px #0a1222,0 0 0 5px #d9ecffaa,0 0 22px #9cc8ff88}
+#talentsDialog .talent-category .talent-section h3{font-size:13px;font-weight:600;color:#e6f2ff}
+#talentsDialog .talent-category .talent-section-heading small,#talentsDialog .talent-category .talent-section.skill-open .talent-section-heading small{background:none;padding:0;color:#9cc8ff}
+#talentsDialog .talent-category .talent-section:not(.skill-open):not(.skill-2):not(:has(.talent-learned)) .talent-section-heading small{color:#6a7fa3}
+#talentsDialog .talent-category .talent-section:not(.skill-open):not(.skill-2):not(:has(.talent-learned)) .talent-skill-icon{filter:saturate(.3) brightness(.7)}
+#talentsDialog .talent-category .openable-tree:focus-visible{outline-color:#bcd6ff}
 /* Души: счётчик под золотом и вылет душ из монстра */
 .soul-wallet{position:absolute;right:24px;top:84px;z-index:3;display:flex;align-items:center;gap:10px;padding:7px 18px 7px 9px;min-width:105px;border-radius:30px;background:linear-gradient(135deg,#0c1d22ee,#07120fee);border:1px solid #6fd8ff66;box-shadow:0 0 14px #4fd8ff33,0 4px 14px #0006}
 .soul-wallet-icon{display:grid;place-items:center;width:38px;height:38px}.soul-wallet-icon img{width:38px;height:38px}
@@ -748,7 +805,7 @@ html body #shopDialog .shop-tab.active{color:#062018;background:linear-gradient(
 <g transform="translate(1112 60)"><path d="M0-23 22 0 0 23-22 0Z" fill="#17151d" stroke="#29242e" stroke-width="3"/><path d="M0-19 18 0 0 19-18 0Z" fill="url(#hpGem)"/><path d="M0-19 0 0-18 0Z" fill="#b7abb2"/><path d="M0 0 18 0 0 19Z" fill="#39343e"/><path d="M0-19 0 0 18 0" fill="none" stroke="#e2d2db" stroke-opacity=".5" stroke-width="2"/></g></svg><div class="track" role="progressbar" aria-label="Здоровье врага" aria-valuemin="0" aria-valuemax="5" aria-valuenow="5" id="hpBar"><div class="hp-damage-trail" id="hpDamageTrail"></div><div class="fill" id="fill"></div><span id="health" class="hp-value">5 / 5</span></div><span class="hp-gem hp-gem-left" aria-hidden="true"></span><span class="hp-gem hp-gem-right" aria-hidden="true"></span><button type="button" id="retreatBoss" hidden>Прервать бой</button></div></div>
 </div><div id="aimMultiplier" class="aim-multiplier" role="status" hidden></div><div class="monster" id="monster"><div class="shadow"></div>
 <svg viewBox="0 0 200 175" role="img" aria-label="Зелёный лесной слизень"><defs><radialGradient id="slime" cx="35%" cy="25%" r="80%"><stop stop-color="#d5e78a"/><stop offset=".5" stop-color="#8caf59"/><stop offset="1" stop-color="#467348"/></radialGradient></defs><path d="M22 142C8 121 37 91 44 67 54 33 70 25 95 32 119 5 151 40 153 68 155 89 187 112 183 139 179 162 151 165 131 158 108 170 88 164 76 160 52 167 30 160 22 142Z" fill="url(#slime)" stroke="#c4db8a" stroke-width="3"/><ellipse cx="64" cy="68" rx="13" ry="8" fill="#efffc7" opacity=".4" transform="rotate(-35 64 68)"/><ellipse cx="74" cy="113" rx="8" ry="11" fill="#1c3d2e"/><ellipse cx="127" cy="113" rx="8" ry="11" fill="#1c3d2e"/><circle cx="76" cy="110" r="2.5" fill="#fff8da"/><circle cx="129" cy="110" r="2.5" fill="#fff8da"/><path d="M93 128Q101 134 109 127" fill="none" stroke="#284e32" stroke-width="3" stroke-linecap="round"/><ellipse cx="55" cy="127" rx="11" ry="5" fill="#dae898" opacity=".35"/><ellipse cx="147" cy="127" rx="11" ry="5" fill="#dae898" opacity=".35"/><path d="M98 32Q84 15 94 9Q110 8 108 28" fill="#a2bd64"/><path d="M106 29Q120 9 134 17Q130 33 106 34" fill="#7b9e50"/></svg>
-</div><button class="feature-button character-stats-button" id="openCharacterStats" aria-label="Характеристики" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M6 16v-5M12 16V4M18 16V8"/><circle cx="12" cy="3" r="1"/></svg><span class="feature-label">Характеристики</span></button><div class="potion-wheel" id="potionWheel" role="group" aria-label="Зелья"></div><div class="chest-area"><button id="lootChest" class="loot-chest" aria-label="Сундук с предметом"><svg viewBox="0 0 64 56" fill="none" stroke="#edc77b" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><path d="M7 27V17C7 2 57 2 57 17v10Z" fill="#694c2b"/><path d="M7 27h50v24H7Z" fill="#493823"/><path d="M18 8v43M46 8v43M7 27h50"/><path d="M27 23h10v14H27Z" fill="#d0a754"/><path d="M32 27v6" stroke="#493823"/></svg><span id="chestTimer">01:00</span><small id="chestNext" hidden></small><b id="chestCount" hidden></b></button><div id="chestNotice" role="status"></div></div><div class="skill-bar" aria-label="Слоты навыков"><button class="skill-slot" id="rapidSkill" aria-label="Скоростная атака: не открыта" title="Скоростная атака · 5 ударов за 1 сек. · Перезарядка 10 с · Открывается в древе талантов за 1 очко талантов"><span class="rapid-icon-wrap"><svg class="rapid-slashes-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M 7 25 Q 30 2 58 7 Q 29 9 7 25 Z" fill="#fff7d8"/><path d="M 7 36 Q 30 13 58 18 Q 29 20 7 36 Z" fill="#d8bd7a"/><path d="M 7 47 Q 30 24 58 29 Q 29 31 7 47 Z" fill="#927b4b"/><path d="M 7 58 Q 30 35 58 40 Q 29 42 7 58 Z" fill="#514934"/></svg></span><span class="skill-placeholder rapid-cooldown-text"></span><span class="skill-placeholder skill-empty-mark" aria-hidden="true">+</span><span class="skill-number">1</span><span class="skill-mana-cost" aria-label="Стоимость: 10 маны">10</span></button><button type="button" class="skill-slot" id="powerSkill"><span class="power-icon">🗡</span><span class="skill-placeholder power-cooldown-text"></span><span class="skill-placeholder skill-empty-mark" aria-hidden="true">+</span><span class="skill-number">2</span><span class="skill-mana-cost">20</span></button><button type="button" class="skill-slot" id="aimSkill" aria-label="Меткий выстрел: не открыт"><svg class="aim-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="#9ff28f" stroke-width="3"/><circle cx="24" cy="24" r="9" fill="none" stroke="#d4ff7a" stroke-width="2.5"/><circle cx="24" cy="24" r="3" fill="#f4ffc4"/><path d="M24 2v9M24 37v9M2 24h9M37 24h9" stroke="#9ff28f" stroke-width="3" stroke-linecap="round"/></svg><span class="skill-placeholder aim-cooldown-text"></span><span class="skill-placeholder skill-empty-mark" aria-hidden="true">+</span><span class="skill-number">3</span><span class="skill-mana-cost" aria-label="Стоимость: 15 маны">15</span></button><div class="skill-slot" aria-label="Слот навыка 4: пусто"><span class="skill-placeholder">+</span><span class="skill-number">4</span></div><div class="skill-slot" aria-label="Слот навыка 5: пусто"><span class="skill-placeholder">+</span><span class="skill-number">5</span></div><div class="skill-slot" aria-label="Слот навыка 6: пусто"><span class="skill-placeholder">+</span><span class="skill-number">6</span></div></div><div class="mana-bar" role="progressbar" aria-label="Мана" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="manaBar"><div class="mana-track"><div class="mana-fill" id="manaFill"></div><div class="mana-label"><span id="manaValue">100 / 100</span><span id="manaGain" role="status" hidden></span><span id="manaRegenValue" title="Восстановление маны"></span></div></div></div>
+</div><button class="feature-button character-stats-button" id="openCharacterStats" aria-label="Характеристики" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M6 16v-5M12 16V4M18 16V8"/><circle cx="12" cy="3" r="1"/></svg><span class="feature-label">Характеристики</span></button><div class="potion-wheel" id="potionWheel" role="group" aria-label="Зелья"></div><div class="chest-area"><button id="lootChest" class="loot-chest" aria-label="Сундук с предметом"><svg viewBox="0 0 64 56" fill="none" stroke="#edc77b" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><path d="M7 27V17C7 2 57 2 57 17v10Z" fill="#694c2b"/><path d="M7 27h50v24H7Z" fill="#493823"/><path d="M18 8v43M46 8v43M7 27h50"/><path d="M27 23h10v14H27Z" fill="#d0a754"/><path d="M32 27v6" stroke="#493823"/></svg><span id="chestTimer">01:00</span><small id="chestNext" hidden></small><b id="chestCount" hidden></b></button><div id="chestNotice" role="status"></div></div><div class="skill-bar" aria-label="Слоты навыков"><button class="skill-slot" id="rapidSkill" aria-label="Скоростная атака: не открыта" title="Скоростная атака · 5 ударов за 1 сек. · Перезарядка 10 с · Открывается в древе талантов за 1 очко талантов"><span class="rapid-icon-wrap"><img class="rapid-slashes-icon" src="assets/rapid-attack-icon.webp" alt="" aria-hidden="true" draggable="false"></span><span class="skill-placeholder rapid-cooldown-text"></span><span class="skill-placeholder skill-empty-mark" aria-hidden="true">+</span><span class="skill-number">1</span><span class="skill-mana-cost" aria-label="Стоимость: 10 маны">10</span></button><button type="button" class="skill-slot" id="powerSkill"><img class="power-icon" src="assets/power-strike-icon.webp" alt=""><span class="skill-placeholder power-cooldown-text"></span><span class="skill-placeholder skill-empty-mark" aria-hidden="true">+</span><span class="skill-number">2</span><span class="skill-mana-cost">20</span></button><button type="button" class="skill-slot" id="aimSkill" aria-label="Меткий выстрел: не открыт"><img class="aim-icon" src="assets/aim-shot-icon.webp" alt="" aria-hidden="true" draggable="false"><span class="skill-placeholder aim-cooldown-text"></span><span class="skill-placeholder skill-empty-mark" aria-hidden="true">+</span><span class="skill-number">3</span><span class="skill-mana-cost" aria-label="Стоимость: 15 маны">15</span></button><div class="skill-slot" aria-label="Слот навыка 4: пусто"><span class="skill-placeholder">+</span><span class="skill-number">4</span></div><div class="skill-slot" aria-label="Слот навыка 5: пусто"><span class="skill-placeholder">+</span><span class="skill-number">5</span></div><div class="skill-slot" aria-label="Слот навыка 6: пусто"><span class="skill-placeholder">+</span><span class="skill-number">6</span></div></div><div class="mana-bar" role="progressbar" aria-label="Мана" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" id="manaBar"><div class="mana-track"><div class="mana-fill" id="manaFill"></div><div class="mana-label"><span id="manaValue">100 / 100</span><span id="manaGain" role="status" hidden></span><span id="manaRegenValue" title="Восстановление маны"></span></div></div></div>
 <div class="damage-plaque"><div class="dp-main"><img src="assets/stat-damage.webp" alt=""><div><span>УРОН ЗА УДАР</span><b id="damageValue">1</b></div></div><div class="dp-subs"><span class="dp-minor" title="Шанс крита"><img src="assets/stat-crit-chance.webp" alt="Шанс крита"><b id="critChanceValue">5%</b></span><span class="dp-minor dp-crit" title="Урон крита"><img src="assets/stat-crit-damage.webp" alt="Урон крита"><b id="critDamageValue">200%</b></span></div></div><button class="attack" id="attack">⚔ Атаковать</button><p class="message" id="message" role="status" hidden>Нажми на кнопку и нанеси первый удар.</p>
 </div>
 </section>
@@ -774,8 +831,8 @@ html body #shopDialog .shop-tab.active{color:#062018;background:linear-gradient(
 <div class="equipment-slot" data-slot="weapon2" aria-label="Вторая рука: пусто"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m16 15-10-12-3-1 1 5 10 10M19 13l-7 7M16 17l5 5M22 19l-3 3"/></svg><strong>Вторая рука</strong><small>Пусто</small></div></div><div class="equipment-totals" id="equipmentTotals"></div><div class="equipment-note"><button id="unequipItem" hidden>Снять предмет</button><p id="unequipStatus" role="status"></p></div></dialog>
 <dialog id="inventoryDialog" class="equipment-dialog" aria-labelledby="inventoryTitle"><div class="equipment-heading"><h2 id="inventoryTitle">Инвентарь</h2><button id="closeInventory" aria-label="Закрыть инвентарь">×</button></div><div class="inventory-grid"><div class="inventory-cell" aria-label="Ячейка 1: пусто"></div><div class="inventory-cell" aria-label="Ячейка 2: пусто"></div><div class="inventory-cell" aria-label="Ячейка 3: пусто"></div><div class="inventory-cell" aria-label="Ячейка 4: пусто"></div><div class="inventory-cell" aria-label="Ячейка 5: пусто"></div><div class="inventory-cell" aria-label="Ячейка 6: пусто"></div><div class="inventory-cell" aria-label="Ячейка 7: пусто"></div><div class="inventory-cell" aria-label="Ячейка 8: пусто"></div><div class="inventory-cell" aria-label="Ячейка 9: пусто"></div><div class="inventory-cell" aria-label="Ячейка 10: пусто"></div><div class="inventory-cell" aria-label="Ячейка 11: пусто"></div><div class="inventory-cell" aria-label="Ячейка 12: пусто"></div><div class="inventory-cell" aria-label="Ячейка 13: пусто"></div><div class="inventory-cell" aria-label="Ячейка 14: пусто"></div><div class="inventory-cell" aria-label="Ячейка 15: пусто"></div><div class="inventory-cell" aria-label="Ячейка 16: пусто"></div><div class="inventory-cell" aria-label="Ячейка 17: пусто"></div><div class="inventory-cell" aria-label="Ячейка 18: пусто"></div><div class="inventory-cell" aria-label="Ячейка 19: пусто"></div><div class="inventory-cell" aria-label="Ячейка 20: пусто"></div><div class="inventory-cell" aria-label="Ячейка 21: пусто"></div><div class="inventory-cell" aria-label="Ячейка 22: пусто"></div><div class="inventory-cell" aria-label="Ячейка 23: пусто"></div><div class="inventory-cell" aria-label="Ячейка 24: пусто"></div></div><p>Пока пусто · 0 / 250</p><div class="inventory-sale-actions"><button id="sellAllInventory">Продать всё</button></div></dialog>
 <dialog id="itemActionsDialog" aria-labelledby="itemActionsTitle"><div class="equipment-heading"><h2 id="itemActionsTitle"></h2><button id="closeItemActions" aria-label="Закрыть меню предмета">×</button></div><p id="itemActionsDetails"></p><h3 id="equipChoiceTitle"></h3><div id="itemSlotChoices"></div><div class="sell-row"><button id="sellItem">Продать</button><span class="sell-value"><img class="gold-coin" src="assets/coin-gold.svg" alt="золото"><span id="sellPrice">1</span></span></div></dialog>
-<dialog id="characterStatsDialog" aria-labelledby="characterStatsTitle"><div class="equipment-heading"><h2 id="characterStatsTitle">Характеристики</h2><button id="closeCharacterStats" aria-label="Закрыть характеристики">×</button></div><p class="character-stats-intro">Параметры с учётом надетой экипировки</p><div id="characterStatsList"></div><h3 class="effects-title">✦ Уникальные эффекты</h3><div id="characterEffects"></div></dialog>
-<dialog id="talentsDialog" aria-labelledby="talentsTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">РАЗВИТИЕ ПЕРСОНАЖА</div><h2 id="talentsTitle">Древо талантов</h2></div><button id="closeTalents" aria-label="Закрыть древо талантов">×</button></div><p class="talents-intro">Шесть навыков. Шесть путей развития.</p><p class="available-talent-points">Очки талантов: 0</p><button type="button" class="reset-talents-button" id="resetAllTalents">Сбросить очки талантов</button><div class="talents-grid"><section class="talent-section rapid-talent"><div class="talent-section-heading"><span class="talent-skill-icon" id="rapidTreeIcon" tabindex="0" aria-label="Скоростная атака"><svg class="rapid-slashes-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M 7 25 Q 30 2 58 7 Q 29 9 7 25 Z" fill="#fff7d8"/><path d="M 7 36 Q 30 13 58 18 Q 29 20 7 36 Z" fill="#d8bd7a"/><path d="M 7 47 Q 30 24 58 29 Q 29 31 7 47 Z" fill="#927b4b"/><path d="M 7 58 Q 30 35 58 40 Q 29 42 7 58 Z" fill="#514934"/></svg></span><div><h3>Скоростная атака</h3><span>Древо талантов</span></div><small id="rapidTreePoints">0 / 1</small></div><div class="talent-preview"><button class="talent-node root-node" id="unlockRapid" aria-label="Открыть Скоростную атаку за 1 очко талантов"><svg class="rapid-slashes-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M 7 25 Q 30 2 58 7 Q 29 9 7 25 Z" fill="#fff7d8"/><path d="M 7 36 Q 30 13 58 18 Q 29 20 7 36 Z" fill="#d8bd7a"/><path d="M 7 47 Q 30 24 58 29 Q 29 31 7 47 Z" fill="#927b4b"/><path d="M 7 58 Q 30 35 58 40 Q 29 42 7 58 Z" fill="#514934"/></svg></button><span class="talent-branch" aria-hidden="true"></span><div class="talent-leaves" aria-hidden="true"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p><p id="rapidUnlockStatus" role="status" class="visually-hidden"></p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon" id="powerTreeIcon">✹</span><div><h3>Мощный удар</h3><span>Древо талантов</span></div><small id="powerTreePoints">Не открыт</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">2</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon" id="aimTreeIcon"><svg class="aim-icon" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="17" fill="none" stroke="#9ff28f" stroke-width="3"/><circle cx="24" cy="24" r="9" fill="none" stroke="#d4ff7a" stroke-width="2.5"/><circle cx="24" cy="24" r="3" fill="#f4ffc4"/><path d="M24 2v9M24 37v9M2 24h9M37 24h9" stroke="#9ff28f" stroke-width="3" stroke-linecap="round"/></svg></span><div><h3>Меткий выстрел</h3><span>Древо талантов</span></div><small id="aimTreePoints">Не открыт</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">3</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon">❖</span><div><h3>Навык 4</h3><span>Древо талантов</span></div><small>Скоро</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">4</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon">✦</span><div><h3>Навык 5</h3><span>Древо талантов</span></div><small>Скоро</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">5</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon">☄</span><div><h3>Навык 6</h3><span>Древо талантов</span></div><small>Скоро</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">6</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section></div></dialog>
+<dialog id="characterStatsDialog" aria-labelledby="characterStatsTitle"><div class="equipment-heading"><h2 id="characterStatsTitle">Характеристики</h2><button id="closeCharacterStats" aria-label="Закрыть характеристики">×</button></div><div id="characterHero" class="cs-hero"></div><div id="characterStatsList" class="cs-sections"></div></dialog>
+<dialog id="talentsDialog" aria-labelledby="talentsTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">РАЗВИТИЕ ПЕРСОНАЖА</div><h2 id="talentsTitle">Древо талантов</h2></div><button id="closeTalents" aria-label="Закрыть древо талантов">×</button></div><p class="talents-intro">Шесть навыков. Шесть путей развития.</p><p class="available-talent-points">Очки талантов: 0</p><button type="button" class="reset-talents-button" id="resetAllTalents">Сбросить очки талантов</button><div class="talents-grid"><section class="talent-section rapid-talent"><div class="talent-section-heading"><span class="talent-skill-icon" id="rapidTreeIcon" tabindex="0" aria-label="Скоростная атака"><img class="rapid-slashes-icon" src="assets/rapid-attack-icon.webp" alt="" aria-hidden="true" draggable="false"></span><div><h3>Скоростная атака</h3><span>Древо талантов</span></div><small id="rapidTreePoints">0 / 1</small></div><div class="talent-preview"><button class="talent-node root-node" id="unlockRapid" aria-label="Открыть Скоростную атаку за 1 очко талантов"><img class="rapid-slashes-icon" src="assets/rapid-attack-icon.webp" alt="" aria-hidden="true" draggable="false"></button><span class="talent-branch" aria-hidden="true"></span><div class="talent-leaves" aria-hidden="true"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p><p id="rapidUnlockStatus" role="status" class="visually-hidden"></p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon" id="powerTreeIcon"><img class="power-tree-img" src="assets/power-strike-icon.webp" alt=""></span><div><h3>Мощный удар</h3><span>Древо талантов</span></div><small id="powerTreePoints">Не открыт</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">2</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon" id="aimTreeIcon"><img class="aim-icon" src="assets/aim-shot-icon.webp" alt="" aria-hidden="true" draggable="false"></span><div><h3>Меткий выстрел</h3><span>Древо талантов</span></div><small id="aimTreePoints">Не открыт</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">3</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon">❖</span><div><h3>Навык 4</h3><span>Древо талантов</span></div><small>Скоро</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">4</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon">✦</span><div><h3>Навык 5</h3><span>Древо талантов</span></div><small>Скоро</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">5</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section><section class="talent-section"><div class="talent-section-heading"><span class="talent-skill-icon">☄</span><div><h3>Навык 6</h3><span>Древо талантов</span></div><small>Скоро</small></div><div class="talent-preview" aria-hidden="true"><span class="talent-node root-node">6</span><span class="talent-branch"></span><div class="talent-leaves"><span class="talent-node">◇</span><span class="talent-node">◇</span><span class="talent-node">◇</span></div></div><p>Таланты скоро появятся</p></section></div></dialog>
 <dialog id="talentTreeDialog" aria-labelledby="talentTreeTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">ДРЕВО НАВЫКА</div><h2 id="talentTreeTitle"></h2></div><button id="closeTalentTree" aria-label="Закрыть дерево">×</button></div><p class="tree-detail-intro">Развивай навык, продвигаясь вниз по ветвям.</p><p class="available-talent-points">Очки талантов: 0</p><button type="button" class="reset-talents-button" id="resetBranchTalents">Сбросить очки талантов</button><div id="talentTreeContent"></div><p class="tree-detail-note">Новые таланты пока не настроены.</p><div class="talent-draft-actions"><button type="button" id="cancelTalentDraft">Отмена</button><button type="button" id="confirmTalentDraft">Подтвердить</button></div></dialog>
 <button id="openAdmin" class="admin-toggle" aria-haspopup="dialog" aria-controls="adminPanel">⌘ Админ</button>
 <dialog id="adminPanel" aria-labelledby="adminTitle"><div class="equipment-heading"><div><div class="talents-eyebrow">УПРАВЛЕНИЕ ИГРОЙ</div><h2 id="adminTitle">Админ-панель</h2></div><button id="closeAdmin" aria-label="Закрыть админ-панель">×</button></div><p class="admin-caption">Изменения сохраняются автоматически.</p>
@@ -910,7 +967,7 @@ function renderExperience(){$('heroLevel').textContent=playerLevel;$('heroLevelB
 function loadExperience(saved){heroPoints=Number.isSafeInteger(saved.heroPoints)&&saved.heroPoints>=0?saved.heroPoints:0;souls=Number.isSafeInteger(saved.souls)&&saved.souls>=0?saved.souls:0;aimUnlocked=saved.aimUnlocked===true;aimRank=Number.isInteger(saved.aimRank)?Math.max(0,Math.min(AIM_MAX_RANK,saved.aimRank)):0;aimReadyAt=Number.isFinite(saved.aimReadyAt)?Math.min(saved.aimReadyAt,Date.now()+AIM_COOLDOWN+15000):0;rapidSeriesRank=Number.isInteger(saved.rapidSeriesRank)?Math.max(0,Math.min(10,saved.rapidSeriesRank)):0;rapidRestRank=Number.isInteger(saved.rapidRestRank)?Math.max(0,Math.min(10,saved.rapidRestRank)):0;rapidDamageRank=Number.isInteger(saved.rapidDamageRank)?Math.max(0,Math.min(10,saved.rapidDamageRank)):0;playerLevel=Number.isSafeInteger(saved.playerLevel)&&saved.playerLevel>=1?saved.playerLevel:1;playerXp=Number.isFinite(saved.playerXp)&&saved.playerXp>=0&&saved.playerXp<xpRequired()?saved.playerXp:0;talentPoints=Number.isSafeInteger(saved.talentPoints)&&saved.talentPoints>=0?saved.talentPoints:0;}
 const MAX_MANA=100,MANA_REGEN=.1,RAPID_MANA_COST=10;
 // Источники бонусов к характеристикам: надетые предметы, древо прокачки героя и собранные комплекты.
-function bonusSources(){return [...Object.values(equipped).filter(Boolean),...(window.heroTreeBonus?[window.heroTreeBonus()]:[]),...(window.setCollectionBonus?[window.setCollectionBonus()]:[])];}
+function bonusSources(){return [...Object.values(equipped).filter(Boolean),...(window.heroTreeBonus?[window.heroTreeBonus()]:[]),...(window.setCollectionBonus?[window.setCollectionBonus()]:[]),...(window.gemBonus?[window.gemBonus()]:[])];}
 function maxMana(){return MAX_MANA+bonusSources().reduce((sum,item)=>sum+(item?.maxMana||0),0);}
 let mana=100,manaUpdatedAt=Date.now(),manaSavedAt=Date.now();
 // Восстановление маны в секунду: база MANA_REGEN плюс manaRegen предметов, комплектов и пути героя.
@@ -1046,25 +1103,47 @@ function showMonsterDeath(){
   dot.style.setProperty('--dx',Math.cos(angle)*reach+'px');dot.style.setProperty('--dy',Math.sin(angle)*reach+'px');dot.style.setProperty('--size',(4+Math.random()*7)+'px');monster.append(dot);
  }
 }
-function showSlash(critical){
- const swing=swordSwings[swordSwingIndex++%swordSwings.length];if(!settings.animations)return;
- const ns='http://www.w3.org/2000/svg',slash=document.createElementNS(ns,'svg');slash.setAttribute('viewBox','0 0 240 240');slash.setAttribute('aria-hidden','true');slash.classList.add('slash-effect','moving-sword-slash');if(critical)slash.classList.add('critical');if(combatStats().fire)slash.classList.add('fire-slash');
+// Последний удар: урон и дуга нужны «Фантомному клинку», чтобы повторить его.
+let lastStrikeDamage=0,lastSwing=null,slashEchoSeq=0,rapidSlashing=false;
+function showSlash(critical,echo=null){
+ const swing=echo?echo.swing:swordSwings[swordSwingIndex++%swordSwings.length];if(!echo)lastSwing=swing;if(!settings.animations)return;if(!echo&&rapidSlashing){showRapidRibbon(swing,critical);return;}
+ const ns='http://www.w3.org/2000/svg',slash=document.createElementNS(ns,'svg');slash.setAttribute('viewBox','0 0 240 240');slash.setAttribute('aria-hidden','true');slash.classList.add('slash-effect','moving-sword-slash');if(critical)slash.classList.add('critical');if(echo)slash.classList.add('phantom-slash');else if(combatStats().fire)slash.classList.add('fire-slash');
  const group=document.createElementNS(ns,'g');group.setAttribute('transform','translate(120 120) rotate('+swing.angle+') scale('+swing.mirror+' 1) translate(-120 -120)');slash.append(group);
  // The animated trail follows the original slash position and alternating directions.
- const maskId='swing-mask-'+swordSwingIndex;
- group.innerHTML=`<defs><mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="240"><path class="swing-arc" pathLength="100" d="M 23 171 C 42 61 147 24 218 57" fill="none" stroke="white" stroke-width="44" stroke-linecap="round"/></mask></defs><g mask="url(#${maskId})"><path d="M23 171C42 61 147 24 218 57L213 76C143 40 70 91 23 171Z" fill="${critical?'#ffb567':'#eddb9c'}" opacity=".22" style="filter:blur(3px)"/><path d="M23 171C42 61 147 24 218 57L214 69C145 39 68 86 23 171Z" fill="${critical?'#ffdfaa':'#fff2cc'}" opacity=".75"/><path d="M23 171C42 61 147 24 218 57L217 61C146 30 54 73 23 171Z" fill="#fff"/></g>`;
+ const maskId=echo?'swing-echo-'+(++slashEchoSeq):'swing-mask-'+swordSwingIndex;
+ group.innerHTML=`<defs><mask id="${maskId}" maskUnits="userSpaceOnUse" x="0" y="0" width="240" height="240"><path class="swing-arc" pathLength="100" d="M 23 171 C 42 61 147 24 218 57" fill="none" stroke="white" stroke-width="44" stroke-linecap="round"/></mask></defs><g mask="url(#${maskId})"><path d="M23 171C42 61 147 24 218 57L213 76C143 40 70 91 23 171Z" fill="${echo?'#a878ff':critical?'#ffb567':'#eddb9c'}" opacity="${echo?.4:.22}" style="filter:blur(3px)"/><path d="M23 171C42 61 147 24 218 57L214 69C145 39 68 86 23 171Z" fill="${echo?'#c9a8ff':critical?'#ffdfaa':'#fff2cc'}" opacity=".75"/><path d="M23 171C42 61 147 24 218 57L217 61C146 30 54 73 23 171Z" fill="${echo?'#efe6ff':'#fff'}"/></g>`;
  $('monster').append(slash);setTimeout(()=>slash.remove(),500);
 }
+// Скоростная атака, вид «Ледяные ленты»: дуга из трёх линий (свечение, синий, белая сердцевина) прорисовывается и втягивает хвост, за ней тонкая тень гаснет медленнее.
+const RAPID_ARC='M 23 171 C 42 61 147 24 218 57';
+function rapidArc(svg,swing,{turn=0,scale=1,widths,life,opacity=1}){
+ const ns='http://www.w3.org/2000/svg',g=document.createElementNS(ns,'g');
+ g.setAttribute('transform','translate(120 120) rotate('+(swing.angle+turn)+') scale('+swing.mirror*scale+' '+scale+') translate(-120 -120)');g.setAttribute('opacity',opacity);
+ ['#3d6fff','#8fb8ff','#fff'].forEach((color,i)=>{
+  const p=document.createElementNS(ns,'path');
+  for(const [k,v] of Object.entries({d:RAPID_ARC,fill:'none',stroke:color,'stroke-width':widths[i],'stroke-linecap':'round',pathLength:100,'stroke-dasharray':'100 100','stroke-dashoffset':100}))p.setAttribute(k,v);
+  if(!i){p.style.filter='blur(3px)';p.setAttribute('opacity','.7');}
+  g.append(p);p.animate([{strokeDashoffset:100},{strokeDashoffset:0,offset:.55},{strokeDashoffset:-100}],{duration:life,easing:'cubic-bezier(.25,.7,.35,1)',fill:'forwards'});
+ });
+ g.animate([{opacity},{opacity,offset:.6},{opacity:0}],{duration:life,fill:'forwards'});svg.append(g);
+}
+function showRapidRibbon(swing,critical){
+ const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 240 240');svg.setAttribute('aria-hidden','true');svg.classList.add('slash-effect','rapid-slash');if(critical)svg.classList.add('critical');
+ rapidArc(svg,swing,{widths:[11,4.8,1.7],life:460});
+ rapidArc(svg,swing,{turn:6,scale:1.08,widths:[4.2,1.8,.7],life:820,opacity:.45});
+ $('monster').append(svg);setTimeout(()=>svg.remove(),850);
+}
 
-function attack(skillStrike=false,damageScale=null,quiet=false,auto=false){
- checkBossTimer();
+function attack(skillStrike=false,damageScale=null,quiet=false,auto=false,fixedDamage=null,suppressHurt=false){
+ lastStrikeDamage=0;checkBossTimer();
  // Автоатака бьёт и при открытых окнах — пока игрок её не выключит.
  if(auto&&(locked||Date.now()<cooldownUntil))return;
  if(!auto&&(locked||$('shopDialog').open||$('talentsDialog').open||$('characterStatsDialog').open||$('itemActionsDialog').open||$('inventoryDialog').open||$('equipmentDialog').open||(!skillStrike&&Date.now()<cooldownUntil)||$('settingsDialog').open||$('resetDialog').open))return;
- const stats=combatStats();if(!skillStrike)cooldownUntil=Date.now()+2000/(1+stats.speed/100)*(auto?AUTO_COOLDOWN_SCALE:1);updateAttackButton();const crit=!skillStrike&&Math.random()<stats.crit,damage=Number((stats.damage*(crit?stats.multiplier:1)*(damageScale??(skillStrike?1+rapidDamageRank*.1:1))*(window.dungeonApi?.damageFactor()??1)).toFixed(2));hp=Math.max(0,hp-damage);showMonsterHurt();if(!quiet)showSlash(crit);
- if(settings.damage){const pop=document.createElement('div');pop.className='float'+(crit?' crit':'');pop.textContent='−'+damage+(crit?'!':'');pop.style.marginLeft=(Math.random()*70-35)+'px';$('arena').append(pop);setTimeout(()=>pop.remove(),750);}
+ const stats=combatStats();if(!skillStrike)cooldownUntil=Date.now()+2000/(1+stats.speed/100)*(auto?AUTO_COOLDOWN_SCALE:1);updateAttackButton();const crit=!skillStrike&&Math.random()<stats.crit,damage=fixedDamage??Number((stats.damage*(crit?stats.multiplier:1)*(damageScale??(skillStrike?1+rapidDamageRank*.1:1))*(window.dungeonApi?.damageFactor()??1)).toFixed(2));hp=Math.max(0,hp-damage);lastStrikeDamage=damage;if(!suppressHurt)showMonsterHurt();if(!quiet)showSlash(crit);
+ if(settings.damage){const pop=document.createElement('div');pop.className='float'+(crit?' crit':'')+(fixedDamage!==null?' phantom-float':'');pop.textContent='−'+damage+(crit?'!':'');pop.style.marginLeft=(Math.random()*70-35)+'px';$('arena').append(pop);setTimeout(()=>pop.remove(),750);}
  if(settings.animations&&damageScale!==10&&!quiet){$('monster').classList.remove('hit');void $('monster').offsetWidth;$('monster').classList.add('hit');setTimeout(()=>$('monster').classList.remove('hit'),120);}
  $('message').textContent=!settings.damage?'Бой продолжается.':crit?'Критический удар! Нанесено '+damage+' урона.':'Ты наносишь '+damage+' урона.';
+ if(hp===0)window.powerShotApi?.onKill(isTimedBoss()||!!window.dungeonApi?.active());
  if(hp===0&&window.dungeonApi?.active()){showMonsterDeath();window.dungeonApi.onBossKilled();render();return;}
  if(hp===0){showMonsterDeath();gainExperience(maxHp);const reward=Number((maxHp*(maxHp===enemyHealth(zone,5)?.05:.1)*(1+characterParameters().goldBonus/100)).toFixed(2));const soulGain=zoneKills===5?(zone%5===0?5:2):1;souls+=soulGain;dropSouls(soulGain);locked=true;kills++;if(zoneKills===5){zone++;zoneKills=0;bossDeadline=0;}else{zoneKills++;if(isTimedBoss())bossDeadline=Date.now()+bossTimeLimit()+500;}gold=Number((gold+reward).toFixed(2));$('message').textContent='Победа! +'+reward+' золота. Следующий противник уже близко…';enemyTimer=setTimeout(()=>{maxHp=enemyHealth();hp=maxHp;if(isTimedBoss())bossDeadline=Date.now()+bossTimeLimit();locked=false;updateAttackButton();$('message').textContent='Новый слизень появился на тропе. В бой!';render()},500);}
  render();
@@ -1130,24 +1209,44 @@ itemPool.push(...(window.SET_ITEMS||[]));
 const LOOT_RARITY_WEIGHTS={Common:60,Uncommon:25,Rare:10,Epic:4,Legendary:.9,Divine:.1};
 function lootPool(){return itemPool.filter(item=>!item.adminOnly);}
 function rollLootItem(){const pool=lootPool(),present=Object.entries(LOOT_RARITY_WEIGHTS).filter(([rarity])=>pool.some(item=>item.rarity===rarity));if(!present.length)return null;let roll=Math.random()*present.reduce((sum,[,weight])=>sum+weight,0),rarity=present[present.length-1][0];for(const [name,weight] of present){if((roll-=weight)<0){rarity=name;break;}}const options=pool.filter(item=>item.rarity===rarity);return {...options[Math.floor(Math.random()*options.length)]};}
-// Первые два предмета новичка — оружие, из какого бы источника они ни пришли (кроме админ-панели). Редкость сохраняется.
-const STARTER_WEAPONS=2;let starterWeaponsLeft=STARTER_WEAPONS;
+// Первые два предмета новичка — оружие, из какого бы источника они ни пришли (кроме админ-панели).
+// Редкость не выше «Необычного»: обычная и необычная сохраняются, более высокая разыгрывается заново между ними.
+const STARTER_WEAPONS=2,STARTER_RARITIES=['Common','Uncommon'];let starterWeaponsLeft=STARTER_WEAPONS;
 function starterWeapon(item){
  if(!item||starterWeaponsLeft<=0)return item;
- starterWeaponsLeft--;if(item.slot==='weapon')return item;
- const weapons=lootPool().filter(w=>w.slot==='weapon'),same=weapons.filter(w=>w.rarity===item.rarity),pool=same.length?same:weapons;
- return pool.length?{...pool[Math.floor(Math.random()*pool.length)]}:item;
+ starterWeaponsLeft--;
+ const capped=STARTER_RARITIES.includes(item.rarity);
+ if(item.slot==='weapon'&&capped)return item;
+ const weapons=lootPool().filter(w=>w.slot==='weapon'&&STARTER_RARITIES.includes(w.rarity));if(!weapons.length)return item;
+ let rarity=item.rarity;
+ if(!capped){const present=STARTER_RARITIES.filter(r=>weapons.some(w=>w.rarity===r));let roll=Math.random()*present.reduce((s,r)=>s+LOOT_RARITY_WEIGHTS[r],0);rarity=present.find(r=>(roll-=LOOT_RARITY_WEIGHTS[r])<0)||present[present.length-1];}
+ const same=weapons.filter(w=>w.rarity===rarity),pool=same.length?same:weapons;
+ return {...pool[Math.floor(Math.random()*pool.length)]};
 }
 let equipped={};
 // Шанс крита с убывающей отдачей: сумма всех источников X (база 5 + предметы, комплекты, прокачка) даёт X / (X + 100).
 // 100 → 50%, 200 → 66,7%, 300 → 75% — к 100% шанс только приближается, но не достигает его.
 function critChanceFrom(total){return total>0?total/(total+100):0;}
+// Числа в табличке урона растут вместе с героем, а ширина таблички постоянна: длинному значению уменьшаем шрифт, пока оно не поместится.
+function fitPlaqueRow(row,target,minSize){
+ target.style.fontSize='';let size=parseFloat(getComputedStyle(target).fontSize);
+ while(row.scrollWidth>row.clientWidth&&size>minSize){size-=.5;target.style.fontSize=size+'px';}
+}
+function fitDamagePlaque(){
+ const subs=document.querySelector('.dp-subs');if(!subs||!subs.clientWidth)return;
+ fitPlaqueRow(document.querySelector('.dp-main'),$('damageValue'),12);
+ // Оба числа под чертой держим одного размера.
+ const minors=[...subs.querySelectorAll('.dp-minor')];minors.forEach(el=>{el.style.fontSize='';});
+ let size=parseFloat(getComputedStyle(minors[0]).fontSize);
+ while(subs.scrollWidth>subs.clientWidth&&size>8){size-=.5;minors.forEach(el=>{el.style.fontSize=size+'px';});}
+}
+addEventListener('resize',fitDamagePlaque);document.fonts?.ready.then(fitDamagePlaque);
 function combatStats(){const items=bonusSources();return {damage:(items.reduce((n,i)=>n+(i.damage||0),0)||1)+items.reduce((n,i)=>n+(i.damageBonus||0),0),speed:items.reduce((n,i)=>n+(i.attackSpeed||0),0),crit:critChanceFrom(5+items.reduce((n,i)=>n+(i.critChance||0),0)),multiplier:2+items.reduce((n,i)=>n+(i.critDamage||0),0)/100,fire:items.some(i=>i.element==='fire')};}
 function renderEquipment(){renderMana();updateRapidUI();document.querySelectorAll('.equipment-slot').forEach(el=>{const item=equipped[el.dataset.slot];el.querySelectorAll('.equipped-picture').forEach(node=>node.remove());el.classList.toggle('has-item',!!item);if(item)el.style.setProperty('--rc',rarityFlashColors[item.rarity]||'#7fe6c2');else el.style.removeProperty('--rc');el.title=item?item.name+' · '+rarityLabel(item.rarity)+' · Нажми, чтобы сменить':'';el.querySelector('small').textContent=item?item.name:'Пусто';if(item){const image=document.createElement('img');image.className='equipped-picture';image.src=item.image;image.alt=item.name;el.prepend(image);}attachItemTooltip(el,item);el.removeAttribute('title');});renderEquipmentTotals();renderDamagePlaque();}
 // Табличка у панели навыков: урон за удар, шанс крита и урон крита (в процентах от обычного удара).
 function renderDamagePlaque(){
  const stats=combatStats(),fmt=value=>Number(value.toFixed(1)).toLocaleString('ru-RU');
- $('damageValue').textContent=fmt(stats.damage);$('critChanceValue').textContent=fmt(stats.crit*100)+'%';$('critDamageValue').textContent=fmt(stats.multiplier*100)+'%';
+ $('damageValue').textContent=fmt(stats.damage);$('critChanceValue').textContent=fmt(stats.crit*100)+'%';$('critDamageValue').textContent=fmt(stats.multiplier*100)+'%';fitDamagePlaque();
 }
 const rarityFlashColors={Common:'#bfc5c8',Uncommon:'#76d76b',Rare:'#5eaeff',Epic:'#bc79ff',Legendary:'#ff9b3e',Divine:'#ffe375'};
 function flashEquipmentSlot(slot,rarity){
@@ -1414,13 +1513,31 @@ window.addEventListener('resize',hideItemTooltip);document.addEventListener('scr
 
 
 function characterParameters(){const stats=combatStats(),items=Object.values(equipped).filter(Boolean);return {...stats,goldBonus:bonusSources().reduce((n,i)=>n+(i.goldBonus||0),0),cooldown:2000/(1+stats.speed/100)/1000,critDamage:stats.damage*stats.multiplier,elements:[...new Set(items.filter(i=>i.slot==='weapon').map(i=>elementNames[i.element]||'Без элемента'))],effects:Object.entries(equipped).filter(([,i])=>i&&(i.uniqueProperty||i.bonusProperty)).map(([slot,i])=>({slot,name:i.name,text:i.uniqueProperty||i.bonusProperty}))};}
+// Окно «Характеристики»: шапка с кольцом опыта (имя, враги, опыт до уровня, очки талантов) и карточки разделов.
 function showCharacterStats(){
- const stats=characterParameters();const fmt=n=>Number(n.toFixed(2)).toLocaleString('ru-RU');const list=$('characterStatsList');list.replaceChildren();
- const rows=[['☠','Побеждено врагов',String(kills)],['✦','Уровень персонажа',String(playerLevel)],['◇','Очки талантов',String(talentPoints)],['◈','Очки прокачки героя',String(heroPoints)],['💧','Максимум маны',String(maxMana())],['💧','Восстановление маны',Number(manaRegen().toFixed(2)).toLocaleString('ru-RU')+' / с'],['⚔','Урон за удар',fmt(stats.damage)],['◉','Бонус золота за убийство',fmt(stats.goldBonus)+'%'],['➟','Бонус скорости атаки','+'+fmt(stats.speed)+'%'],['◷','Перезарядка атаки',fmt(stats.cooldown)+' с'],['◎','Шанс критического удара',fmt(stats.crit*100)+'%'],['✹','Урон крита',fmt(stats.multiplier*100)+'%'],['⚔','Урон критического удара',fmt(stats.critDamage)],['♨','Элемент оружия',stats.elements.join(', ')||'Без элемента']];
- for(const [icon,label,value] of rows)list.append(tooltipRow(icon,label,value));
- const effects=$('characterEffects');effects.replaceChildren();
- if(!stats.effects.length){const empty=document.createElement('p');empty.className='no-effects';empty.textContent='У надетой экипировки пока нет уникальных эффектов.';effects.append(empty);}
- for(const effect of stats.effects){const card=document.createElement('div');card.className='character-effect';const name=document.createElement('strong');name.textContent=effect.name+' · '+(slotNames[effect.slot]||effect.slot);const text=document.createElement('p');text.textContent=effect.text;card.append(name,text);effects.append(card);}
+ const stats=characterParameters(),fmt=n=>Number(n.toFixed(2)).toLocaleString('ru-RU'),need=xpRequired(),share=Math.max(0,Math.min(1,playerXp/need));
+ const el=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;};
+ const withValue=(cls,label,value)=>{const e=el('div',cls,label);e.append(el('b',null,value));return e;};
+ const ring=el('div','cs-ring');ring.style.setProperty('--p',(share*100).toFixed(1)+'%');ring.setAttribute('role','img');ring.setAttribute('aria-label','Уровень '+playerLevel+', опыт '+Math.round(share*100)+'%');
+ const ringText=el('div');ringText.append(el('b',null,String(playerLevel)),el('small',null,'УРОВЕНЬ'));ring.append(ringText);
+ const xp=el('div','cs-xp'),xpLabel=el('div','cs-xp-label'),xpLeft=el('span');
+ xpLeft.append(el('b',null,fmt(Math.max(0,need-playerXp))),' опыта');xpLabel.append(el('span',null,'До '+(playerLevel+1)+' уровня'),xpLeft);
+ const track=el('div','cs-xp-track'),fill=el('i');fill.style.width=(share*100).toFixed(1)+'%';track.append(fill);xp.append(xpLabel,track);
+ const chips=el('div','cs-chips');chips.append(withValue('cs-chip','◇ Очков талантов в собственности: ',String(talentPoints)));
+ const info=el('div','cs-hero-info');info.append(el('div','cs-name',heroName),withValue('cs-muted','☠ Побеждено врагов: ',fmt(kills)),xp,chips);
+ $('characterHero').replaceChildren(ring,info);
+ const sections=[
+  ['⚔','Атака','#ff7a5a',[['Урон за удар',fmt(stats.damage)],['Скорость атаки','+'+fmt(stats.speed)+'%'],['Перезарядка',fmt(stats.cooldown)+' с'],['Элемент оружия',stats.elements.join(', ')||'Без элемента']]],
+  ['✹','Критический удар','#ffb04a',[['Шанс',fmt(stats.crit*100)+'%'],['Сила крита',fmt(stats.multiplier*100)+'%'],['Урон крита',fmt(stats.critDamage)]]],
+  ['💧','Мана','#6fb8ff',[['Максимум',String(maxMana())],['Восстановление',fmt(manaRegen())+' / с']]],
+  ['◉','Добыча','#ffd76a',[['Бонус золота за убийство',fmt(stats.goldBonus)+'%']]]
+ ];
+ const list=$('characterStatsList');list.replaceChildren();
+ const card=(icon,title,color)=>{const sec=el('section','cs-sec');sec.style.setProperty('--c',color);sec.append(el('h3','cs-title',icon+' '+title));list.append(sec);return sec;};
+ for(const [icon,title,color,rows] of sections){const sec=card(icon,title,color);for(const [label,value] of rows){const row=el('div','cs-row');row.append(el('span',null,label),el('b',null,value));sec.append(row);}}
+ const effects=card('✦','Уникальные эффекты','#c9a6ff');effects.classList.add('cs-full');
+ if(!stats.effects.length)effects.append(el('p','no-effects','У надетой экипировки пока нет уникальных эффектов.'));
+ for(const effect of stats.effects){const box=el('div','character-effect');box.append(el('strong',null,effect.name+' · '+(slotNames[effect.slot]||effect.slot)),el('p',null,effect.text));effects.append(box);}
  $('characterStatsDialog').showModal();
 }
 $('openCharacterStats').addEventListener('click',showCharacterStats);
@@ -1613,7 +1730,7 @@ let manaWarningTimer=null;
 function showManaWarning(skill){
  document.querySelectorAll('.skill-mana-warning').forEach(el=>el.remove());clearTimeout(manaWarningTimer);
  const warning=document.createElement('div');warning.className='skill-mana-warning';warning.textContent='Недостаточно маны';warning.setAttribute('role','status');
- const bar=skill.closest('.skill-bar');bar.append(warning);warning.style.left=(skill.offsetLeft+skill.offsetWidth/2)+'px';
+ const bar=skill.closest('.skill-bar');if(!bar)return;bar.append(warning);warning.style.left=(skill.offsetLeft+skill.offsetWidth/2)+'px';
  manaWarningTimer=setTimeout(()=>warning.remove(),1500);
 }
 
@@ -1626,8 +1743,8 @@ function useRapid(){
  for(let i=0;i<strikeCount;i++)setTimeout(()=>{
   if(token!==rapidToken)return;
   checkBossTimer();
-  if(locked){showSlash(false);return;}
-  attack(true);
+  rapidSlashing=true;try{if(locked){showSlash(false);return;}attack(true);}finally{rapidSlashing=false;}
+  const swing=lastSwing;window.phantomApi?.echo(()=>showSlash(false,{swing}));
  },i*200);
  setTimeout(()=>{if(token!==rapidToken)return;rapidActive=false;rapidReadyAt=Date.now()+rapidCooldown();saveProgress();updateRapidUI();},rapidDuration());
 }
@@ -1659,7 +1776,7 @@ function showPowerInfo(anchor){
 let cancelCustomPowerSwing=null;
 // «Мощный удар» — ледяной призрачный меч. Хронометраж при durationScale=1 (мс):
 // появление → замах назад → пауза с дрожью и накоплением силы → молниеносный удар → замирание в момент попадания → доводка → угасание.
-const POWER_PHASE_MS={appear:140,windup:260,hold:150,strike:95,hitstop:55,follow:110,fade:260};
+const POWER_PHASE_MS={appear:140,windup:520,hold:150,strike:95,hitstop:55,follow:110,fade:260};
 const POWER_BASE_DURATION=Object.values(POWER_PHASE_MS).reduce((s,ms)=>s+ms,0);
 const POWER_HIT_RATIO=(POWER_PHASE_MS.appear+POWER_PHASE_MS.windup+POWER_PHASE_MS.hold+POWER_PHASE_MS.strike)/POWER_BASE_DURATION;
 function powerStrikeDuration(){return Math.round(POWER_BASE_DURATION*((window.POWER_STRIKE?.durationScale)||1));}
@@ -1669,14 +1786,18 @@ function powerStrikeGeometry(){
  return {cx:(monster.left+monster.width/2-box.left)/zoom,cy:(monster.top+monster.height/2-box.top)/zoom,w:monster.width/zoom,h:monster.height/zoom};
 }
 new Image().src='assets/spectral-sword.png';
+const POWER_STRIKE_TEX='assets/effects/power-strike/';
+['magic_02-ice','twirl_01-ice','twirl_01-white','spark_05-white','star_08-white','star_06-white','star_06-ice','trace_03-white','trace_06-ice','whitePuff05-ice','flash03-white','light_01-ice','spark_01-white','scratch_01-white','circle_rings_b-ice','ring_a_streaks-white','ring_a_streaks-violet','explosion02-ice'].forEach(n=>{new Image().src=POWER_STRIKE_TEX+n+'.png';});
 let powerStrikeSeq=0;
 // Меч вращается вокруг невидимой руки сбоку от моба (справа или слева, случайно); остриё проходит дугой через моба.
 // Сцена — viewBox 300×220, центр моба в (150,125), ширина моба 126 единиц.
-function playCustomPowerSwing(){
- const cfg=window.POWER_STRIKE||{},k=cfg.durationScale||1,swordScale=cfg.swordScale||1,[cr,cg,cb]=hexToRgb(cfg.trailColor);
+// echo — призрачный повтор для «Фантомного клинка»: тот же замах (echo.dir) фиолетовым и сразу с фазы удара.
+let lastPowerDir=1;
+function playCustomPowerSwing(echo=null){
+ const cfg=window.POWER_STRIKE||{},k=cfg.durationScale||1,swordScale=cfg.swordScale||1,[cr,cg,cb]=hexToRgb(echo?'#a878ff':cfg.trailColor);
  const color=`rgb(${cr},${cg},${cb})`,core=`rgb(${Math.round(cr+(255-cr)*.72)},${Math.round(cg+(255-cg)*.72)},${Math.round(cb+(255-cb)*.72)})`;
  const id='ps'+(++powerStrikeSeq),NS='http://www.w3.org/2000/svg',T=POWER_PHASE_MS,MX=150,MY=125;
- const dir=Math.random()<.5?1:-1,px=dir>0?210:90,py=215,R=172,TIP=125,mir=a=>dir>0?a:180-a;
+ const dir=echo?echo.dir:(lastPowerDir=Math.random()<.5?1:-1),px=dir>0?210:90,py=215,R=172,TIP=125,mir=a=>dir>0?a:180-a;
  const A0=mir(-85),AW=mir(-58),A1=mir(-188),sgn=Math.sign(A1-AW);
  let AH=Math.atan2(MY-py,MX-px)*180/Math.PI;
  while(AH<Math.min(AW,A1))AH+=360;while(AH>Math.max(AW,A1))AH-=360;
@@ -1706,7 +1827,7 @@ function playCustomPowerSwing(){
   // Размер меча меняется вокруг гарды так, чтобы остриё оставалось на дуге следа.
   const body=el('g',{transform:`translate(${R-TIP*swordScale} 0) scale(${swordScale})`},inner);
   body.innerHTML=(ghost?'':`<ellipse class="glow" cx="48" cy="0" rx="92" ry="18" fill="${color}" opacity=".2" filter="url(#${id}g)"/>`)+
-   `<image href="assets/spectral-sword.png" x="-41.5" y="-20.6" width="166.3" height="41.1" style="filter:drop-shadow(0 0 3px ${color})"/>`;
+   `<image href="assets/spectral-sword.png" x="-41.5" y="-20.6" width="166.3" height="41.1" style="filter:${echo?'hue-rotate(65deg) saturate(1.5) ':''}drop-shadow(0 0 3px ${color})"/>`;
   run(g,motion,{duration:total,delay:lag,fill:'both'});
   if(ghost)run(inner,[{transform:sc(1),opacity:0,offset:0},{transform:sc(1),opacity:0,offset:off(strikeStart)},{transform:sc(1),opacity:ghost,offset:off(strikeStart+20*k)},{transform:sc(1),opacity:ghost*.8,offset:off(fadeStart)},{transform:sc(1),opacity:0,offset:1}],{duration:total,delay:lag,fill:'both'});
   else{
@@ -1723,32 +1844,53 @@ function playCustomPowerSwing(){
   run(path,dash,{duration:total,fill:'forwards'});
   run(path,[{opacity:op},{opacity:0}],{duration:(T.fade+200)*k,delay:fadeStart-60*k,fill:'forwards'});
  };
- band(R-48,76,color,.22,true);band(R-16,22,color,.6,true);band(R-6,4,'#fff',1,false);
+ // «Клинок бури»: эффекты на текстурах Kenney, перекрашенных tools/make_power_strike_fx.py (assets/effects/power-strike).
+ // Текстура ставится центром в точку и анимируется вокруг неё; у фантомной копии — тот же фиолетовый сдвиг цвета, что у её меча.
+ const texFilter=echo?'filter:hue-rotate(65deg) saturate(1.5);':'';
+ const tex=(name,x,y,size,parent=svg,rot=0)=>el('image',{href:POWER_STRIKE_TEX+name+'.png',x:-size/2,y:-size/2,width:size,height:size,style:`mix-blend-mode:screen;opacity:0;${texFilter}`},el('g',{transform:`translate(${x} ${y}) rotate(${rot})`},parent));
+ // Когда меч проходит угол a: удар идёт с ускорением до моба, доводка — с замедлением.
+ const timeAt=a=>{if((a-AW)*sgn<=(AH-AW)*sgn){const f=Math.max(0,Math.min(1,(a-AW)/(AH-AW)));return strikeStart+T.strike*k*Math.cbrt(f);}const g=Math.max(0,Math.min(1,(a-AH)/(A1-AH)));return mark[5]+T.follow*k*(1-Math.sqrt(1-g));};
+ const rnd=(a,b)=>a+Math.random()*(b-a);
+ band(R-50,80,'#b996ff',.08,true);band(R-30,44,color,.12,true);band(R-14,12,core,.5,true);band(R-6,3,'#fff',1,false);
+ // Вдоль дуги ложатся световые полосы (по касательной) и искры — ровно за мечом.
+ for(let i=0;i<16;i++){const a=AW+(A1-AW)*(i+.5)/16,[x,y]=at(R-rnd(6,44),a),streak=tex(i%2?'trace_03-white':'trace_06-ice',x,y,rnd(95,135),svg,a);
+  run(streak,[{transform:'scale(.6,.2)',opacity:0},{transform:'scale(1,1.2)',opacity:.95,offset:.2},{transform:'scale(.7,1.6)',opacity:0}],{duration:360*k,delay:timeAt(a),fill:'both'});}
+ for(let i=0;i<7;i++){const a=AW+(A1-AW)*rnd(.1,.95),[x,y]=at(R-rnd(0,40),a),star=tex('star_06-white',x,y,rnd(16,26));
+  run(star,[{transform:'scale(0)',opacity:0},{transform:'scale(1.2)',opacity:1,offset:.3},{transform:'translate(0,10px) scale(.3)',opacity:0}],{duration:rnd(380,460)*k,delay:timeAt(a)+40*k,fill:'both'});}
+ {const [fx,fy]=at(R-40,A1),puff=tex('whitePuff05-ice',fx,fy,90);run(puff,[{transform:'scale(.5)',opacity:0},{transform:'scale(1)',opacity:.35,offset:.3},{transform:'scale(1.6)',opacity:0}],{duration:T.fade*k,delay:fadeStart-40*k,fill:'both'});}
  for(let i=4;i>=1;i--)makeBlade(i*16*k,.5/i);
  makeBlade(0,0);
 
- // Накопление силы: ледяные искры стягиваются к острию во время паузы, перед ударом на нём вспыхивает блик.
+ // Призыв и накопление силы: руна за мечом, на острие закручиваются два вихря с молниями, перед ударом вспыхивает звезда.
  const [tx,ty]=at(R-12,AW);
- for(let i=0;i<9;i++){
-  const a=Math.random()*Math.PI*2,d=30+Math.random()*26,spark=el('circle',{cx:tx,cy:ty,r:1.4+Math.random()*1.8,fill:i%3?core:'#fff'});
-  run(spark,[{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px)`,opacity:0},{transform:`translate(${Math.cos(a)*d*.6}px,${Math.sin(a)*d*.6}px)`,opacity:1,offset:.3},{transform:'translate(0,0)',opacity:0}],{duration:(T.hold+T.windup*.5)*k,delay:mark[1]+T.windup*k*.5+i*12*k,easing:'ease-in',fill:'both'});
+ if(!echo){
+  const [rx,ry]=at(R-70,AW),rune=tex('magic_02-ice',rx,ry,96);
+  run(rune,[{transform:'scale(.4) rotate(0deg)',opacity:0},{transform:'scale(1) rotate(60deg)',opacity:.9,offset:.35},{transform:'scale(1.15) rotate(120deg)',opacity:0}],{duration:(T.appear+T.windup)*k,fill:'both'});
+  const start=mark[1]+T.windup*k*.35,len=strikeStart-start;
+  run(tex('twirl_01-ice',tx,ty,110),[{transform:'scale(1.5) rotate(0deg)',opacity:0},{transform:'scale(1.1) rotate(-200deg)',opacity:.9,offset:.5},{transform:'scale(.5) rotate(-420deg)',opacity:0}],{duration:len,delay:start,easing:'ease-in',fill:'both'});
+  run(tex('twirl_01-white',tx,ty,74),[{transform:'scale(1.4) rotate(40deg)',opacity:0},{transform:'scale(1) rotate(300deg)',opacity:.8,offset:.55},{transform:'scale(.4) rotate(560deg)',opacity:0}],{duration:len,delay:start+40*k,easing:'ease-in',fill:'both'});
+  for(let i=0;i<3;i++)run(tex('spark_05-white',tx+rnd(-6,6),ty+rnd(-6,6),rnd(48,64),svg,rnd(0,360)),[{opacity:0},{opacity:1,offset:.1},{opacity:.2,offset:.4},{opacity:.9,offset:.55},{opacity:0}],{duration:120*k,delay:start+len*(.35+i*.2),fill:'both'});
+  run(tex('star_08-white',tx,ty,60),[{transform:'scale(0) rotate(0deg)',opacity:0},{transform:'scale(1.3) rotate(30deg)',opacity:1,offset:.5},{transform:'scale(.2) rotate(70deg)',opacity:0}],{duration:200*k,delay:strikeStart-150*k,fill:'both'});
  }
- const glint=el('path',{d:'M0 -14L3 -3L14 0L3 3L0 14L-3 3L-14 0L-3 -3Z',fill:'#fff',transform:`translate(${tx} ${ty})`});
- run(glint,[{transform:'scale(0) rotate(0deg)',opacity:0},{transform:'scale(1.3) rotate(45deg)',opacity:1,offset:.5},{transform:'scale(.2) rotate(90deg)',opacity:0}],{duration:170*k,delay:strikeStart-130*k,fill:'both'});
+ // Повтор пропускает замах: все анимации сразу перематываются на начало удара.
+ const skipped=echo?strikeStart:0;anims.forEach(a=>{a.currentTime=skipped;});
 
- // Попадание: вспышка, два ледяных кольца и разлетающиеся осколки в центре моба.
+ // Попадание укладывается в ~420 мс до конца анимации: вспышка, морозное облако, трещина-молния, след разреза,
+ // кольца и двойная ударная волна, разлетающиеся звёздочки.
  timers.push(setTimeout(()=>{
-  const g=el('g',{transform:`translate(${MX} ${MY})`});
-  const flash=el('circle',{r:34,fill:`url(#${id}f)`},g);
-  run(flash,[{transform:'scale(.3)',opacity:1},{transform:'scale(1.7)',opacity:0}],{duration:300*k,easing:'ease-out',fill:'forwards'});
-  for(let i=0;i<2;i++){const ring=el('circle',{r:16,fill:'none',stroke:i?'#fff':color,'stroke-width':i?2.5:6},g);run(ring,[{transform:'scale(.4)',opacity:1},{transform:'scale(4.4)',opacity:0}],{duration:480*k,delay:i*90*k,easing:'cubic-bezier(.2,.8,.3,1)',fill:'both'});}
-  for(let i=0;i<10;i++){
-   const d=46+Math.random()*30,shard=el('path',{d:'M0 -6L3 0L0 6L-3 0Z',fill:i%2?'#fff':core,stroke:color,'stroke-width':.8},g);
-   shard.style.rotate=(i*36+Math.random()*20)+'deg';
-   run(shard,[{transform:'translateX(8px) scale(.6)',opacity:1},{transform:`translateX(${d}px) scale(1.3)`,opacity:1,offset:.55},{transform:`translateX(${d+12}px) scale(.4)`,opacity:0}],{duration:560*k,easing:'cubic-bezier(.15,.85,.35,1)',fill:'forwards'});
-  }
- },hitAt));
- const end=Math.max(total,hitAt+(560+180)*k)+60;
+  const g=el('g',{transform:`translate(${MX} ${MY})`}),cut=AH+sgn*90-45;
+  const once=(name,size,frames,dur,delay=0,rot=0)=>run(tex(name,0,0,size,g,rot),frames,{duration:dur*k,delay:delay*k,easing:'cubic-bezier(.2,.8,.3,1)',fill:'both'});
+  once('flash03-white',170,[{transform:'scale(.3)',opacity:1},{transform:'scale(1.5)',opacity:0}],240);
+  once('light_01-ice',240,[{transform:'scale(.6)',opacity:1},{transform:'scale(1.3)',opacity:0}],400);
+  once('spark_01-white',180,[{opacity:1},{opacity:.3,offset:.3},{opacity:1,offset:.45},{opacity:0}],280,0,rnd(0,360));
+  once('scratch_01-white',170,[{transform:'scale(.4,1)',opacity:0},{transform:'scale(1.1,1)',opacity:1,offset:.25},{transform:'scale(1,1)',opacity:0}],380,20,cut);
+  once('circle_rings_b-ice',120,[{transform:'scale(.3)',opacity:1},{transform:'scale(2.6)',opacity:0}],390,20);
+  once('ring_a_streaks-white',120,[{transform:'scale(.4)',opacity:1},{transform:'scale(2.8)',opacity:0}],360,40);
+  once('ring_a_streaks-violet',120,[{transform:'scale(.4)',opacity:.8},{transform:'scale(3.3)',opacity:0}],340,80);
+  for(let i=0;i<5;i++){const a=rnd(0,Math.PI*2),d=rnd(20,40);once('explosion02-ice',rnd(90,125),[{transform:'translate(0,0) scale(.4)',opacity:.8},{transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(1.4)`,opacity:0}],rnd(360,400),20,rnd(0,360));}
+  for(let i=0;i<10;i++){const r=rad(i*36+rnd(-12,12)),d=rnd(50,85);once(i%2?'star_06-white':'star_06-ice',rnd(14,22),[{transform:'translate(0,0) scale(.5)',opacity:1},{transform:`translate(${Math.cos(r)*d}px,${Math.sin(r)*d}px) scale(1.2)`,opacity:1,offset:.6},{transform:`translate(${Math.cos(r)*(d+12)}px,${Math.sin(r)*(d+12)+8}px) scale(.3)`,opacity:0}],rnd(360,410),10);}
+ },hitAt-skipped));
+ const end=Math.max(total,hitAt+(560+180)*k)+60-skipped;
  timers.push(setTimeout(()=>svg.remove(),end));
  return ()=>{timers.forEach(clearTimeout);anims.forEach(a=>a.cancel());svg.remove();};
 }
@@ -1757,7 +1899,7 @@ function usePower(){
  if(mana<20){showManaWarning($('powerSkill'));return;}if(Date.now()<powerReadyAt)return;
  const duration=powerStrikeDuration();mana=Number((mana-20).toFixed(6));powerActive=true;const token=++powerToken;powerReadyAt=Date.now()+duration+1000;renderMana();saveProgress();updatePowerUI();
  if(settings.animations)cancelCustomPowerSwing=playCustomPowerSwing();
- setTimeout(()=>{if(token!==powerToken)return;if(!locked&&hp>0){attack(true,10);if(settings.animations){$('monster').style.setProperty('--power-shake-scale',(window.POWER_STRIKE?.shakeScale)??1);$('monster').classList.remove('hit','power-shaken');void $('monster').offsetWidth;$('monster').classList.add('power-shaken');setTimeout(()=>$('monster').classList.remove('power-shaken'),350);}}},Math.round(duration*POWER_HIT_RATIO));
+ setTimeout(()=>{if(token!==powerToken)return;if(!locked&&hp>0){attack(true,10);{const dir=lastPowerDir,k=window.POWER_STRIKE?.durationScale||1;window.phantomApi?.echo(()=>playCustomPowerSwing({dir}),POWER_PHASE_MS.strike*k);}if(settings.animations){$('monster').style.setProperty('--power-shake-scale',(window.POWER_STRIKE?.shakeScale)??1);$('monster').classList.remove('hit','power-shaken');void $('monster').offsetWidth;$('monster').classList.add('power-shaken');setTimeout(()=>$('monster').classList.remove('power-shaken'),350);}}},Math.round(duration*POWER_HIT_RATIO));
  setTimeout(()=>{if(token!==powerToken)return;cancelCustomPowerSwing?.();cancelCustomPowerSwing=null;powerActive=false;powerReadyAt=Date.now()+1000;saveProgress();updatePowerUI();},duration);
 }
 $('powerSkill').addEventListener('click',usePower);setInterval(updatePowerUI,100);
@@ -1934,18 +2076,18 @@ function updateTalentResetButtons(){
 // Черновик прокачки: в окне ветки вложения видны сразу, но закрепляются только кнопкой «Подтвердить».
 // «Отмена», крестик, Esc или клик мимо окна возвращают уровни талантов и очки, какими они были при открытии.
 let talentDraft=null;
-function talentRanks(){return {rapidDamageRank,rapidRestRank,rapidSeriesRank,aimRank,rapidReadyAt,...(window.cutApi?.ranks?.()||{})};}
+function talentRanks(){return {rapidDamageRank,rapidRestRank,rapidSeriesRank,aimRank,rapidReadyAt,...(window.cutApi?.ranks?.()||{}),...(window.powerShotApi?.ranks?.()||{})};}
 function talentDraftCost(){return talentDraft?spentTalentPoints()-talentDraft.spent:0;}
 function talentDraftChanged(){if(!talentDraft)return false;const {rapidReadyAt:_,...now}=talentRanks(),{rapidReadyAt:__,...before}=talentDraft.ranks;return JSON.stringify(now)!==JSON.stringify(before);}
 function beginTalentDraft(){talentDraft={ranks:talentRanks(),spent:spentTalentPoints()};updateTalentDraftUI();}
 function cancelTalentDraft(){
  if(!talentDraft)return;const draft=talentDraft;talentDraft=null;
  talentPoints+=spentTalentPoints()-draft.spent;
- ({rapidDamageRank,rapidRestRank,rapidSeriesRank,aimRank}=draft.ranks);rapidReadyAt=Math.max(rapidReadyAt,draft.ranks.rapidReadyAt);window.cutApi?.setRanks?.(draft.ranks);
+ ({rapidDamageRank,rapidRestRank,rapidSeriesRank,aimRank}=draft.ranks);rapidReadyAt=Math.max(rapidReadyAt,draft.ranks.rapidReadyAt);window.cutApi?.setRanks?.(draft.ranks);window.powerShotApi?.setRanks?.(draft.ranks);
  render();
 }
 // Обе кнопки оставляют окно открытым: после них начинается новый черновик от текущего состояния.
-function confirmTalentDraft(){talentDraft=null;saveProgress();beginTalentDraft();}
+function confirmTalentDraft(){talentDraft=null;window.powerShotApi?.save?.();saveProgress();beginTalentDraft();}
 function revertTalentDraft(){cancelTalentDraft();openTalentTree(activeTalentTree);beginTalentDraft();}
 function updateTalentDraftUI(){
  const confirm=$('confirmTalentDraft');if(!confirm)return;
@@ -1992,9 +2134,9 @@ function openTalentTree(index){
  activeTalentTree=index;updateTalentResetButtons();hideItemTooltip(true);$('talentTreeTitle').textContent=talentTreeNames[index];
  const container=$('talentTreeContent');container.replaceChildren();
  const root=document.createElement('button');root.className='detail-root talent-node';root.type='button';
- if(index===2){root.append($('aimTreeIcon').querySelector('svg').cloneNode(true));root.classList.toggle('talent-learned',aimUnlocked);root.setAttribute('aria-label','Меткий выстрел');const info=()=>showAimInfo(root,'root');root.addEventListener('mouseenter',info);root.addEventListener('mouseleave',hideItemTooltip);root.addEventListener('focus',info);root.addEventListener('blur',hideItemTooltip);root.addEventListener('click',()=>{unlockAim();root.classList.toggle('talent-learned',aimUnlocked);info();});}
- else if(index===0){root.append($('rapidTreeIcon').querySelector('svg').cloneNode(true));root.classList.toggle('talent-learned',rapidUnlocked);root.setAttribute('aria-label','Скоростная атака');root.addEventListener('mouseenter',()=>showRapidTooltip(root));root.addEventListener('mouseleave',hideItemTooltip);root.addEventListener('focus',()=>showRapidTooltip(root));root.addEventListener('blur',hideItemTooltip);root.addEventListener('click',()=>{$('unlockRapid').click();root.classList.toggle('talent-learned',rapidUnlocked);showRapidTooltip(root);});}
- else if(index===1){root.textContent='✹';root.classList.toggle('talent-learned',powerUnlocked);root.setAttribute('aria-label','Мощный удар');const info=()=>showPowerInfo(root);root.addEventListener('mouseenter',info);root.addEventListener('mouseleave',hideItemTooltip);root.addEventListener('focus',info);root.addEventListener('blur',hideItemTooltip);root.addEventListener('click',()=>{unlockPower();root.classList.toggle('talent-learned',powerUnlocked);info();});}
+ if(index===2){root.append($('aimTreeIcon').querySelector('.aim-icon').cloneNode(true));root.classList.toggle('talent-learned',aimUnlocked);root.setAttribute('aria-label','Меткий выстрел');const info=()=>showAimInfo(root,'root');root.addEventListener('mouseenter',info);root.addEventListener('mouseleave',hideItemTooltip);root.addEventListener('focus',info);root.addEventListener('blur',hideItemTooltip);root.addEventListener('click',()=>{unlockAim();root.classList.toggle('talent-learned',aimUnlocked);info();});}
+ else if(index===0){root.append($('rapidTreeIcon').querySelector('.rapid-slashes-icon').cloneNode(true));root.classList.toggle('talent-learned',rapidUnlocked);root.setAttribute('aria-label','Скоростная атака');root.addEventListener('mouseenter',()=>showRapidTooltip(root));root.addEventListener('mouseleave',hideItemTooltip);root.addEventListener('focus',()=>showRapidTooltip(root));root.addEventListener('blur',hideItemTooltip);root.addEventListener('click',()=>{$('unlockRapid').click();root.classList.toggle('talent-learned',rapidUnlocked);showRapidTooltip(root);});}
+ else if(index===1){root.innerHTML='<img class="power-tree-img" src="assets/power-strike-icon.webp" alt="">';root.classList.toggle('talent-learned',powerUnlocked);root.setAttribute('aria-label','Мощный удар');const info=()=>showPowerInfo(root);root.addEventListener('mouseenter',info);root.addEventListener('mouseleave',hideItemTooltip);root.addEventListener('focus',info);root.addEventListener('blur',hideItemTooltip);root.addEventListener('click',()=>{unlockPower();root.classList.toggle('talent-learned',powerUnlocked);info();});}
  else{root.textContent=talentTreeIcons[index];root.title='Навык пока не настроен';}
  container.append(root);
  for(let tier=0;tier<3;tier++){
@@ -2055,13 +2197,16 @@ function drawTalentBranches(){
  const center=el=>{const r=el.getBoundingClientRect();return {x:r.left+r.width/2-box.left,y:r.top+r.height/2-box.top};};
  const root=container.querySelector('.detail-root'),rows=[...container.querySelectorAll('.detail-talent-row')].map(row=>[...row.querySelectorAll('.detail-talent')]);
  if(!root)return;
- const r=center(root);let paths=`<defs><filter id="talentSap"><feGaussianBlur stdDeviation="3"/></filter></defs><path d="M${r.x} ${r.y}C${r.x-30} ${r.y-30} ${r.x-70} ${r.y-38} ${r.x-100} ${r.y-32}M${r.x} ${r.y}C${r.x+30} ${r.y-30} ${r.x+70} ${r.y-38} ${r.x+100} ${r.y-32}M${r.x} ${r.y}C${r.x} ${r.y-30} ${r.x-8} ${r.y-46} ${r.x-16} ${r.y-58}" stroke="#3b2a18" stroke-width="7" fill="none" stroke-linecap="round" opacity=".7"/>`;
+ // Прямые линии с изломом посередине и точкой на развилке. Ромб таланта выступает на 31px от центра, круг навыка — на 42px.
+ const r=center(root),reach=el=>el===root?root.offsetHeight/2:31;let paths='',lit='',dots='';
  rows.forEach((row,tier)=>row.forEach((node,branch)=>{
-  const from=tier?center(rows[tier-1][branch].querySelector('.talent-node')):r,to=center(node.querySelector('.talent-node')),bend=(to.y-from.y)*.5;
-  const d=`M${from.x} ${from.y}C${from.x} ${from.y+bend} ${to.x} ${to.y-bend} ${to.x} ${to.y}`,width=16-tier*4;
-  paths+=`<path d="${d}" stroke="#24180d" stroke-width="${width+4}" fill="none" stroke-linecap="round"/><path d="${d}" stroke="#5a3e24" stroke-width="${width}" fill="none" stroke-linecap="round"/>`;
-  if(node.classList.contains('talent-invested'))paths+=`<path d="${d}" stroke="#b7e26a" stroke-width="6" fill="none" filter="url(#talentSap)" opacity=".8"/><path d="${d}" stroke="#d9f59a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  const parent=tier?rows[tier-1][branch].querySelector('.talent-node'):root,from=tier?center(parent):r,to=center(node.querySelector('.talent-node'));
+  const y1=from.y+reach(parent),y2=to.y-31,mid=(y1+y2)/2,d=`M${from.x} ${y1}V${mid}H${to.x}V${y2}`,on=node.classList.contains('talent-invested');
+  if(on)lit+=`<path d="${d}" stroke="#d9ecff" stroke-width="1.8" fill="none" filter="url(#talentStar)"/>`;
+  else paths+=`<path d="${d}" stroke="#7fa6e0" stroke-width="1.2" fill="none" stroke-dasharray="3 4" opacity=".55"/>`;
+  dots+=`<circle cx="${to.x}" cy="${mid}" r="2.6" fill="${on?'#e6f2ff':'#7fa6e0'}" opacity="${on?1:.6}"/>`;
  }));
+ paths=`<defs><filter id="talentStar" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`+paths+lit+dots;
  let svg=container.querySelector('.tree-branches');
  if(!svg){svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('class','tree-branches');svg.setAttribute('aria-hidden','true');container.prepend(svg);}
  svg.setAttribute('viewBox',`0 0 ${box.width} ${box.height}`);svg.innerHTML=paths;
@@ -2090,7 +2235,7 @@ const TALENT_CATEGORIES=[
  }
 })();
 function updateTalentCategories(){
- const open=[rapidUnlocked,powerUnlocked,aimUnlocked,window.cutApi?.unlocked()??false,window.spinApi?.unlocked()??false,false];
+ const open=[rapidUnlocked,powerUnlocked,aimUnlocked,window.cutApi?.unlocked()??false,window.spinApi?.unlocked()??false,window.phantomApi?.unlocked()??false,window.powerShotApi?.unlocked()??false,window.rageApi?.unlocked()??false];
  for(const category of TALENT_CATEGORIES)category.box.querySelector('.talent-category-count').textContent=category.skills.filter(index=>open[index]).length+' из '+category.skills.length+' открыто';
 }
 $('openTalents').addEventListener('click',updateTalentCategories);updateTalentCategories();
@@ -2336,10 +2481,20 @@ addEventListener('resize',fitHud);fitHud();
 <script src="dungeon.js"></script>
 <script src="precise-cut-data.js"></script>
 <script src="precise-cut.js"></script>
+<script src="mana-burn-fx.js"></script>
 <script src="sword-spin.js"></script>
+<script src="phantom-blade.js"></script>
+<script src="fx-textures.js"></script>
+<script src="power-shot-state.js"></script>
+<script src="power-shot-fx.js"></script>
+<script src="power-shot-audio.js"></script>
+<script src="power-shot.js"></script><script src="rage.js"></script><script src="talent-burst.js"></script>
 <script src="skill-dock.js"></script>
+<script src="gems.js"></script>
 <script src="anvil.js"></script>
+<script src="upgrade-wheel.js"></script>
 <script src="collection.js"></script>
+<script src="divine-fx.js"></script>
 <script src="music.js"></script>
 <script src="ui-editor.js"></script>
 <script src="shop-editor.js"></script>

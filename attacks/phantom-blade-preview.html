@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Фантомный клинок: варианты</title>
+<!-- Прототип для выбора варианта. В игру не подключён и сохранения не трогает. Адрес: http://127.0.0.1:8765/attacks/phantom-blade-preview.html -->
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#0b120e;color:#f0e6c8;font-family:Segoe UI,system-ui,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+#arena{position:fixed;inset:0;background:#0b120e url(../assets/forest-dusk-stylized.png) center/cover no-repeat}
+#arena:after{content:'';position:absolute;inset:0;background:linear-gradient(#0b120ecc,#0b120e22 28%,#0b120e22 65%,#0b120ee6)}
+#monster{position:absolute;z-index:1;object-fit:contain;pointer-events:none;filter:drop-shadow(0 14px 14px #0009)}
+#enemyBar{position:absolute;z-index:2;height:14px;border-radius:8px;border:1px solid #d9c07a88;background:#2a0d0d;overflow:hidden;translate:-50% 0}
+#enemyFill{height:100%;width:100%;background:linear-gradient(#ff5a4d,#b31717);transition:width .12s}
+#fx{position:fixed;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}
+#tabs{position:fixed;z-index:4;top:12px;left:50%;translate:-50% 0;display:flex;gap:8px;max-width:calc(100% - 24px)}
+button{font:inherit;cursor:pointer}
+#tabs button{font-weight:700;font-size:13px;color:#d9cfae;padding:9px 14px;border-radius:10px;border:1px solid #8c805588;background:#111c16e6;white-space:nowrap}
+#tabs button:hover{border-color:#c9a8ff}
+#tabs button.on{color:#180d2c;background:linear-gradient(#dcc6ff,#9d76ec);border-color:#f1e6ff}
+#about{position:fixed;z-index:4;top:58px;left:50%;translate:-50% 0;width:min(640px,calc(100% - 24px));text-align:center;padding:8px 14px;border-radius:10px;background:#0d1712d9;border:1px solid #8b805044;pointer-events:none}
+#about b{display:block;font-size:16px;color:#dcc6ff}
+#about span{display:block;margin-top:2px;font-size:13px;line-height:1.4;color:#c6d0b8}
+#score{position:fixed;z-index:4;top:12px;right:12px;padding:8px 12px;border-radius:10px;background:#0d1712d9;border:1px solid #8b805044;font-size:12px;line-height:1.6;color:#c6d0b8;text-align:right;pointer-events:none}
+#score b{color:#ffe9a8}#score b.ph{color:#c9a8ff}
+#dock{position:fixed;z-index:5;bottom:12px;left:50%;translate:-50% 0;width:min(760px,calc(100% - 20px));display:flex;flex-direction:column;align-items:center;gap:8px}
+#row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+#row button,#extras button{font-weight:700;font-size:13px;color:#f0e6c8;padding:10px 12px;border-radius:10px;border:1px solid #8c8055;background:linear-gradient(#26382b,#121c16)}
+#row button:hover,#extras button:hover{border-color:#edc77b}
+#row button small{color:#d5c18b;font-weight:800;margin-right:5px}
+#row button.on{border-color:#ffd27a;box-shadow:0 0 14px #ffd27a77}
+#phantom{color:#e6d8ff!important;border-color:#8a6bd0!important;background:linear-gradient(#37285a,#191030)!important}
+#phantom.on{border-color:#d4bcff!important;box-shadow:0 0 18px #a878ffbb;background:linear-gradient(#6a48b4,#2c1a56)!important}
+#phantom.empty{animation:empty .35s}
+@keyframes empty{25%{translate:-6px 0}50%{translate:6px 0}75%{translate:-3px 0}}
+#extras{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px}
+#extras button{padding:6px 10px;font-size:12px}
+#slow.on{border-color:#7fc8ff;color:#bfe4ff}
+#manaBar{position:relative;width:min(380px,calc(100vw - 32px));height:20px;border-radius:12px;border:1px solid #6fb4ff99;background:#0a1a2c;overflow:hidden}
+#manaFill{height:100%;background:linear-gradient(#58b6ff,#1c62c9)}
+#manaText{position:absolute;inset:0;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000}
+@media(max-width:640px){#tabs button{padding:8px 9px;font-size:11px}#score{top:auto;bottom:190px}#about span{font-size:12px}#row button{padding:8px;font-size:12px}}
+</style>
+</head>
+<body>
+<div id="arena">
+ <img id="monster" src="../assets/monster-slime.svg" alt="">
+ <div id="enemyBar"><div id="enemyFill"></div></div>
+</div>
+<canvas id="fx"></canvas>
+<nav id="tabs" aria-label="Варианты навыка"></nav>
+<div id="about"><b></b><span></span></div>
+<div id="score">Урон навыков: <b id="origTotal">0</b><br>Урон фантома: <b class="ph" id="phTotal">0</b><br>Доля фантома: <b class="ph" id="phShare">—</b></div>
+<div id="dock">
+ <div id="row">
+  <button id="phantom" type="button" aria-pressed="false"><small>Q</small>Фантомный клинок · 10/с</button>
+  <button id="rapid" type="button"><small>1</small>Скоростная атака</button>
+  <button id="power" type="button"><small>2</small>Мощный удар</button>
+  <button id="cut" type="button"><small>3</small>Точный разрез</button>
+  <button id="spin" type="button" aria-pressed="false"><small>4</small>Вихрь · 5/с</button>
+ </div>
+ <div id="extras">
+  <button id="show" type="button">▶ Показать все навыки подряд</button>
+  <button id="slow" type="button" aria-pressed="false">Замедлить в 4 раза</button>
+ </div>
+ <div id="manaBar"><div id="manaFill"></div><div id="manaText"></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const VARIANTS=[
+ {name:'Эхо удара',about:'Через 0,2 с тот же удар повторяется целиком: та же дуга и тот же путь меча, но призрачные и фиолетовые. Самый буквальный вариант.'},
+ {name:'Разлом',about:'В точке удара сразу остаётся тонкая трещина, а через 0,2 с она взрывается. Видно, куда придёт урон, и арена не перегружена мечами.'},
+ {name:'Клинок-двойник',about:'Призрачный меч вылетает из воздуха и за 0,2 с пронзает точку удара по направлению оригинала. Самый заметный вариант, один на все навыки.'}
+];
+const DAMAGE=10,ENEMY_HP=3000,DELAY=.2,SHARE=.5,PHANTOM_COST=10,SPIN_COST=5,MANA_MAX=300,REGEN_IDLE=25,TAU=Math.PI*2;
+const GOLD='255,214,140',ICE='159,220,255',VIOLET='168,120,255',VIOLET_CORE='236,224,255';
+const ART_RATIO=354/1457,ART_PIVOT=1266/1457,ART_BLADE=1031/1457;
+const PULL=40,MAX_ACCEL=38,DAMP_HELD=2.6,DAMP_FREE=.55,MAX_SPEED=14,MIN_HIT_SPEED=3,MAX_LEAD=Math.PI*1.2;
+const POWER_SEGS=[[.14,'A0','lin'],[.26,'AW','out'],[.15,'AW','lin'],[.095,'AH','in'],[.055,'AH','lin'],[.11,'A1','out'],[.26,'A1','out']];
+const POWER_STRIKE=.55,POWER_HIT=.645,POWER_FADE=.81,POWER_TOTAL=1.07;
+const EASE={lin:t=>t,out:t=>1-(1-t)**2,in:t=>t*t*t};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rad=d=>d*Math.PI/180,rnd=(a,b)=>a+Math.random()*(b-a);
+const wrap=a=>{a=(a+Math.PI)%TAU;return a<0?a+TAU-Math.PI:a-Math.PI;};
+const fmt=v=>v.toLocaleString('ru-RU',{maximumFractionDigits:1});
+
+const canvas=$('fx'),ctx=canvas.getContext('2d'),monster=$('monster');
+const load=src=>{const i=new Image();i.src=src;return i;};
+const swordArt=load('../assets/sword-spin.webp'),spectralArt=load('../assets/spectral-sword.png');
+// Фиолетовая копия картинки для призрачных мечей.
+function tinted(img){
+ if(img.tint||!img.complete||!img.naturalWidth)return img.tint||null;
+ const c=document.createElement('canvas');c.width=img.naturalWidth;c.height=img.naturalHeight;const g=c.getContext('2d');
+ g.drawImage(img,0,0);g.globalCompositeOperation='source-atop';g.fillStyle='rgba(150,100,255,.72)';g.fillRect(0,0,c.width,c.height);
+ return img.tint=c;
+}
+
+let vi=0,now=0,lastTs=performance.now(),timeScale=1,W=0,H=0,dpr=1,geo={};
+let mana=MANA_MAX,phantomOn=false,hp=ENEMY_HP,enemyId=1,origTotal=0,phTotal=0,flash=0,flashPh=0,shake=0;
+let events=[],effects=[],sparks=[],floats=[],rapidUntil=0,powerUntil=0,cutUntil=0,showUntil=0;
+const spin={on:false,show:0,angle:-Math.PI/2,vel:0,grabbed:false,target:0,mouseAngle:0,touching:false,auto:0,trail:[]};
+let mouse={x:0,y:0};
+
+const schedule=(at,fn)=>events.push({at,fn});
+const effect=(start,dur,draw)=>effects.push({start,dur,draw});
+
+function layout(){
+ dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;
+ const size=Math.min(250,H*.36,W*.34),cx=W*.42,cy=H*.46;
+ monster.style.left=cx-size/2+'px';monster.style.top=cy-size/2+'px';monster.style.width=size+'px';monster.style.height=size+'px';
+ const bar=$('enemyBar');bar.style.left=cx+'px';bar.style.top=cy-size/2-22+'px';bar.style.width=size*.9+'px';
+ geo={cx,cy,size,rx:size*.42,ry:size*.42,px:Math.min(W-40,cx+size*.36+135),py:cy+8,L:size*.36+190};
+}
+function setVariant(i){vi=i;[...$('tabs').children].forEach((b,n)=>b.classList.toggle('on',n===i));document.querySelector('#about b').textContent=VARIANTS[i].name;document.querySelector('#about span').textContent=VARIANTS[i].about;}
+VARIANTS.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+'. '+v.name;b.addEventListener('click',()=>setVariant(i));$('tabs').append(b);});
+
+// ── Урон ──
+const alive=()=>hp>0;
+function damage(value,x,y,isPhantom){
+ hp-=value;if(isPhantom){phTotal+=value;flashPh=1;}else{origTotal+=value;flash=1;}shake=Math.max(shake,isPhantom?.6:1);
+ floats.push({x:x+rnd(-14,14),y:y-10,value,isPhantom,t:now});
+ $('enemyFill').style.width=Math.max(0,hp/ENEMY_HP*100)+'%';
+ $('origTotal').textContent=fmt(origTotal);$('phTotal').textContent=fmt(phTotal);$('phShare').textContent=origTotal?Math.round(phTotal/origTotal*100)+'%':'—';
+ if(hp<=0){hp=0;enemyId++;monster.style.opacity=.15;schedule(now+.6,()=>{hp=ENEMY_HP;monster.style.opacity=1;$('enemyFill').style.width='100%';});}
+}
+// Любой удар навыка проходит здесь: фантом запоминает его форму и место.
+function skillHit(shape,value){
+ if(!alive())return;
+ damage(value,shape.x,shape.y,false);
+ if(phantomOn)launchPhantom(shape,value);
+}
+function launchPhantom(shape,value){
+ const t=now+DELAY,enemy=enemyId,v=vi;
+ [replay,rift,twin][v](shape,t);
+ schedule(t,()=>{
+  if(enemy===enemyId&&alive()){damage(value*SHARE,shape.x,shape.y,true);[impactEcho,impactRift,impactTwin][v](shape);}
+  else burst(shape.x,shape.y,8,VIOLET,90);
+ });
+}
+
+// ── Рисование ──
+function burst(x,y,n,rgb,speed,size=2.4){for(let i=0;i<n;i++){const a=Math.random()*TAU,s=speed*rnd(.3,1);sparks.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:rnd(.2,.5),max:.5,size:rnd(1,size),rgb});}}
+function lens(x,y,angle,len,width,rgb,alpha,blur=0){
+ ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=alpha;ctx.fillStyle=`rgb(${rgb})`;if(blur){ctx.shadowColor=`rgb(${rgb})`;ctx.shadowBlur=blur;}
+ ctx.beginPath();ctx.moveTo(-len/2,0);ctx.quadraticCurveTo(0,-width,len/2,0);ctx.quadraticCurveTo(0,width,-len/2,0);ctx.fill();ctx.restore();
+}
+function ring(x,y,r,width,rgb,alpha){ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=`rgb(${rgb})`;ctx.lineWidth=width;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.stroke();ctx.restore();}
+function glow(x,y,r,rgb,alpha){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(255,255,255,${alpha})`);g.addColorStop(.4,`rgba(${rgb},${alpha*.7})`);g.addColorStop(1,`rgba(${rgb},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();}
+// Дуга «Скоростной атаки»: серп дорисовывается вдоль пути и гаснет.
+function crescent(s,p,core,edge,alpha){
+ const head=clamp(p*2.4,0,1),tail=clamp((p-.35)/.65,0,1),n=16,pts=[];
+ if(head<=tail)return;
+ for(let i=0;i<=n;i++){const u=tail+(head-tail)*i/n,along=(u-.5)*s.len,bend=s.bend*(1-(2*u-1)**2),th=Math.sin(Math.PI*(i/n))*s.len*.055;pts.push([along,bend,th]);}
+ ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.angle);ctx.globalAlpha=alpha;
+ const shape=k=>{ctx.beginPath();pts.forEach(([a,b,t],i)=>ctx[i?'lineTo':'moveTo'](a,b-t*k));for(let i=pts.length-1;i>=0;i--){const[a,b,t]=pts[i];ctx.lineTo(a,b+t*k);}ctx.closePath();ctx.fill();};
+ ctx.fillStyle=`rgb(${edge})`;ctx.shadowColor=`rgb(${edge})`;ctx.shadowBlur=14;shape(1);ctx.shadowBlur=0;ctx.fillStyle=`rgb(${core})`;shape(.4);ctx.restore();
+}
+// Меч «Мощного удара»: те же фазы и углы, что в игре. phantom рисует только сам удар и фиолетовым.
+function powerAngle(g,age){
+ let t=0,prev=g.A0;
+ for(const[d,key,ez]of POWER_SEGS){const to=g[key];if(age<=t+d)return prev+(to-prev)*EASE[ez](clamp((age-t)/d,0,1));t+=d;prev=to;}
+ return prev;
+}
+function drawPower(g,age,phantom){
+ const a=powerAngle(g,age),art=phantom?tinted(spectralArt):spectralArt,s=g.s,rgb=phantom?VIOLET:ICE,core=phantom?VIOLET_CORE:'255,255,255';
+ const fade=age>POWER_FADE?1-(age-POWER_FADE)/(POWER_TOTAL-POWER_FADE):1,alpha=(phantom?.8:clamp(age/.14,0,1))*fade;
+ if(age>POWER_STRIKE){
+  const back=g.AW>a;ctx.save();ctx.lineCap='round';ctx.globalCompositeOperation='lighter';
+  for(const[r,w,c,o]of[[g.R-48,76,rgb,.2],[g.R-16,22,rgb,.5],[g.R-6,4,core,.95]]){ctx.globalAlpha=o*fade*(phantom?.8:1);ctx.strokeStyle=`rgb(${c})`;ctx.lineWidth=w*s;ctx.beginPath();ctx.arc(g.px,g.py,r*s,rad(g.AW),rad(a),back);ctx.stroke();}
+  ctx.restore();
+ }
+ if(art){ctx.save();ctx.translate(g.px,g.py);ctx.rotate(rad(a));ctx.globalAlpha=alpha;ctx.shadowColor=`rgb(${rgb})`;ctx.shadowBlur=10;ctx.drawImage(art,(g.R-166.3)*s,-20.5*s,166.3*s,41.1*s);ctx.restore();}
+}
+function drawSpinSprite(s,angle,alpha,phantom){
+ const art=phantom?tinted(swordArt):swordArt;if(!art||(!phantom&&!art.complete))return;
+ const height=s.L/ART_PIVOT,width=height*ART_RATIO;
+ ctx.save();ctx.translate(s.px,s.py);ctx.rotate(angle+Math.PI/2);ctx.globalAlpha=alpha;ctx.shadowColor=phantom?`rgb(${VIOLET})`:'#ffd27a';ctx.shadowBlur=phantom?20:12;ctx.drawImage(art,-width/2,-s.L,width,height);ctx.restore();
+}
+
+// ── Вариант 1: тот же удар повторяется призрачным ──
+function replay(s,t){
+ if(s.type==='slash')effect(t,.26,p=>crescent(s,p,VIOLET_CORE,VIOLET,.85));
+ else if(s.type==='cut')effect(t,.32,p=>{lens(s.x,s.y,s.angle,s.len,3+11*Math.sin(Math.PI*Math.min(1,p*1.4))*s.power,VIOLET,(1-p)*.9,16);lens(s.x,s.y,s.angle,s.len*.92,1+4*(1-p),VIOLET_CORE,1-p);});
+ else if(s.type==='power')effect(t-.095,POWER_TOTAL-POWER_STRIKE,(p,age)=>drawPower(s.g,POWER_STRIKE+age,true));
+ else effect(t-.1,.3,(p,age)=>{
+  const a=s.swAngle+s.dir*s.speed*(age-.1),alpha=Math.sin(Math.PI*p)*.85;
+  ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle=`rgba(${VIOLET},${alpha*.3})`;const back=s.dir<0,from=a-s.dir*.55;
+  ctx.beginPath();ctx.arc(s.px,s.py,s.L,from,a,back);ctx.arc(s.px,s.py,s.L*.35,a,from,!back);ctx.closePath();ctx.fill();ctx.restore();
+  drawSpinSprite(s,a,alpha,true);
+ });
+}
+function impactEcho(s){burst(s.x,s.y,14,VIOLET,190);burst(s.x,s.y,5,VIOLET_CORE,130);effect(now,.25,p=>glow(s.x,s.y,geo.size*.2,VIOLET,(1-p)*.75));}
+
+// ── Вариант 2: трещина сразу в точке удара, взрыв через 0,2 с ──
+function rift(s,t){
+ const len=Math.min(s.len,geo.size*.75);
+ effect(now,DELAY,p=>{
+  const tremble=Math.sin(p*40)*p*2,g=len*(.35+.65*p);
+  lens(s.x+Math.cos(s.angle+1.57)*tremble,s.y+Math.sin(s.angle+1.57)*tremble,s.angle,g,1.5+3*p,VIOLET,.55+.45*p,6+16*p);
+  lens(s.x,s.y,s.angle,g*.9,.8+p,VIOLET_CORE,.9);
+  if(Math.random()<.5)sparks.push({x:s.x+Math.cos(s.angle)*rnd(-g/2,g/2),y:s.y+Math.sin(s.angle)*rnd(-g/2,g/2),vx:rnd(-20,20),vy:rnd(-55,-15),life:.25,max:.3,size:1.6,rgb:VIOLET});
+ });
+ s.riftLen=len;
+}
+function impactRift(s){
+ const len=s.riftLen,x=s.x,y=s.y;
+ effect(now,.34,p=>{const q=1-(1-p)**3;lens(x,y,s.angle,len*(1+.2*q),3+20*Math.sin(Math.PI*Math.min(1,p*1.8)),VIOLET,(1-p)*.8,20);lens(x,y,s.angle,len,1+7*(1-p),VIOLET_CORE,1-p);glow(x,y,geo.size*.28*(.5+q),VIOLET,(1-p)*.7);ring(x,y,geo.size*.32*q,4*(1-p)+.5,VIOLET,(1-p)*.9);});
+ const nx=Math.cos(s.angle),ny=Math.sin(s.angle);
+ for(let i=0;i<18;i++){const al=rnd(-.5,.5)*len,side=Math.random()<.5?-1:1,sp=rnd(60,240);sparks.push({x:x+nx*al,y:y+ny*al,vx:-ny*side*sp+nx*rnd(-30,30),vy:nx*side*sp+ny*rnd(-30,30),life:rnd(.25,.5),max:.5,size:rnd(1,3),rgb:i%3?VIOLET:VIOLET_CORE});}
+}
+
+// ── Вариант 3: призрачный меч прилетает за 0,2 с и пронзает точку ──
+function twin(s,t){
+ const L=geo.size*.85,from=geo.size*1.15,nx=Math.cos(s.angle),ny=Math.sin(s.angle),start=now;
+ const sprite=(dist,alpha)=>{
+  const art=tinted(swordArt);if(!art)return;const w=L*ART_RATIO;
+  ctx.save();ctx.translate(s.x+nx*dist,s.y+ny*dist);ctx.rotate(s.angle+Math.PI/2);ctx.globalAlpha=alpha;ctx.shadowColor=`rgb(${VIOLET})`;ctx.shadowBlur=18;ctx.drawImage(art,-w/2,0,w,L);ctx.restore();
+ };
+ const dist=age=>age<=DELAY?-from*(1-(age/DELAY)**2):(age-DELAY)*from*1.3;
+ effect(start,DELAY+.17,(p,age)=>{
+  const out=age>DELAY?1-(age-DELAY)/.17:1;
+  [.045,.03,.015].forEach((lag,i)=>{if(age>lag)sprite(dist(age-lag),(.14+i*.08)*out);});
+  sprite(dist(age),clamp(age/.06,0,1)*.92*out);
+ });
+}
+function impactTwin(s){
+ burst(s.x,s.y,20,VIOLET,250,3);burst(s.x,s.y,6,VIOLET_CORE,150);
+ effect(now,.28,p=>{glow(s.x,s.y,geo.size*.24,VIOLET,(1-p)*.85);ring(s.x,s.y,geo.size*.26*(1-(1-p)**2),3*(1-p)+.5,VIOLET_CORE,1-p);lens(s.x,s.y,s.angle+Math.PI/2,geo.size*.5,5*(1-p),VIOLET_CORE,1-p,12);});
+}
+
+// ── Навыки ближнего боя (анимации оригиналов упрощены, кроме «Мощного удара» и «Вихря») ──
+const RAPID_ANGLES=[-35,145,-65,115,-15];
+function useRapid(){
+ if(now<rapidUntil)return;rapidUntil=now+1.1;
+ RAPID_ANGLES.forEach((deg,i)=>schedule(now+i*.2,()=>{
+  if(!alive())return;
+  const s={type:'slash',x:geo.cx+rnd(-.1,.1)*geo.size,y:geo.cy+rnd(-.1,.1)*geo.size,angle:rad(deg),len:geo.size*.95,bend:geo.size*.13*(i%2?1:-1)};
+  effect(now,.24,p=>crescent(s,p,'255,255,255',GOLD,1));skillHit(s,DAMAGE);
+ }));
+}
+function usePower(){
+ if(now<powerUntil)return;powerUntil=now+POWER_TOTAL+.3;
+ const dir=Math.random()<.5?1:-1,mir=a=>dir>0?a:180-a,s=geo.size/150,px=geo.cx+dir*60*s,py=geo.cy+90*s;
+ const g={px,py,s,R:172,A0:mir(-85),AW:mir(-58),A1:mir(-188)};
+ let ah=Math.atan2(geo.cy-py,geo.cx-px)/Math.PI*180;while(ah<Math.min(g.AW,g.A1))ah+=360;while(ah>Math.max(g.AW,g.A1))ah-=360;g.AH=ah;
+ effect(now,POWER_TOTAL,(p,age)=>drawPower(g,age,false));
+ schedule(now+POWER_HIT,()=>{
+  if(!alive())return;
+  const shape={type:'power',g,x:geo.cx,y:geo.cy,angle:rad(ah+Math.sign(g.A1-g.AW)*90),len:geo.size*.9};
+  burst(geo.cx,geo.cy,16,ICE,260,3);effect(now,.4,p=>{glow(geo.cx,geo.cy,geo.size*.3,ICE,(1-p));ring(geo.cx,geo.cy,geo.size*.4*(1-(1-p)**2),5*(1-p)+.5,ICE,1-p);});
+  skillHit(shape,DAMAGE*10);
+ });
+}
+// В игре разрезы рисует игрок. Здесь три разреза расставляются сами, чтобы варианты было проще сравнивать.
+function useCut(){
+ if(now<cutUntil)return;cutUntil=now+1.2;
+ const base=rnd(0,Math.PI);
+ [0,1,2].forEach(i=>{
+  const m={type:'cut',x:geo.cx+rnd(-.16,.16)*geo.size,y:geo.cy+rnd(-.16,.16)*geo.size,angle:base+i*1.05+rnd(-.2,.2),len:geo.size*rnd(.65,.95),power:rnd(.5,1)},fire=now+.35+i*.14,value=DAMAGE*Math.round(10+m.power*20)/10;
+  effect(now,fire-now,p=>lens(m.x,m.y,m.angle,m.len*Math.min(1,p*4),1.1,'255,255,255',.75,4));
+  schedule(fire,()=>{
+   if(!alive())return;
+   effect(now,.3,p=>{lens(m.x,m.y,m.angle,m.len,3+11*Math.sin(Math.PI*Math.min(1,p*1.4))*m.power,'190,225,255',(1-p)*.9,14);lens(m.x,m.y,m.angle,m.len*.92,1+4*(1-p),'255,255,255',1-p);});
+   burst(m.x,m.y,12,'255,255,255',170);skillHit(m,value);
+  });
+ });
+}
+function setSpin(on){
+ spin.on=on;spin.auto=0;spin.grabbed=false;$('spin').classList.toggle('on',on);$('spin').setAttribute('aria-pressed',on);
+ if(on){spin.angle=spin.target=-Math.PI/2;spin.vel=0;spin.touching=false;spin.trail=[];}
+}
+function updateSpin(dt){
+ spin.show=clamp(spin.show+(spin.on?dt/.3:-dt/.2),0,1);if(spin.show<=0)return;
+ const before=spin.angle;
+ if(spin.grabbed){
+  const dx=mouse.x-geo.px,dy=mouse.y-geo.py;
+  if(Math.hypot(dx,dy)>=12){const a=Math.atan2(dy,dx);spin.target+=wrap(a-spin.mouseAngle);spin.mouseAngle=a;}
+  spin.target=spin.angle+clamp(spin.target-spin.angle,-MAX_LEAD,MAX_LEAD);
+  spin.vel+=clamp((spin.target-spin.angle)*PULL,-MAX_ACCEL,MAX_ACCEL)*dt;
+ }
+ if(spin.auto)spin.vel=spin.auto;
+ spin.vel*=Math.exp(-dt*(spin.grabbed?DAMP_HELD:DAMP_FREE));spin.vel=clamp(spin.vel,-MAX_SPEED,MAX_SPEED);spin.angle+=spin.vel*dt;
+ const speed=Math.abs(wrap(spin.angle-before))/Math.max(dt,.001);
+ spin.trail.push({a:spin.angle,t:now,speed});spin.trail=spin.trail.filter(p=>now-p.t<.28);
+ if(!spin.on||spin.show<1)return;
+ const c=Math.cos(spin.angle),sn=Math.sin(spin.angle),from=geo.L*(1-ART_BLADE/ART_PIVOT);let inside=null,near=false;
+ for(let i=0;i<=16;i++){const r=from+(geo.L-from)*i/16,x=geo.px+c*r,y=geo.py+sn*r,d=((x-geo.cx)/geo.rx)**2+((y-geo.cy)/geo.ry)**2;if(d<1&&!inside)inside={x,y};if(d<1.3)near=true;}
+ if(inside&&!spin.touching){
+  spin.touching=true;
+  if(speed>=MIN_HIT_SPEED&&alive()){
+   const dir=Math.sign(spin.vel)||1;burst(inside.x,inside.y,14,GOLD,270);
+   skillHit({type:'spin',x:inside.x,y:inside.y,angle:spin.angle+dir*Math.PI/2,len:geo.size*.7,swAngle:spin.angle,dir,speed,px:geo.px,py:geo.py,L:geo.L},DAMAGE);
+  }
+ }else if(!near)spin.touching=false;
+}
+function drawSpin(){
+ if(spin.show<=0)return;
+ ctx.save();ctx.globalCompositeOperation='lighter';
+ for(let i=1;i<spin.trail.length;i++){const a=spin.trail[i-1],b=spin.trail[i],diff=wrap(b.a-a.a);if(Math.abs(diff)<.004)continue;const f=1-(now-b.t)/.28;ctx.fillStyle=`rgba(255,214,140,${f*f*Math.min(.3,b.speed*.03)*spin.show})`;ctx.beginPath();ctx.arc(geo.px,geo.py,geo.L,a.a,a.a+diff,diff<0);ctx.arc(geo.px,geo.py,geo.L*.35,a.a+diff,a.a,diff>=0);ctx.closePath();ctx.fill();}
+ ctx.restore();
+ drawSpinSprite({px:geo.px,py:geo.py,L:geo.L},spin.angle,spin.show,false);
+ if(spin.on&&spin.show>=1&&!spin.grabbed&&!spin.auto){
+  const pulse=.5+.5*Math.sin(now*4);ctx.save();ctx.strokeStyle=`rgba(255,233,168,${.3+pulse*.45})`;ctx.lineWidth=2;ctx.setLineDash([6,5]);ctx.lineDashOffset=-now*18;ctx.beginPath();ctx.arc(geo.px,geo.py,40+pulse*3,0,TAU);ctx.stroke();ctx.setLineDash([]);
+  ctx.font='800 13px Segoe UI,sans-serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#000b';ctx.fillStyle='#ffe9a8';ctx.strokeText('Возьмись за рукоять',geo.px,geo.py+62);ctx.fillText('Возьмись за рукоять',geo.px,geo.py+62);ctx.restore();
+ }
+}
+
+function setPhantom(on){
+ if(on&&mana<1){const b=$('phantom');b.classList.remove('empty');void b.offsetWidth;b.classList.add('empty');return;}
+ phantomOn=on;$('phantom').classList.toggle('on',on);$('phantom').setAttribute('aria-pressed',on);
+}
+function runShow(){
+ if(now<showUntil)return;showUntil=now+7.4;if(!phantomOn)setPhantom(true);
+ useRapid();schedule(now+1.7,usePower);schedule(now+3.3,useCut);
+ schedule(now+4.8,()=>{setSpin(true);spin.auto=9;});schedule(now+7.2,()=>setSpin(false));
+}
+
+// ── Кадр ──
+function tick(dt){
+ now+=dt;
+ const due=events.filter(e=>e.at<=now);if(due.length){events=events.filter(e=>e.at>now);due.sort((a,b)=>a.at-b.at).forEach(e=>e.fn());}
+ const burn=(phantomOn?PHANTOM_COST:0)+(spin.on?SPIN_COST:0);
+ mana=clamp(mana+(burn?-burn:REGEN_IDLE)*dt,0,MANA_MAX);
+ if(mana<=0&&burn){setPhantom(false);setSpin(false);}
+ updateSpin(dt);
+ sparks=sparks.filter(p=>(p.life-=dt)>0);for(const p of sparks){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.985;p.vy*=.985;}
+ flash=Math.max(0,flash-dt*7);flashPh=Math.max(0,flashPh-dt*5);shake=Math.max(0,shake-dt*7);
+}
+function draw(){
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+ effects=effects.filter(e=>now<e.start+e.dur);
+ for(const e of effects)if(now>=e.start){const age=now-e.start;e.draw(age/e.dur,age);}
+ drawSpin();
+ ctx.save();ctx.globalCompositeOperation='lighter';for(const p of sparks){ctx.fillStyle=`rgba(${p.rgb},${Math.min(1,p.life/p.max*1.4)})`;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,TAU);ctx.fill();}ctx.restore();
+ floats=floats.filter(f=>now-f.t<.9);
+ ctx.save();ctx.textAlign='center';ctx.lineJoin='round';
+ for(const f of floats){const a=(now-f.t)/.9;ctx.globalAlpha=1-a*a;ctx.font=`800 ${f.isPhantom?19:24}px Segoe UI,sans-serif`;ctx.lineWidth=4;ctx.strokeStyle='#000c';ctx.fillStyle=f.isPhantom?'#cfb4ff':'#ffe9a8';const y=f.y-a*46;ctx.strokeText(fmt(f.value),f.x,y);ctx.fillText(fmt(f.value),f.x,y);}
+ ctx.restore();
+ const k=Math.sin(now*70)*shake*5;
+ monster.style.translate=k+'px 0';
+ monster.style.filter=`drop-shadow(0 14px 14px #0009) brightness(${1+flash*.5}) drop-shadow(0 0 ${flashPh*22}px rgba(${VIOLET},${flashPh}))`;
+ $('manaFill').style.width=mana/MANA_MAX*100+'%';
+ const burn=(phantomOn?PHANTOM_COST:0)+(spin.on?SPIN_COST:0);
+ $('manaText').textContent=Math.round(mana)+' / '+MANA_MAX+(burn?' · −'+burn+' / с':'');
+}
+function frame(ts){
+ const dt=clamp((ts-lastTs)/1000,0,.1)*timeScale;lastTs=ts;
+ const steps=Math.max(1,Math.ceil(dt/.008));for(let i=0;i<steps;i++)tick(dt/steps);
+ draw();requestAnimationFrame(frame);
+}
+
+// ── Управление ──
+$('phantom').addEventListener('click',()=>setPhantom(!phantomOn));
+$('rapid').addEventListener('click',useRapid);$('power').addEventListener('click',usePower);$('cut').addEventListener('click',useCut);
+$('spin').addEventListener('click',()=>setSpin(!spin.on));$('show').addEventListener('click',runShow);
+$('slow').addEventListener('click',()=>{timeScale=timeScale===1?.25:1;$('slow').classList.toggle('on',timeScale<1);$('slow').setAttribute('aria-pressed',timeScale<1);});
+addEventListener('keydown',e=>{if(e.repeat)return;({KeyQ:()=>setPhantom(!phantomOn),Digit1:useRapid,Digit2:usePower,Digit3:useCut,Digit4:()=>setSpin(!spin.on)})[e.code]?.();});
+addEventListener('pointerdown',e=>{
+ mouse={x:e.clientX,y:e.clientY};if(e.button!==0||e.target.closest('button'))return;
+ if(spin.on&&spin.show>.8&&Math.hypot(mouse.x-geo.px,mouse.y-geo.py)<44){
+  spin.grabbed=true;spin.mouseAngle=Math.atan2(mouse.y-geo.py,mouse.x-geo.px);spin.target=spin.angle+wrap(spin.mouseAngle-spin.angle);
+  try{document.documentElement.setPointerCapture(e.pointerId);}catch{}
+  return;
+ }
+ // Обычный клик наносит урон, но фантом его не повторяет: он дублирует только навыки.
+ if(((mouse.x-geo.cx)/geo.rx)**2+((mouse.y-geo.cy)/geo.ry)**2<1&&alive()){
+  const s={x:mouse.x,y:mouse.y,angle:rnd(-1,1),len:geo.size*.6,bend:geo.size*.08};
+  effect(now,.2,p=>crescent(s,p,'255,255,255','220,220,200',.8));damage(DAMAGE,mouse.x,mouse.y,false);
+ }
+});
+addEventListener('pointermove',e=>{mouse={x:e.clientX,y:e.clientY};},{passive:true});
+const release=()=>{spin.grabbed=false;};addEventListener('pointerup',release);addEventListener('pointercancel',release);addEventListener('blur',release);
+addEventListener('resize',layout);
+layout();setVariant(0);requestAnimationFrame(frame);
+</script>
+</body>
+</html>

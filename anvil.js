@@ -261,7 +261,8 @@ const chute=(id,d)=>`<g data-chute="${id}"><path class="anvil-chute-shell" d="${
 const dialog=document.createElement('dialog');
 dialog.id='anvilDialog';dialog.setAttribute('aria-labelledby','anvilTitle');
 dialog.innerHTML=`<div class="equipment-heading"><div><div class="talents-eyebrow">РЕМЕСЛО</div><h2 id="anvilTitle">Кузница</h2></div><button id="closeAnvil" type="button" aria-label="Закрыть кузницу">×</button></div>
-<div class="anvil-tabs" role="tablist" aria-label="Разделы кузницы"><button class="anvil-tab active" type="button" role="tab" id="anvilFusionTab" data-tab="fusion" aria-selected="true" aria-controls="anvilFusionPanel">Сплавление</button><button class="anvil-tab" type="button" role="tab" id="anvilSmeltTab" data-tab="smelt" aria-selected="false" aria-controls="anvilSmeltPanel" tabindex="-1">Плавильня</button><button class="anvil-tab" type="button" role="tab" id="anvilCraftTab" data-tab="craft" aria-selected="false" aria-controls="anvilCraftPanel" tabindex="-1">Наковальня</button></div>
+<div class="anvil-tabs" role="tablist" aria-label="Разделы кузницы"><button class="anvil-tab active" type="button" role="tab" id="anvilFusionTab" data-tab="fusion" aria-selected="true" aria-controls="anvilFusionPanel">Сплавление</button><button class="anvil-tab" type="button" role="tab" id="anvilSmeltTab" data-tab="smelt" aria-selected="false" aria-controls="anvilSmeltPanel" tabindex="-1">Плавильня</button><button class="anvil-tab" type="button" role="tab" id="anvilCraftTab" data-tab="craft" aria-selected="false" aria-controls="anvilCraftPanel" tabindex="-1">Наковальня</button><button class="anvil-tab" type="button" role="tab" id="anvilJewelTab" data-tab="jewel" aria-selected="false" aria-controls="anvilJewelPanel" tabindex="-1">Ювелир</button></div>
+<section class="anvil-panel" id="anvilJewelPanel" role="tabpanel" aria-labelledby="anvilJewelTab" hidden></section>
 <section class="anvil-panel" id="anvilFusionPanel" role="tabpanel" aria-labelledby="anvilFusionTab">
 <p class="anvil-intro">Положи на наковальню три разных предмета одной редкости — металл сольётся в один случайный предмет. Редкость может вырасти, но исходные предметы расходуются при любом исходе.</p>
 <div class="anvil-forge" id="anvilForge">
@@ -554,7 +555,8 @@ const stage=$('smeltStage'),stack=$('smeltStack');
 const smeltable=item=>!!REAGENT_YIELD[item.rarity]&&inventoryItems.includes(item)&&!isEquipped(item);
 const randomInt=(min,max)=>min+Math.floor(Math.random()*(max-min+1));
 // Небольшой сдвиг и поворот каждой карточки, чтобы стопка выглядела набросанной; зависит только от позиции.
-function cardPose(i){const seed=Math.sin(i*12.9898+4.1)*43758.5453,f=seed-Math.floor(seed);return {x:Math.round((f-.5)*14),y:-i*3,r:Math.round((f*2-1)*9)};}
+// Высота считается среди видимых карточек (level): иначе большая стопка уезжает за верх сцены.
+function cardPose(i,level){const seed=Math.sin(i*12.9898+4.1)*43758.5453,f=seed-Math.floor(seed);return {x:Math.round((f-.5)*14),y:-level*3,r:Math.round((f*2-1)*9)};}
 
 function renderBank(pulse=[]){
  for(const bank of dialog.querySelectorAll('.reagent-bank')){
@@ -573,7 +575,7 @@ function renderStack(added=null){
  const list=smeltPicks,visible=list.slice(-STACK_VISIBLE),offset=list.length-visible.length;
  $('smeltEmpty').hidden=list.length>0;stack.hidden=!list.length;stack.replaceChildren();
  visible.forEach((item,i)=>{
-  const pose=cardPose(offset+i),card=document.createElement('div');card.className='smelt-card'+(item===added?' card-in':'');
+  const pose=cardPose(offset+i,i),card=document.createElement('div');card.className='smelt-card'+(item===added?' card-in':'');
   card.style.cssText=`--rc:${color(item.rarity)};--x:${pose.x}px;--y:${pose.y}px;--r:${pose.r}deg;z-index:${i+1}`;
   card.dataset.x=pose.x;card.dataset.y=pose.y;card.dataset.r=pose.r;
   card.innerHTML=`<small>${rarityLabel(item.rarity)}</small><img src="${item.image}" alt=""><strong></strong>`;card.querySelector('strong').textContent=item.name;addLevelPlate(card,item);
@@ -1013,13 +1015,14 @@ let activeTab='fusion';
 function renderTabs(){
  const busy=phase==='melting'||smeltBusy||craftBusy;
  dialog.querySelectorAll('.anvil-tab').forEach(tab=>{const on=tab.dataset.tab===activeTab;tab.classList.toggle('active',on);tab.setAttribute('aria-selected',String(on));tab.tabIndex=on?0:-1;tab.disabled=busy&&!on;});
- $('anvilFusionPanel').hidden=activeTab!=='fusion';$('anvilSmeltPanel').hidden=activeTab!=='smelt';$('anvilCraftPanel').hidden=activeTab!=='craft';
+ $('anvilFusionPanel').hidden=activeTab!=='fusion';$('anvilSmeltPanel').hidden=activeTab!=='smelt';$('anvilCraftPanel').hidden=activeTab!=='craft';$('anvilJewelPanel').hidden=activeTab!=='jewel';
 }
 function showTab(tab){
  if(tab===activeTab||phase==='melting'||smeltBusy||craftBusy)return;
  hideItemTooltip(true);activeTab=tab;renderTabs();renderActive();
 }
-function renderActive(){if(activeTab==='smelt')renderSmelt();else if(activeTab==='craft')renderCraft();else render();}
+// «Ювелир» (инкрустация камней) рисует gems.js.
+function renderActive(){if(activeTab==='jewel')window.gems?.renderJeweler($('anvilJewelPanel'));else if(activeTab==='smelt')renderSmelt();else if(activeTab==='craft')renderCraft();else render();}
 dialog.querySelectorAll('.anvil-tab').forEach(tab=>tab.addEventListener('click',()=>showTab(tab.dataset.tab)));
 function resetSmelt(){
  smeltTimers.forEach(clearTimeout);smeltTimers=[];
@@ -1037,7 +1040,7 @@ function reset(){
  selected=[null,null,null];sources=null;result=null;sourceRarity=null;phase='idle';note='';
 }
 
-openButton.addEventListener('click',()=>{reset();resetSmelt();resetCraft();renderTabs();dialog.showModal();renderActive();});
+openButton.addEventListener('click',()=>{reset();resetSmelt();resetCraft();window.gems?.resetJeweler();renderTabs();dialog.showModal();renderActive();});
 // Результат уже лежит в инвентаре, поэтому при закрытии достаточно остановить эффекты и снять блокировки.
 // Событие close приходит асинхронно, поэтому кнопка закрытия чистит всё сразу, а Escape — через событие.
 function closeAnvil(){hideItemTooltip(true);reset();resetSmelt();resetCraft();revealDone();}

@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Точный разрез: варианты</title>
+<!-- Прототип для выбора вида навыка. В игру не подключён и сохранения не трогает. Адрес: http://127.0.0.1:8765/attacks/precise-cut-preview.html -->
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#0b120e;color:#f0e6c8;font-family:Segoe UI,system-ui,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+#arena{position:fixed;inset:0;background:#0b120e url(../assets/forest-dusk-stylized.png) center/cover no-repeat}
+#arena:after{content:'';position:absolute;inset:0;background:linear-gradient(#0b120ecc,#0b120e22 28%,#0b120e22 65%,#0b120ee6)}
+#monster{position:absolute;z-index:1;object-fit:contain;pointer-events:none;filter:drop-shadow(0 14px 14px #0009)}
+#enemyBar{position:absolute;z-index:4;height:14px;border-radius:8px;border:1px solid #d9c07a88;background:#2a0d0d;overflow:hidden;translate:-50% 0}
+#enemyFill{height:100%;width:100%;background:linear-gradient(#ff5a4d,#b31717);transition:width .12s}
+#fx{position:fixed;inset:0;z-index:3;width:100%;height:100%;pointer-events:none}
+#tabs{position:fixed;z-index:4;top:12px;left:50%;translate:-50% 0;display:flex;gap:8px;max-width:calc(100% - 24px)}
+button{font:inherit;cursor:pointer}
+#tabs button{font-weight:700;font-size:13px;color:#d9cfae;padding:9px 14px;border-radius:10px;border:1px solid #8c805588;background:#111c16e6;white-space:nowrap}
+#tabs button:hover{border-color:#edc77b}
+#tabs button.on{color:#22160a;background:linear-gradient(#f2d48a,#c89a48);border-color:#fff2c4}
+#about{position:fixed;z-index:4;top:58px;left:50%;translate:-50% 0;width:min(640px,calc(100% - 24px));text-align:center;padding:8px 14px;border-radius:10px;background:#0d1712d9;border:1px solid #8b805044;pointer-events:none}
+#about b{display:block;font-size:16px;color:#ffe9a8}
+#about span{display:block;margin-top:2px;font-size:13px;line-height:1.4;color:#c6d0b8}
+#dock{position:fixed;z-index:5;bottom:14px;left:50%;translate:-50% 0;width:min(760px,calc(100% - 20px));display:flex;flex-direction:column;align-items:center;gap:8px}
+#status{font-size:13px;font-weight:700;color:#e8f4ff;text-shadow:0 1px 3px #000;text-align:center}
+#row,#extras{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+#row button,#extras button{font-weight:700;color:#f0e6c8;border-radius:10px;border:1px solid #8c8055;background:linear-gradient(#26382b,#121c16)}
+#row button{padding:10px 14px;font-size:14px}
+#extras button{padding:6px 10px;font-size:12px}
+#row button:hover,#extras button:hover{border-color:#edc77b}
+#row button small{color:#d5c18b;font-weight:800;margin-right:5px}
+#use.on{border-color:#d8efff;box-shadow:0 0 16px #9fd6ff}
+#extras button.on{border-color:#7fc8ff;color:#bfe4ff}
+@media(max-width:640px){#tabs button{padding:8px 7px;font-size:11px}#about span{font-size:12px}}
+</style>
+</head>
+<body>
+<div id="arena">
+ <img id="monster" src="../assets/monster-slime.svg" alt="">
+ <div id="enemyBar"><div id="enemyFill"></div></div>
+</div>
+<canvas id="fx"></canvas>
+<nav id="tabs" aria-label="Варианты вида навыка"></nav>
+<div id="about"><b></b><span></span></div>
+<div id="dock">
+ <div id="status"></div>
+ <div id="row">
+  <button id="use" type="button"><small>1</small>Точный разрез</button>
+  <button id="demo" type="button">▶ Показать без мыши</button>
+ </div>
+ <div id="extras">
+  <button id="count" type="button">Разрезов: 3</button>
+  <button id="phantomBtn" type="button" aria-pressed="false">Копии «Фантомного клинка»: выкл</button>
+  <button id="slow" type="button" aria-pressed="false">Замедлить в 4 раза</button>
+ </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const TAU=Math.PI*2,FIRE_STEP=.2,FX=.5,PH_DELAY=.2,DAMAGE=10,ENEMY_HP=4000,SAMPLE_STALE=150,SPEED_WINDOW=120,CROSS_BONUS=.1;
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),rnd=(a,b)=>a+Math.random()*(b-a);
+const fmt=v=>v.toLocaleString('ru-RU',{maximumFractionDigits:2});
+const speedMultiplier=s=>s<=2400?Math.max(1,s/800):Math.min(5,3+(s-2400)/1200);
+const PHANTOM={rim:'168,120,255',core:'236,224,255',dark:'30,12,60',spark:'200,170,255'};
+
+const canvas=$('fx'),ctx=canvas.getContext('2d'),monster=$('monster');
+let vi=0,now=0,lastTs=performance.now(),timeScale=1,W=0,H=0,dpr=1,geo={};
+let state='idle',marks=[],total=3,armed=true,lastPoint=null,samples=[],mouse={x:-999,y:-999},crossings=0,multPulse=0,multVisible=0;
+let hp=ENEMY_HP,flash=0,flashRgb='255,255,255',shake=0,phantomOn=false,split=null,screenInk=0;
+let events=[],effects=[],sparks=[],shards=[],floats=[],splats=[];
+const schedule=(at,fn)=>events.push({at,fn});
+const effect=(start,dur,draw)=>effects.push({start,dur,draw});
+
+function layout(){
+ dpr=Math.min(2,devicePixelRatio||1);W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;
+ const size=Math.min(260,H*.38,W*.42),cx=W*.5,cy=H*.47;
+ monster.style.left=cx-size/2+'px';monster.style.top=cy-size/2+'px';monster.style.width=size+'px';monster.style.height=size+'px';
+ const bar=$('enemyBar');bar.style.left=cx+'px';bar.style.top=cy-size/2-22+'px';bar.style.width=size*.9+'px';
+ geo={cx,cy,size,rx:size*.43,ry:size*.45};
+}
+
+// ── Общие рисунки ──
+function lens(x,y,angle,len,width,rgb,alpha,blur=0){
+ ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.globalAlpha=alpha;ctx.fillStyle=`rgb(${rgb})`;if(blur){ctx.shadowColor=`rgb(${rgb})`;ctx.shadowBlur=blur;}
+ ctx.beginPath();ctx.moveTo(-len/2,0);ctx.quadraticCurveTo(0,-width,len/2,0);ctx.quadraticCurveTo(0,width,-len/2,0);ctx.fill();ctx.restore();
+}
+function glow(x,y,r,rgb,alpha){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,`rgba(255,255,255,${alpha})`);g.addColorStop(.4,`rgba(${rgb},${alpha*.7})`);g.addColorStop(1,`rgba(${rgb},0)`);ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,TAU);ctx.fill();}
+function spark(x,y,vx,vy,life,size,rgb,g=0){sparks.push({x,y,vx,vy,life,max:life,size,rgb,g});}
+const dirOf=m=>({ux:Math.cos(m.angle),uy:Math.sin(m.angle)});
+const settle=m=>clamp((now-m.t0)/.14,0,1);
+// Опорные точки вдоль разреза: нужны рваным и кистевым контурам, чтобы рисунок не дрожал от кадра к кадру.
+function buildShape(m){
+ m.noise=Array.from({length:25},()=>Math.random());
+ m.stars=Array.from({length:46},()=>({u:rnd(-.5,.5),w:rnd(-.5,.5),r:rnd(.5,1.9),drift:rnd(-40,40),phase:rnd(0,TAU)}));
+ m.jag=[];for(let i=0;i<=14;i++)m.jag.push([i/14-.5,(i===0||i===14)?0:rnd(-1,1)]);
+ m.branches=Array.from({length:4+Math.round(m.intensity*5)},()=>({u:rnd(-.38,.38),side:Math.random()<.5?-1:1,tilt:rnd(.4,1.1),len:rnd(14,34+m.intensity*30)}));
+}
+
+// ── Вариант 0: как сейчас ──
+const CURRENT={
+ name:'Сейчас',about:'Текущий вид для сравнения: тонкая светящаяся линия, ледяная вспышка и белые искры.',
+ pal:{rim:'191,228,255',core:'255,255,255',dark:'191,228,255',spark:'255,255,255'},number:'#ffffff',
+ cursor(x,y){glow(x,y,20,'191,228,255',.55);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,4,0,TAU);ctx.fill();},
+ mark(m,pal){const len=m.length*settle(m);lens(m.x,m.y,m.angle,len,1.5,pal.rim,m.opacity,8+22*m.intensity);lens(m.x,m.y,m.angle,len,1,pal.core,m.opacity);},
+ fire(m,pal){
+  const w=3+9*m.intensity,{ux,uy}=dirOf(m);
+  effect(now,FX,p=>{lens(m.x,m.y,m.angle,m.length,17*Math.sin(Math.PI*Math.min(1,p*1.2)),pal.rim,(1-p)*.8,12);lens(m.x,m.y,m.angle,m.length,1+w*Math.sin(Math.PI*Math.min(1,p*2.2)),pal.core,1-p,m.glow);});
+  for(let i=0,n=12+m.multiplier*2;i<n;i++){const al=rnd(-.4,.4)*m.length,s=Math.random()<.5?-1:1,sp=(25+rnd(0,40+60*m.intensity))/(FX*.8);spark(m.x+ux*al,m.y+uy*al,-uy*s*sp+ux*rnd(-40,40),ux*s*sp+uy*rnd(-40,40),FX*rnd(.6,1),2,pal.spark);}
+ }
+};
+
+// ── Вариант 1: разрез режет самого врага; половины расходятся, между ними чёрная пустота ──
+const VOID={
+ name:'Разлом пустоты',about:'Разрез рвёт пространство. На враге остаётся чёрная щель с голубой кромкой, а при срабатывании враг расходится на две половины, и искры затягивает внутрь.',
+ pal:{rim:'70,225,255',core:'225,255,255',dark:'0,8,16',spark:'120,235,255'},number:'#8ff0ff',
+ cursor(x,y){glow(x,y,18,this.pal.rim,.45);ctx.fillStyle='#02060c';ctx.beginPath();ctx.arc(x,y,5.5,0,TAU);ctx.fill();ctx.strokeStyle=`rgb(${this.pal.rim})`;ctx.lineWidth=1.5;ctx.stroke();},
+ mark(m,pal){
+  const len=m.length*settle(m),pulse=.75+.25*Math.sin(now*11+m.seed*9);
+  lens(m.x,m.y,m.angle,len,2.2+2*m.intensity,pal.rim,.8*pulse,8+12*m.intensity);lens(m.x,m.y,m.angle,len*.96,1.2+1.6*m.intensity,pal.dark,1);
+  if(Math.random()<.25+m.intensity*.3){const{ux,uy}=dirOf(m),al=rnd(-.42,.42)*len,s=Math.random()<.5?-1:1,d=rnd(10,26);spark(m.x+ux*al-uy*s*d,m.y+uy*al+ux*s*d,uy*s*d*2.6,-ux*s*d*2.6,.36,1.4,pal.spark);}
+ },
+ fire(m,pal){
+  split={m,start:now,dur:.46,gap:6+16*m.intensity,slide:6+18*m.intensity,pal};
+  const{ux,uy}=dirOf(m),open=8+22*m.intensity;
+  effect(now,FX,p=>{
+   const k=Math.sin(Math.PI*Math.min(1,p*1.6)),a=1-p*p;
+   lens(m.x,m.y,m.angle,m.length*1.04,open*k+3,pal.rim,a*.95,22);
+   lens(m.x,m.y,m.angle,m.length,open*k+1.5,pal.dark,a);
+   lens(m.x,m.y,m.angle,m.length*1.08,1.4*(1-p),pal.core,a);
+  });
+  // Искры летят не наружу, а к щели: пустота их затягивает.
+  for(let i=0,n=18+Math.round(m.multiplier*6);i<n;i++){const al=rnd(-.46,.46)*m.length,s=Math.random()<.5?-1:1,d=rnd(30,70+60*m.intensity),life=rnd(.24,.42);spark(m.x+ux*al-uy*s*d,m.y+uy*al+ux*s*d,uy*s*d/life,-ux*s*d/life,life,rnd(1,2.6),i%3?pal.spark:pal.core);}
+ }
+};
+
+// ── Вариант 2: мазок кисти ──
+function brush(m,head,tail,scale,rgb,alpha,blur=0){
+ const{ux,uy}=dirOf(m),n=24,top=[],bot=[];
+ for(let i=0;i<=n;i++){
+  const t=i/n,u=tail+(head-tail)*t,along=(u-.5)*m.length,prof=Math.sin(Math.PI*t)**.6*(.55+.45*Math.sin(Math.PI*u)),th=scale*prof*(.65+.5*m.noise[i%25]);
+  top.push([m.x+ux*along-uy*th,m.y+uy*along+ux*th]);bot.push([m.x+ux*along+uy*th,m.y+uy*along-ux*th]);
+ }
+ ctx.save();ctx.globalAlpha=alpha;ctx.fillStyle=`rgb(${rgb})`;if(blur){ctx.shadowColor=`rgb(${rgb})`;ctx.shadowBlur=blur;}
+ ctx.beginPath();top.forEach(([x,y],i)=>ctx[i?'lineTo':'moveTo'](x,y));for(let i=bot.length-1;i>=0;i--)ctx.lineTo(bot[i][0],bot[i][1]);ctx.closePath();ctx.fill();ctx.restore();
+}
+const INK={
+ name:'Алая тушь',about:'Удар как росчерк кистью. На враге остаётся чёрный мазок, а при срабатывании он за долю секунды заливается алым, и брызги туши падают вниз. Экран на миг темнеет.',
+ pal:{rim:'232,32,52',core:'255,196,180',dark:'10,4,6',spark:'232,32,52'},number:'#ff6a70',
+ cursor(x,y){ctx.fillStyle='#0a0406';ctx.strokeStyle=`rgb(${this.pal.rim})`;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x,y-9);ctx.quadraticCurveTo(x+7,y+1,x,y+5);ctx.quadraticCurveTo(x-7,y+1,x,y-9);ctx.fill();ctx.stroke();},
+ mark(m,pal){const s=settle(m);brush(m,s,0,4+5*m.intensity,pal.dark,.95);brush(m,s,0,1.2+1.5*m.intensity,pal.rim,.85);},
+ fire(m,pal){
+  const{ux,uy}=dirOf(m),scale=11+20*m.intensity;
+  screenInk=Math.max(screenInk,.2+.25*m.intensity);
+  effect(now,FX+.1,p=>{
+   const head=clamp(p/.22,0,1),fade=p<.4?1:1-(p-.4)/.6;
+   brush(m,head,0,scale+3,pal.dark,fade*.95);brush(m,head,0,scale,pal.rim,fade,14);brush(m,head,0,scale*.28,pal.core,fade*.9);
+  });
+  for(let i=0,n=16+Math.round(m.multiplier*5);i<n;i++){const al=rnd(-.42,.42)*m.length,s=Math.random()<.5?-1:1,sp=rnd(60,200+160*m.intensity),x=m.x+ux*al,y=m.y+uy*al;sparks.push({x,y,vx:-uy*s*sp+ux*rnd(-60,60),vy:ux*s*sp+uy*rnd(-60,60)-rnd(0,90),life:rnd(.4,.8),max:.8,size:rnd(1.4,4.6),rgb:i%4?pal.rim:pal.dark,g:760,solid:true,splat:i%2===0});}
+ }
+};
+
+// ── Вариант 3: трещина в стекле ──
+function crack(m,grow,width,rgb,alpha,blur=0,dx=0,dy=0){
+ const{ux,uy}=dirOf(m),amp=3+4*m.intensity,len=m.length;
+ ctx.save();ctx.globalAlpha=alpha;ctx.strokeStyle=`rgb(${rgb})`;ctx.lineWidth=width;ctx.lineJoin='miter';ctx.lineCap='round';if(blur){ctx.shadowColor=`rgb(${rgb})`;ctx.shadowBlur=blur;}
+ ctx.beginPath();m.jag.forEach(([u,j],i)=>{const a=u*len*grow,off=j*amp,x=m.x+ux*a-uy*off+dx,y=m.y+uy*a+ux*off+dy;ctx[i?'lineTo':'moveTo'](x,y);});
+ for(const b of m.branches){const a=b.u*len*grow,bx=m.x+ux*a+dx,by=m.y+uy*a+dy,ang=m.angle+b.side*b.tilt;ctx.moveTo(bx,by);ctx.lineTo(bx+Math.cos(ang)*b.len*grow,by+Math.sin(ang)*b.len*grow);}
+ ctx.stroke();ctx.restore();
+}
+const PRISM=['255,70,90','90,255,170','90,140,255'];
+const CRYSTAL={
+ name:'Хрустальный раскол',about:'Воздух трескается как стекло. На враге остаётся ветвистая трещина, а при срабатывании она вспыхивает радугой и разлетается вращающимися осколками.',
+ pal:{rim:'196,236,255',core:'255,255,255',dark:'196,236,255',spark:'220,245,255',prism:true},number:'#d8f2ff',
+ cursor(x,y){ctx.save();ctx.translate(x,y);ctx.rotate(now*2.2);ctx.fillStyle='#eaf8ff';ctx.shadowColor='#9fd6ff';ctx.shadowBlur=12;ctx.beginPath();ctx.moveTo(0,-8);ctx.lineTo(5,0);ctx.lineTo(0,8);ctx.lineTo(-5,0);ctx.closePath();ctx.fill();ctx.restore();},
+ mark(m,pal){const s=settle(m);crack(m,s,1.1+.8*m.intensity,pal.rim,.85,6+10*m.intensity);},
+ fire(m,pal){
+  const{ux,uy}=dirOf(m);
+  effect(now,FX,p=>{
+   const a=(1-p)**1.4,off=2+5*Math.sin(Math.PI*Math.min(1,p*1.5))*(.5+m.intensity);
+   ctx.save();ctx.globalCompositeOperation='lighter';
+   if(pal.prism)PRISM.forEach((c,i)=>crack(m,1,2+2*m.intensity,c,a*.9,10,-uy*off*(i-1),ux*off*(i-1)));
+   else crack(m,1,2.4+2*m.intensity,pal.rim,a,14);
+   ctx.restore();crack(m,1,1.2,pal.core,a);
+   if(p<.3)lens(m.x,m.y,m.angle,m.length*.9,10+18*m.intensity,pal.core,(1-p/.3)*.5,18);
+  });
+  for(let i=0,n=12+Math.round(m.multiplier*5);i<n;i++){
+   const al=rnd(-.42,.42)*m.length,s=Math.random()<.5?-1:1,sp=rnd(70,240+200*m.intensity),life=rnd(.35,.7);
+   shards.push({x:m.x+ux*al,y:m.y+uy*al,vx:-uy*s*sp+ux*rnd(-50,50),vy:ux*s*sp+uy*rnd(-50,50),rot:rnd(0,TAU),vr:rnd(-14,14),size:rnd(4,9+m.intensity*7),life,max:life,rgb:pal.prism?(i%4===0?PRISM[i%3]:pal.spark):pal.spark});
+  }
+ }
+};
+// ── Развитие «Разлома пустоты» ──
+// Вариант 1: внутри щели видно звёздное небо.
+function drawStarSlit(m,open,pal,alpha,age){
+ ctx.save();ctx.translate(m.x,m.y);ctx.rotate(m.angle);ctx.globalAlpha=alpha;
+ ctx.beginPath();ctx.moveTo(-m.length/2,0);ctx.quadraticCurveTo(0,-open,m.length/2,0);ctx.quadraticCurveTo(0,open,-m.length/2,0);ctx.clip();
+ const nebula=pal.nebula||pal.rim,g=ctx.createLinearGradient(-m.length/2,0,m.length/2,0);
+ g.addColorStop(0,`rgb(${pal.dark})`);g.addColorStop(.35,`rgba(${nebula},.85)`);g.addColorStop(.55,`rgb(${pal.dark})`);g.addColorStop(.75,`rgba(${nebula},.6)`);g.addColorStop(1,`rgb(${pal.dark})`);
+ ctx.fillStyle=`rgb(${pal.dark})`;ctx.fillRect(-m.length/2,-open,m.length,open*2);ctx.fillStyle=g;ctx.fillRect(-m.length/2,-open,m.length,open*2);
+ for(const s of m.stars){ctx.globalAlpha=alpha*(.45+.55*Math.abs(Math.sin(age*9+s.phase)));ctx.fillStyle=s.r>1.5?`rgb(${pal.core})`:'#fff';ctx.beginPath();ctx.arc(s.u*m.length+s.drift*age,s.w*open,s.r,0,TAU);ctx.fill();}
+ ctx.restore();
+}
+const STARS={
+ name:'Звёздная бездна',about:'Щель открывается шире, а внутри видно ночное небо: туманность и мерцающие звёзды. Несколько звёзд вылетают наружу и гаснут.',
+ pal:{rim:'110,195,255',core:'235,246,255',dark:'3,5,26',spark:'170,215,255',nebula:'72,58,190'},number:'#a8d8ff',
+ cursor(x,y){VOID.cursor.call(this,x,y);},
+ mark(m,pal){VOID.mark(m,pal);},
+ fire(m,pal){
+  split={m,start:now,dur:.56,gap:6+16*m.intensity,slide:6+18*m.intensity,pal};
+  const{ux,uy}=dirOf(m),open=20+36*m.intensity,dur=.6;
+  effect(now,dur,(p,age)=>{
+   const k=Math.sin(Math.PI*Math.min(1,p*1.25))**.7,a=p<.75?1:1-(p-.75)/.25;
+   lens(m.x,m.y,m.angle,m.length*1.03,open*k+3,pal.rim,a*.95,20);drawStarSlit(m,open*k+1,pal,a,age);lens(m.x,m.y,m.angle,m.length*1.06,1.2,pal.core,a*(1-k*.7));
+  });
+  for(let i=0,n=8+Math.round(m.multiplier*3);i<n;i++){const al=rnd(-.4,.4)*m.length,s=Math.random()<.5?-1:1,sp=rnd(30,110);spark(m.x+ux*al,m.y+uy*al,-uy*s*sp+ux*rnd(-25,25),ux*s*sp+uy*rnd(-25,25),rnd(.45,.85),rnd(1,2.4),pal.core);}
+ }
+};
+// Вариант 2: щель раскрывается рывком и тут же схлопывается с ударной волной.
+const COLLAPSE={
+ name:'Схлопывание',about:'Щель рывком раскрывается и через долю секунды захлопывается. Половины врага ударяются друг о друга, по линии бьёт белая вспышка, расходится волна.',
+ pal:{rim:'70,225,255',core:'255,255,255',dark:'0,8,16',spark:'150,240,255'},number:'#d6f8ff',
+ cursor(x,y){VOID.cursor.call(this,x,y);},
+ mark(m,pal){VOID.mark(m,pal);},
+ fire(m,pal){
+  const SNAP=.2,{ux,uy}=dirOf(m),open=12+28*m.intensity,gap=8+20*m.intensity;
+  split={m,start:now,dur:.34,gap,slide:8+22*m.intensity,pal,curve:q=>{const t=q*.34;return t<.1?t/.1:t<SNAP?1-(t-.1)/(SNAP-.1):-.22*Math.sin(Math.PI*(t-SNAP)/.14);}};
+  effect(now,SNAP,p=>{const t=p*SNAP,k=t<.1?t/.1:1-(t-.1)/(SNAP-.1);lens(m.x,m.y,m.angle,m.length,open*k+3,pal.rim,.95,20);lens(m.x,m.y,m.angle,m.length*.97,open*k+1,pal.dark,1);});
+  for(let i=0,n=14+Math.round(m.multiplier*4);i<n;i++){const al=rnd(-.46,.46)*m.length,s=Math.random()<.5?-1:1,d=rnd(30,80),life=SNAP*rnd(.7,1);spark(m.x+ux*al-uy*s*d,m.y+uy*al+ux*s*d,uy*s*d/life,-ux*s*d/life,life,rnd(1,2.4),pal.spark);}
+  schedule(now+SNAP,()=>{
+   shake=Math.max(shake,1.5);
+   effect(now,.36,p=>{const a=(1-p)**1.5,q=1-(1-p)**3;lens(m.x,m.y,m.angle,m.length*(1.05+.25*q),4+16*(1-p),pal.core,a,24);ctx.save();ctx.translate(m.x,m.y);ctx.rotate(m.angle);ctx.scale(1,.55);ctx.globalAlpha=a*.9;ctx.strokeStyle=`rgb(${pal.rim})`;ctx.lineWidth=5*(1-p)+.6;ctx.beginPath();ctx.arc(0,0,m.length*.62*q,0,TAU);ctx.stroke();ctx.restore();});
+   for(let i=0,n=16+Math.round(m.multiplier*6);i<n;i++){const al=rnd(-.45,.45)*m.length,s=Math.random()<.5?-1:1,sp=rnd(140,420+200*m.intensity);spark(m.x+ux*al,m.y+uy*al,-uy*s*sp+ux*rnd(-70,70),ux*s*sp+uy*rnd(-70,70),rnd(.2,.42),rnd(1,2.6),i%3?pal.spark:pal.core);}
+  });
+ }
+};
+// Вариант 3: расходится не только враг, а вся сцена целиком.
+const WORLD={
+ name:'Рассечённый мир',about:'Разрез проходит через весь экран. На мгновение весь лес вместе с врагом сдвигается по линии разреза, а в щели видна чернота.',
+ pal:{rim:'70,225,255',core:'225,255,255',dark:'0,8,16',spark:'120,235,255'},number:'#8ff0ff',
+ cursor(x,y){VOID.cursor.call(this,x,y);},
+ mark(m,pal){VOID.mark(m,pal);},
+ fire(m,pal){
+  split={m,start:now,dur:.4,gap:3+9*m.intensity,slide:10+26*m.intensity,pal,world:true};
+  const far=Math.hypot(W,H)*2.2;
+  effect(now,.4,p=>{const k=Math.sin(Math.PI*Math.min(1,p*1.2)),a=1-p*p;lens(m.x,m.y,m.angle,far,2+(3+9*m.intensity)*k,pal.rim,a*.75,18);lens(m.x,m.y,m.angle,far,.9,pal.core,a);});
+  VOID.fireSparks(m,pal);
+ }
+};
+VOID.fireSparks=(m,pal)=>{const{ux,uy}=dirOf(m);for(let i=0,n=16+Math.round(m.multiplier*5);i<n;i++){const al=rnd(-.46,.46)*m.length,s=Math.random()<.5?-1:1,d=rnd(30,70+60*m.intensity),life=rnd(.24,.42);spark(m.x+ux*al-uy*s*d,m.y+uy*al+ux*s*d,uy*s*d/life,-ux*s*d/life,life,rnd(1,2.6),i%3?pal.spark:pal.core);}};
+const VARIANTS=[VOID,STARS,COLLAPSE,WORLD];
+
+function setVariant(i){vi=i;[...$('tabs').children].forEach((b,n)=>b.classList.toggle('on',n===i));document.querySelector('#about b').textContent=VARIANTS[i].name;document.querySelector('#about span').textContent=VARIANTS[i].about;}
+VARIANTS.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.textContent=i?i+'. '+v.name:v.name;b.addEventListener('click',()=>setVariant(i));$('tabs').append(b);});
+
+// ── Механика: те же правила, что в игре ──
+const insideEllipse=(x,y,e)=>((x-e.cx)/e.rx)**2+((y-e.cy)/e.ry)**2<=1;
+function insideSegment(ax,ay,bx,by,e){
+ const px=(ax-e.cx)/e.rx,py=(ay-e.cy)/e.ry,dx=(bx-ax)/e.rx,dy=(by-ay)/e.ry,A=dx*dx+dy*dy,B=2*(px*dx+py*dy),C=px*px+py*py-1;
+ if(A===0)return C<=0?{mid:{x:ax,y:ay}}:null;
+ const disc=B*B-4*A*C;if(disc<0)return null;
+ const root=Math.sqrt(disc),t0=Math.max(0,(-B-root)/(2*A)),t1=Math.min(1,(-B+root)/(2*A));if(t1<=t0)return null;
+ const tm=(t0+t1)/2;return {mid:{x:ax+(bx-ax)*tm,y:ay+(by-ay)*tm}};
+}
+function currentSpeed(t){const r=samples.filter(s=>t-s.t<=SPEED_WINDOW);if(r.length<2)return 0;let d=0;for(let i=1;i<r.length;i++)d+=Math.hypot(r[i].x-r[i-1].x,r[i].y-r[i-1].y);const el=r[r.length-1].t-r[0].t;return el>0?d/el*1000:0;}
+function useSkill(){if(state!=='idle')return;state='collect';marks=[];crossings=0;armed=true;lastPoint=null;samples=[];multVisible=0;$('use').classList.add('on');updateStatus();}
+function updateStatus(){
+ $('status').textContent=state==='collect'?`Задень врага курсором: ${marks.length} из ${total}. Чем быстрее взмах, тем сильнее разрез.`:state==='fire'?'Разрезы срабатывают…':'Нажми «Точный разрез» или клавишу 1.';
+ $('use').classList.toggle('on',state!=='idle');
+}
+function segmentEnds(m){const{ux,uy}=dirOf(m),hx=ux*m.length/2,hy=uy*m.length/2;return [{x:m.x-hx,y:m.y-hy},{x:m.x+hx,y:m.y+hy}];}
+function crossPoint(a,b){
+ const [p,p2]=segmentEnds(a),[q,q2]=segmentEnds(b),r={x:p2.x-p.x,y:p2.y-p.y},s={x:q2.x-q.x,y:q2.y-q.y},den=r.x*s.y-r.y*s.x;if(Math.abs(den)<1e-9)return null;
+ const qp={x:q.x-p.x,y:q.y-p.y},t=(qp.x*s.y-qp.y*s.x)/den,u=(qp.x*r.y-qp.y*r.x)/den;if(t<=1e-4||t>=.9999||u<=1e-4||u>=.9999)return null;
+ return {x:p.x+t*r.x,y:p.y+t*r.y};
+}
+function placeMark(speed,dir,to){
+ const e=geo,multiplier=Number(speedMultiplier(speed).toFixed(2)),intensity=clamp(speed/4800,0,1),reach=(e.rx+e.ry)*4;
+ const chord=insideSegment(to.x-dir.x*reach,to.y-dir.y*reach,to.x+dir.x*reach,to.y+dir.y*reach,e),hit=chord?.mid||to;
+ const m={multiplier,intensity,angle:Math.atan2(dir.y,dir.x),x:hit.x,y:hit.y,length:Math.max(220,e.size*1.65)*(.7+.7*intensity),opacity:.5+.45*intensity,glow:8+22*intensity,seed:Math.random(),t0:now};
+ buildShape(m);
+ for(const other of marks){const pt=crossPoint(m,other);if(pt){crossings++;multPulse=1;multVisible=1;crossFlash(pt);}}
+ marks.push(m);updateStatus();
+ if(marks.length===total)startFiring();
+}
+function crossFlash(pt){
+ const pal=VARIANTS[vi].pal;
+ effect(now,.36,p=>{const a=1-p;glow(pt.x,pt.y,26*(.6+p),pal.rim,a);lens(pt.x,pt.y,0,44*(.6+p),1.4,pal.core,a,6);lens(pt.x,pt.y,Math.PI/2,44*(.6+p),1.4,pal.core,a,6);});
+}
+function startFiring(){
+ state='fire';updateStatus();
+ const list=[...marks],mult=1+CROSS_BONUS*crossings;
+ list.forEach((m,i)=>schedule(now+.14+FIRE_STEP*(i+1),()=>fireMark(m,mult)));
+ schedule(now+.14+FIRE_STEP*list.length+FX+(phantomOn?PH_DELAY:0),()=>{state='idle';marks=[];multVisible=0;updateStatus();});
+}
+function oppositeMark(m){
+ const nx=-Math.sin(m.angle),ny=Math.cos(m.angle),off=(m.x-geo.cx)*nx+(m.y-geo.cy)*ny,gap=Math.min(geo.rx,geo.ry)*.45,side=off>0?-1:1,d=Math.max(Math.abs(off),gap);
+ return {...m,x:geo.cx+nx*side*d,y:geo.cy+ny*side*d};
+}
+function fireMark(m,mult){
+ const variant=VARIANTS[vi],value=DAMAGE*m.multiplier*mult;
+ marks=marks.filter(x=>x!==m);
+ variant.fire(m,variant.pal);damage(value,m.x,m.y,false,variant.pal.rim);
+ if(phantomOn){const copy=oppositeMark(m);schedule(now+PH_DELAY,()=>{variant.fire(copy,PHANTOM);damage(value*.5,copy.x,copy.y,true,PHANTOM.rim);});}
+}
+function damage(value,x,y,isPhantom,rgb){
+ hp-=value;if(hp<=0)hp=ENEMY_HP;flash=1;flashRgb=rgb;shake=Math.max(shake,isPhantom?.6:1);
+ floats.push({x:x+rnd(-16,16),y:y-12,value,isPhantom,t:now});$('enemyFill').style.width=hp/ENEMY_HP*100+'%';
+}
+// Показ без мыши: взмахи разной силы в разные стороны, чтобы разрезы пересекались.
+function runDemo(){
+ if(state!=='idle')return;useSkill();const base=rnd(0,Math.PI);
+ for(let i=0;i<total;i++)schedule(now+.18*(i+1),()=>{if(state!=='collect')return;const a=base+i*(Math.PI/total)+rnd(-.15,.15),speed=1200+3400*(i+1)/total;placeMark(speed,{x:Math.cos(a),y:Math.sin(a)},{x:geo.cx+rnd(-.14,.14)*geo.size,y:geo.cy+rnd(-.14,.14)*geo.size});});
+}
+addEventListener('pointermove',e=>{
+ mouse={x:e.clientX,y:e.clientY};if(state!=='collect'){lastPoint=null;return;}
+ const t=performance.now(),point={x:e.clientX,y:e.clientY,t};
+ if(!lastPoint||t-lastPoint.t>SAMPLE_STALE){samples=[point];lastPoint=point;return;}
+ samples.push(point);if(samples.length>40)samples.shift();
+ const part=insideSegment(lastPoint.x,lastPoint.y,point.x,point.y,geo);
+ if(part&&armed){
+  const r=samples.filter(s=>t-s.t<=SPEED_WINDOW),st=r.length>1?r[0]:lastPoint;let dx=point.x-st.x,dy=point.y-st.y;if(!dx&&!dy){dx=point.x-lastPoint.x;dy=point.y-lastPoint.y;}
+  const n=Math.hypot(dx,dy)||1;placeMark(currentSpeed(t),{x:dx/n,y:dy/n},point);armed=false;
+ }
+ if(!insideEllipse(point.x,point.y,geo))armed=true;
+ lastPoint=point;
+},{passive:true});
+
+// ── Половины врага для «Разлома пустоты» ──
+function drawSplit(){
+ if(!split)return;
+ const q=(now-split.start)/split.dur;if(q>=1){split=null;monster.style.opacity=1;return;}
+ if(!monster.complete||!monster.naturalWidth)return;
+ monster.style.opacity=0;
+ const k=split.curve?split.curve(q):Math.sin(Math.PI*Math.min(1,q*1.1)),m=split.m,nx=-Math.sin(m.angle),ny=Math.cos(m.angle),{ux,uy}=dirOf(m),world=!!split.world,big=world?Math.hypot(W,H)*2.5:geo.size*3;
+ if(world){ctx.fillStyle=`rgb(${split.pal.dark})`;ctx.fillRect(0,0,W,H);}
+ for(const side of [-1,1]){
+  ctx.save();
+  const ox=(nx*side*split.gap+ux*side*split.slide)*k,oy=(ny*side*split.gap+uy*side*split.slide)*k;
+  // Сцена сдвигается вместе с границей, поэтому между половинами видна щель.
+  if(world)ctx.translate(ox,oy);
+  // Полуплоскость по одну сторону линии разреза.
+  ctx.beginPath();ctx.moveTo(m.x-ux*big,m.y-uy*big);ctx.lineTo(m.x+ux*big,m.y+uy*big);ctx.lineTo(m.x+ux*big+nx*side*big,m.y+uy*big+ny*side*big);ctx.lineTo(m.x-ux*big+nx*side*big,m.y-uy*big+ny*side*big);ctx.closePath();
+  if(!world)ctx.translate(ox,oy);
+  ctx.clip();
+  if(world)drawScene();
+  ctx.drawImage(monster,geo.cx-geo.size/2,geo.cy-geo.size/2,geo.size,geo.size);ctx.restore();
+ }
+}
+// Фон сцены на холсте: та же картинка и то же затемнение, что у #arena.
+const sceneArt=new Image();sceneArt.src='../assets/forest-dusk-stylized.png';
+function drawScene(){
+ if(sceneArt.complete&&sceneArt.naturalWidth){const s=Math.max(W/sceneArt.naturalWidth,H/sceneArt.naturalHeight),w=sceneArt.naturalWidth*s,h=sceneArt.naturalHeight*s;ctx.drawImage(sceneArt,(W-w)/2,(H-h)/2,w,h);}
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#0b120ecc');g.addColorStop(.28,'#0b120e22');g.addColorStop(.65,'#0b120e22');g.addColorStop(1,'#0b120ee6');ctx.fillStyle=g;ctx.fillRect(-50,-50,W+100,H+100);
+}
+
+// ── Кадр ──
+function tick(dt){
+ now+=dt;
+ const due=events.filter(e=>e.at<=now);if(due.length){events=events.filter(e=>e.at>now);due.sort((a,b)=>a.at-b.at).forEach(e=>e.fn());}
+ sparks=sparks.filter(p=>{p.life-=dt;if(p.life<=0){if(p.splat&&splats.length<70)splats.push({x:p.x,y:p.y,r:p.size*1.3,t:now,rgb:p.rgb});return false;}return true;});
+ for(const p of sparks){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=(p.g||0)*dt;if(!p.g){p.vx*=.985;p.vy*=.985;}}
+ shards=shards.filter(s=>(s.life-=dt)>0);for(const s of shards){s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=240*dt;s.vx*=.985;s.rot+=s.vr*dt;}
+ splats=splats.filter(s=>now-s.t<.9);
+ flash=Math.max(0,flash-dt*6);shake=Math.max(0,shake-dt*7);multPulse=Math.max(0,multPulse-dt*2.6);screenInk=Math.max(0,screenInk-dt*2.2);
+}
+function draw(){
+ ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
+ if(screenInk>0){ctx.fillStyle=`rgba(8,2,4,${screenInk})`;ctx.fillRect(0,0,W,H);}
+ drawSplit();
+ const v=VARIANTS[vi];
+ for(const s of splats){ctx.fillStyle=`rgba(${s.rgb},${(1-(now-s.t)/.9)*.8})`;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,TAU);ctx.fill();}
+ for(const m of marks)v.mark(m,v.pal);
+ effects=effects.filter(e=>now<e.start+e.dur);
+ for(const e of effects)if(now>=e.start){const age=now-e.start;e.draw(age/e.dur,age);}
+ for(const s of shards){const a=Math.min(1,s.life/s.max*1.6);ctx.save();ctx.translate(s.x,s.y);ctx.rotate(s.rot);ctx.globalAlpha=a;ctx.fillStyle=`rgba(${s.rgb},.75)`;ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(0,-s.size);ctx.lineTo(s.size*.55,s.size*.5);ctx.lineTo(-s.size*.45,s.size*.3);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
+ ctx.save();for(const p of sparks){ctx.globalCompositeOperation=p.solid?'source-over':'lighter';ctx.fillStyle=`rgba(${p.rgb},${Math.min(1,p.life/p.max*1.4)})`;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,TAU);ctx.fill();}ctx.restore();
+ if(multVisible){
+  ctx.save();ctx.translate(geo.cx,Math.min(geo.cy+geo.size/2+38,H-170));ctx.scale(1+multPulse*.28,1+multPulse*.28);ctx.font='900 34px Segoe UI,sans-serif';ctx.textAlign='center';ctx.lineJoin='round';ctx.lineWidth=5;ctx.strokeStyle='#000b';ctx.fillStyle=v.number;ctx.shadowColor=v.number;ctx.shadowBlur=14;
+  const text='×'+fmt(1+CROSS_BONUS*crossings);ctx.strokeText(text,0,0);ctx.fillText(text,0,0);ctx.restore();
+ }
+ floats=floats.filter(f=>now-f.t<.9);
+ ctx.save();ctx.textAlign='center';ctx.lineJoin='round';
+ for(const f of floats){const a=(now-f.t)/.9;ctx.globalAlpha=1-a*a;ctx.font=`800 ${f.isPhantom?19:24}px Segoe UI,sans-serif`;ctx.lineWidth=4;ctx.strokeStyle='#000c';ctx.fillStyle=f.isPhantom?'#cfb4ff':v.number;const y=f.y-a*46;ctx.strokeText(fmt(f.value),f.x,y);ctx.fillText(fmt(f.value),f.x,y);}
+ ctx.restore();
+ if(state==='collect'&&marks.length<total)v.cursor(mouse.x,mouse.y);
+ monster.style.translate=Math.sin(now*70)*shake*5+'px 0';
+ monster.style.filter=`drop-shadow(0 14px 14px #0009) brightness(${1+flash*.45}) drop-shadow(0 0 ${flash*18}px rgba(${flashRgb},${flash}))`;
+}
+function frame(ts){
+ const dt=clamp((ts-lastTs)/1000,0,.1)*timeScale;lastTs=ts;
+ const steps=Math.max(1,Math.ceil(dt/.016));for(let i=0;i<steps;i++)tick(dt/steps);
+ draw();requestAnimationFrame(frame);
+}
+
+// ── Управление ──
+$('use').addEventListener('click',useSkill);$('demo').addEventListener('click',runDemo);
+$('count').addEventListener('click',()=>{if(state!=='idle')return;total=total===3?5:total===5?8:3;$('count').textContent='Разрезов: '+total;});
+$('phantomBtn').addEventListener('click',()=>{phantomOn=!phantomOn;$('phantomBtn').classList.toggle('on',phantomOn);$('phantomBtn').setAttribute('aria-pressed',phantomOn);$('phantomBtn').textContent='Копии «Фантомного клинка»: '+(phantomOn?'вкл':'выкл');});
+$('slow').addEventListener('click',()=>{timeScale=timeScale===1?.25:1;$('slow').classList.toggle('on',timeScale<1);$('slow').setAttribute('aria-pressed',timeScale<1);});
+addEventListener('keydown',e=>{if(!e.repeat&&e.code==='Digit1')useSkill();});
+addEventListener('resize',layout);
+layout();setVariant(1);updateStatus();requestAnimationFrame(frame);
+</script>
+</body>
+</html>

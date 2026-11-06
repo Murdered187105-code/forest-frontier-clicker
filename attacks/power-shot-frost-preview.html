@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Мощный выстрел — морозный раскол</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#0c1411;color:#eee8d9;font:15px system-ui,Segoe UI}button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}
+#arena{position:relative;height:100svh;min-height:660px;overflow:hidden;background:linear-gradient(#07120dde,#07120d20 45%,#07120de8),url('../assets/forest-dusk-stylized.png') center/cover}
+header{position:absolute;z-index:3;top:26px;left:32px;right:32px;display:flex;justify-content:space-between;gap:20px;pointer-events:none}header small{color:#b3c6aa;letter-spacing:3px;font-size:10px}h1{font:600 clamp(25px,4vw,42px) Georgia;margin:9px 0}header p{color:#bdc7b8;margin:0;max-width:520px;line-height:1.5}.badge{align-self:start;border:1px solid #d6c79744;border-radius:30px;padding:8px 14px;font-size:11px;color:#d7c9a3}
+#target{position:absolute;left:50%;top:47%;transform:translate(-50%,-50%);width:240px;text-align:center;pointer-events:none}#target img{width:220px;height:200px;object-fit:contain;filter:drop-shadow(0 18px 12px #0007)}#target strong{display:block;font-size:13px;letter-spacing:1px;margin-bottom:10px}.bar{height:6px;background:#050b08;border:1px solid #b8c68744;border-radius:6px;overflow:hidden}#hpFill{height:100%;background:#a6c97b;width:100%;transition:width .15s}#health{display:block;font-size:12px;color:#c6cfbc;margin:7px}
+canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.bottom{position:absolute;z-index:4;left:50%;bottom:22px;transform:translateX(-50%);width:min(880px,calc(100% - 32px))}.variants{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.variant{border:1px solid #76816b55;background:#101e17e8;color:#e9e7d8;border-radius:12px;padding:14px;text-align:left;transition:border-color .2s}.variant.selected{border-color:var(--tint);box-shadow:inset 0 0 24px #ffffff08}.variant small{color:var(--tint);font-size:10px;letter-spacing:2px}.variant b{display:block;margin:7px 0;font-size:15px}.variant span{color:#aab6a8;font-size:12px;line-height:1.4;display:block}
+.controls{margin-top:12px;padding:15px;background:#0a1511ee;border:1px solid #7d8b7040;border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.mana{min-width:140px;font-size:12px;color:#b5ccdf}.mana .bar{margin-top:7px}#manaFill{height:100%;background:#72bce6;width:100%;transition:width .15s}#shoot{padding:14px 24px;border:1px solid #f0d69b;border-radius:8px;background:linear-gradient(#e8ca8c,#b58f50);color:#281e10;font-weight:750}.sub{background:transparent;color:#bac9bd;border:1px solid #607965;border-radius:7px;padding:9px 12px}label{color:#aebeb1;font-size:12px}input{width:65px;padding:6px;background:#14271c;border:1px solid #52644f;border-radius:5px;color:#fff}#status{height:32px;text-align:center;font-size:12px;color:#d0d9c5;margin:10px 0 0}footer{text-align:center;font-size:10px;color:#809886}a{color:#adc3a3}
+@media(max-width:600px){header{top:18px;left:18px;right:18px}.badge{display:none}header p{font-size:12px}#target{top:42%;width:190px}#target img{width:170px;height:165px}.variant{padding:10px}.variant b{font-size:12px}.variant span{font-size:10px}.controls{gap:10px;padding:10px}#shoot{padding:11px 15px}.mana{min-width:110px}.bottom{bottom:12px}}
+</style>
+<div id="arena">
+ <header><div><small>МОРОЗНЫЙ ШЛЕЙФ · РАЗВИТИЕ ВАРИАНТА 02</small><h1>Мощный выстрел</h1><p>При касании врага стрела раскалывается.<br>Обломки несут морозный дым дальше по траектории.</p></div><span class="badge">МОРОЗНЫЙ РАСКОЛ · 3 ВАРИАНТА</span></header>
+ <div id="target"><strong>Лесной слизень · мишень</strong><div class="bar"><div id="hpFill"></div></div><span id="health">100 / 100</span><img id="enemy" src="../assets/monster-slime.svg" alt="Лесной слизень"></div>
+ <canvas id="fx"></canvas>
+ <div class="bottom"><div class="variants">
+  <button class="variant selected" data-v="0" style="--tint:#a7e5ff" aria-pressed="true"><small>01 / СТРУЯ</small><b>Ледяная щепа</b><span>Пять крупных обломков и узкий плотный дымный след.</span></button>
+  <button class="variant" data-v="1" style="--tint:#79ccff" aria-pressed="false"><small>02 / ВЕЕР</small><b>Морозный выброс</b><span>Мелкие осколки раскрывают широкий конус холодного дыма.</span></button>
+  <button class="variant" data-v="2" style="--tint:#c5edff" aria-pressed="false"><small>03 / СПИРАЛЬ</small><b>Ледяной бурав</b><span>Обломки вращаются вокруг пути стрелы, закручивая дым.</span></button>
+ </div><div class="controls"><div class="mana"><span id="manaText">Мана: 100 / 100</span><div class="bar"><div id="manaFill"></div></div></div><label>Урон удара <input id="damage" type="number" min="1" max="100" step="1" value="10"></label><label><input id="slow" type="checkbox" style="width:auto"> Замедлить ×3</label><button id="shoot" disabled>Загрузка…</button><button id="reset" class="sub">Восстановить</button></div><p id="status" role="status">20 маны · Урон ×1 · Без вспышки и тряски врага</p><footer>Отдельное демо · <a href="power-shot-preview.html">Предыдущие варианты</a> · Текстуры <a href="../assets/effects/README.md">Kenney · CC0</a></footer></div>
+</div>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),canvas=$('fx'),ctx=canvas.getContext('2d');
+const particle='../assets/effects/kenney-particle-pack/PNG (Transparent)/';
+const sources={smoke:'../assets/effects/kenney-smoke-particles/PNG/White puff/whitePuff00.png'};
+const variants=[{name:'Ледяная щепа',color:'#a7e5ff',kind:'smoke',life:.7,mode:'jet',count:5,spread:95},{name:'Морозный выброс',color:'#79ccff',kind:'smoke',life:.9,mode:'fan',count:12,spread:420},{name:'Ледяной бурав',color:'#c5edff',kind:'smoke',life:.8,mode:'spiral',count:8,spread:140}];
+let width=0,height=0,mana=100,hp=100,selected=0,shot=null,parts=[],shards=[],last=0,raf=0,ready=false;
+const textures={},tints=new Map();
+function resize(){const rect=$('arena').getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);width=rect.width;height=rect.height;canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);}
+function tinted(kind,color){const key=kind+color;if(tints.has(key))return tints.get(key);const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.drawImage(textures[kind],0,0,128,128);g.globalCompositeOperation='source-in';g.fillStyle=color;g.fillRect(0,0,128,128);tints.set(key,c);return c;}
+function sync(){ $('manaText').textContent=`Мана: ${mana} / 100`;$('manaFill').style.width=mana+'%';$('health').textContent=hp+' / 100';$('hpFill').style.width=hp+'%';$('shoot').disabled=!ready||!!shot||shards.length>0||mana<20||hp<=0;$('shoot').textContent=ready?'Выстрелить · 20 маны':'Загрузка…';}
+function fire(){
+ if(!ready||shot||shards.length||mana<20||hp<=0)return;
+ const damage=Number($('damage').value);if(!Number.isInteger(damage)||damage<1||damage>100){$('status').textContent='Урон должен быть целым числом от 1 до 100.';return;}
+ const ar=$('arena').getBoundingClientRect(),e=$('enemy').getBoundingClientRect(),cx=e.left+e.width/2-ar.left,cy=e.top+e.height*.53-ar.top;
+ const angle=Math.random()*Math.PI*2,dx=Math.cos(angle),dy=Math.sin(angle),margin=180;
+ const ray=(x,y)=>Math.min(x>0?(width+margin-cx)/x:x<0?(-margin-cx)/x:Infinity,y>0?(height+margin-cy)/y:y<0?(-margin-cy)/y:Infinity);
+ const before=ray(-dx,-dy),after=ray(dx,dy),total=before+after;
+ const rx=e.width*.34,ry=e.height*.33,entry=1/Math.sqrt((dx/rx)**2+(dy/ry)**2);
+ mana-=20;shot={dx,dy,angle,cx,cy,before,total,impact:before-entry,travel:0,speed:Math.max(2200,total/.48),damage,hit:false,v:variants[selected],trail:[]};
+ $('status').textContent=shot.v.name+' · стрела летит';sync();start();
+}
+function spawn(s,x,y){const v=s.v;parts.push({x,y,vx:-s.dx*(50+Math.random()*120)+(Math.random()-.5)*100,vy:-s.dy*(50+Math.random()*120)+(Math.random()-.5)*100,age:0,life:v.life*(.75+Math.random()*.5),size:v.kind==='smoke'?24+Math.random()*22:v.kind==='star'?7+Math.random()*15:6+Math.random()*12,rotation:Math.random()*6.28,kind:v.kind,color:v.color});}
+function sprite(kind,color,x,y,size,alpha,rotation=0){ctx.save();ctx.translate(x,y);ctx.rotate(rotation);ctx.globalAlpha=alpha;ctx.globalCompositeOperation=kind==='smoke'?'source-over':'lighter';ctx.drawImage(tinted(kind,color),-size/2,-size/2,size,size);ctx.restore();}
+function drawArrow(s,x,y){
+ ctx.save();ctx.translate(x,y);ctx.rotate(s.angle);ctx.strokeStyle=s.v.color;ctx.fillStyle='#eff8e5';ctx.lineWidth=3;ctx.shadowColor=s.v.color;ctx.shadowBlur=10;
+ ctx.beginPath();ctx.moveTo(-94,0);ctx.lineTo(-14,0);ctx.stroke();ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-23,-7);ctx.lineTo(-17,0);ctx.lineTo(-23,7);ctx.closePath();ctx.fill();
+ ctx.fillStyle=s.v.color;for(const y of [-1,1]){ctx.beginPath();ctx.moveTo(-75,0);ctx.lineTo(-98,y*9);ctx.lineTo(-106,y*9);ctx.lineTo(-91,0);ctx.fill();}ctx.restore();
+}
+// Each fragment is a clipped piece of the actual arrow, rather than an unrelated spark.
+function breakArrow(s,x,y){
+ for(let i=0;i<s.v.count;i++){
+  const lo=-108+i*108/s.v.count,hi=lo+108/s.v.count,center=(lo+hi)/2;
+  shards.push({s,x:x+s.dx*center,y:y+s.dy*center,lo,hi,center,angle:s.angle,spin:(Math.random()-.5)*12,
+   age:0,life:.65+Math.random()*.25,forward:620+Math.random()*560,side:(i/(s.v.count-1)-.5)*s.v.spread,
+   phase:i/s.v.count*Math.PI*2,emit:0});
+ }
+ // All smoke initially travels forward; no radial impact flash or enemy shake.
+ for(let i=0;i<34;i++){
+  const speed=180+Math.random()*540,side=(Math.random()-.5)*s.v.spread;
+  parts.push({x:x-s.dx*Math.random()*24,y:y-s.dy*Math.random()*24,vx:s.dx*speed-s.dy*side,vy:s.dy*speed+s.dx*side,
+   age:0,life:s.v.life*(.8+Math.random()*.5),size:24+Math.random()*34,rotation:Math.random()*6.28,kind:'smoke',color:s.v.color,alpha:.35,drag:1.5});
+ }
+}
+function frame(now){
+ const dt=Math.min((now-last)/1000,.05)/($('slow').checked?3:1);last=now;ctx.clearRect(0,0,width,height);
+ if(shot){const s=shot,old=s.travel;s.travel=Math.min(s.impact,s.travel+s.speed*dt);
+  for(let d=old;d<s.travel;d+=13)spawn(s,s.cx+s.dx*(d-s.before-65),s.cy+s.dy*(d-s.before-65));
+  const x=s.cx+s.dx*(s.travel-s.before),y=s.cy+s.dy*(s.travel-s.before);
+  if(s.travel>=s.impact){hp=Math.max(0,hp-s.damage);breakArrow(s,x,y);shot=null;$('status').textContent=`${s.v.name}: ${s.damage} урона · стрела раскололась`+(hp===0?' · восстанови мишень':'');sync();}
+  else drawArrow(s,x,y);
+ }
+ const hadShards=shards.length;shards=shards.filter(f=>(f.age+=dt)<f.life);
+ for(const f of shards){const s=f.s,spiral=s.v.mode==='spiral',damping=Math.exp(-1.7*f.age);
+  const lateral=spiral?Math.cos(f.phase+f.age*17)*240:f.side;
+  f.x+=(s.dx*f.forward-s.dy*lateral)*damping*dt;f.y+=(s.dy*f.forward+s.dx*lateral)*damping*dt;f.angle+=f.spin*dt;
+  f.emit+=dt;while(f.emit>=.025){f.emit-=.025;parts.push({x:f.x,y:f.y,vx:s.dx*90-s.dy*lateral*.3,vy:s.dy*90+s.dx*lateral*.3,age:0,life:s.v.life,size:18+Math.random()*22,rotation:f.phase+f.age,kind:'smoke',color:s.v.color,alpha:.22,drag:1.2});}
+ }
+ parts=parts.filter(p=>(p.age+=dt)<p.life);for(const p of parts){p.vx*=Math.exp(-(p.drag||.5)*dt);p.vy*=Math.exp(-(p.drag||.5)*dt);p.x+=p.vx*dt;p.y+=p.vy*dt;const t=p.age/p.life;sprite(p.kind,p.color,p.x,p.y,p.size*(1+t*2),(1-t)*(p.alpha||.25),p.rotation+t*.3);}
+ for(const f of shards){ctx.save();ctx.translate(f.x,f.y);ctx.rotate(f.angle);ctx.globalAlpha=Math.min(1,(f.life-f.age)*5);ctx.beginPath();ctx.rect(f.lo-f.center,-13,f.hi-f.lo,26);ctx.clip();drawArrow({...f.s,angle:0},-f.center,0);ctx.restore();}
+ if(hadShards&&!shards.length)sync();
+ if(shot||parts.length||shards.length)raf=requestAnimationFrame(frame);else raf=0;
+}
+function start(){if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}}
+function reset(){shot=null;parts=[];shards=[];mana=100;hp=100;cancelAnimationFrame(raf);raf=0;ctx.clearRect(0,0,width,height);sync();$('status').textContent='Мишень и мана восстановлены. Выбери вариант и выстрели.';}
+document.querySelectorAll('.variant').forEach(b=>b.onclick=()=>{selected=Number(b.dataset.v);document.querySelectorAll('.variant').forEach((v,i)=>{v.classList.toggle('selected',i===selected);v.setAttribute('aria-pressed',String(i===selected));});});
+$('shoot').onclick=fire;$('reset').onclick=reset;document.addEventListener('keydown',e=>{if(e.code==='Space'&&!e.target.matches('input,button,select,textarea')){e.preventDefault();if(!e.repeat)fire();}});
+addEventListener('resize',()=>{resize();if(shot||parts.length||shards.length)reset();});resize();
+Promise.all(Object.entries(sources).map(([key,url])=>new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>{textures[key]=img;resolve();};img.onerror=()=>reject(new Error(url));img.src=url;}))).then(()=>{ready=true;sync();}).catch(error=>{$('status').textContent='Не удалось загрузить текстуру. Обнови страницу.';console.error(error);});
+</script></html>

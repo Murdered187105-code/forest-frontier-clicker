@@ -1,13 +1,15 @@
 // Точный разрез (слот 4, клавиша 4): за ману игрок оставляет на враге несколько отметок, задевая его курсором
-// без нажатия кнопки мыши: отметка появляется сразу при попадании и ложится по направлению взмаха. Сила каждой отметки — множитель ×1–×5 от скорости мыши. Урон не наносится сразу:
+// без нажатия кнопки мыши: отметка появляется сразу при попадании и ложится по направлению взмаха. Сила каждой отметки — множитель ×0,5–×2,5 от скорости мыши. Урон не наносится сразу:
 // когда размещены все отметки, разрезы срабатывают по очереди с шагом 0,2 с и бьют только того врага, на котором оставлены.
 // Таланты: «Серия разрезов» добавляет отметки, «Перекрёстный разрез» усиливает серию за каждое пересечение отметок.
 // Все числа навыка и талантов — в precise-cut-data.js.
 (()=>{
 const CFG=Object.assign({mana:25,baseCuts:3,icon:'assets/precision-cut-icon-v1.png',
- series:{name:'Серия разрезов',cutsPerRank:1,costs:[1,2,3,4,5,6,7]},cross:{name:'Перекрёстный разрез',bonusPerCross:.1,costs:[1]}},window.PRECISE_CUT||{});
+ series:{name:'Серия разрезов',cutsPerRank:1,costs:[1,2,3,4,5,6,7]},cross:{name:'Перекрёстный разрез',bonusPerCross:.05,costs:[1]}},window.PRECISE_CUT||{});
 const CUT_KEY='forest-frontier-cut-v1',CUT_MANA=CFG.mana;
-const SAMPLE_STALE=150,SPEED_WINDOW=120,FIRE_STEP=200,FX_MS=500;
+const SAMPLE_STALE=150,SPEED_WINDOW=120,FIRE_STEP=200,FX_MS=500,MARK_DRAW_MS=160;
+// Сдвиг сцены при срабатывании разреза: длительность и смещение половин (пиксели, к базовому прибавляется доля от силы взмаха).
+const WORLD_MS=340,WORLD_GAP=1.5,WORLD_GAP_POWER=3,WORLD_SLIDE=3,WORLD_SLIDE_POWER=8;
 // Область попадания — эллипс внутри изображения врага (доли его ширины и высоты).
 const HIT={cx:.5,cy:.48,rx:.43,ry:.45};
 const SERIES_MAX=CFG.series.costs.length,CROSS_MAX=CFG.cross.costs.length;
@@ -35,7 +37,7 @@ const enemySprite=()=>document.querySelector('#monster > svg:not(.slash-effect)'
 const modalOpen=()=>!!document.querySelector('dialog[open]');
 const canStrikeEnemy=()=>!locked&&hp>0&&!modalOpen();
 const formatMultiplier=value=>'×'+Number(value.toFixed(2)).toLocaleString('ru-RU');
-function speedMultiplier(speed){return speed<=2400?Math.max(1,speed/800):Math.min(5,3+(speed-2400)/1200);}
+function speedMultiplier(speed){return speed<=2400?Math.max(.5,speed/1600):Math.min(2.5,1.5+(speed-2400)/2400);}
 function arenaPoint(clientX,clientY){
  const arena=$('arena'),zoom=arena.currentCSSZoom||1,box=arena.getBoundingClientRect();
  return {x:(clientX-box.left)/zoom,y:(clientY-box.top)/zoom,zoom};
@@ -51,7 +53,14 @@ style.textContent=`
 #cutSkill.skill-running{filter:none;box-shadow:0 0 0 2px #d8efff,0 0 18px #9fd6ff}
 .cut-mark,.cut-fx{position:absolute;z-index:6;pointer-events:none;transform:translate(-50%,-50%) rotate(var(--angle))}
 .cut-mark{height:3px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff 10%,#fff 90%,transparent);opacity:var(--opacity);filter:brightness(var(--bright));box-shadow:0 0 var(--glow) #bfe4ff,0 0 calc(var(--glow) / 2.5) #fff}
-.cut-mark.cut-settle{transition:width .14s ease-out}
+.cut-world{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.cut-world-half{position:absolute;inset:0;will-change:transform}
+.cut-world-half>.dungeon-scene{display:block}
+.cut-world-sprite{position:absolute}
+.cut-world-sprite>svg{display:block;width:100%;height:100%;animation:none;transition:none}
+.cut-world-line{position:absolute;height:3px;background:linear-gradient(90deg,transparent,#fff 6%,#fff 94%,transparent);box-shadow:0 0 12px #fff,0 0 26px #bfe4ff}
+.cut-world-line.phantom{z-index:2;pointer-events:none;background:linear-gradient(90deg,transparent,#efe6ff 6%,#efe6ff 94%,transparent);box-shadow:0 0 12px #c9a8ff,0 0 26px #a878ff}
+#monster.cut-world-hide>svg:not(.slash-effect){visibility:hidden}
 .cut-fx{height:0}
 .cut-fx>span{position:absolute;left:0;right:0;top:50%;border-radius:50%}
 .cut-spark{position:absolute;z-index:7;width:4px;height:4px;margin:-2px;border-radius:50%;background:#fff;box-shadow:0 0 6px #bfe4ff,0 0 2px #fff;pointer-events:none}
@@ -72,11 +81,11 @@ style.textContent=`
 .cut-cross-flash .ray{width:34px;height:2px;border-radius:2px;background:linear-gradient(90deg,transparent,#fff,transparent)}
 .cut-cross-flash .ray.v{rotate:90deg}
 /* Таланты ветки */
-#talentTreeContent .cut-talent .talent-node>svg{width:38px;height:38px;transition:opacity .2s,filter .2s}
+#talentTreeContent .cut-talent .talent-node>svg{width:30px;height:30px;transition:opacity .2s,filter .2s}
 #talentTreeContent .cut-talent:not(.talent-invested) .talent-node>svg{opacity:.45;filter:grayscale(.6)}
 #talentTreeContent .cut-talent.talent-invested .talent-node>svg{filter:drop-shadow(0 0 6px #bfe4ff)}
 #talentTreeContent .cut-talent .cut-plus{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:2;font-size:30px;font-weight:900;line-height:1;color:#f2faff;text-shadow:0 0 8px #7fc8ff,0 1px 2px #000;pointer-events:none}
-#talentTreeContent .cut-talent.cut-talent-flash .talent-node{animation:cut-talent-flash .6s ease-out}
+#talentTreeContent .cut-talent.cut-talent-flash .talent-node:before{animation:cut-talent-flash .6s ease-out}
 @keyframes cut-talent-flash{0%{box-shadow:0 0 0 0 #fff,0 0 0 #bfe4ff}35%{box-shadow:0 0 0 6px #ffffff88,0 0 34px #bfe4ff}100%{box-shadow:0 0 0 14px #fff0,0 0 0 #bfe4ff00}}
 `;
 document.head.append(style);
@@ -106,7 +115,7 @@ function updateCutUI(){
  button.classList.toggle('mana-insufficient',cutUnlocked&&!active&&mana<CUT_MANA);
  button.disabled=!cutUnlocked||active||locked;
  button.querySelector('.cut-count').textContent=collecting?(total-marks.length)+'/'+total:'';
- button.title=cutUnlocked?'Точный разрез · '+CUT_MANA+' маны · '+cutsTotal()+' отложенных разрезов · урон ×1–×5 от скорости мыши':'';
+ button.title=cutUnlocked?'Точный разрез · '+CUT_MANA+' маны · '+cutsTotal()+' отложенных разрезов · урон ×0,5–×2,5 от скорости мыши':'';
  button.setAttribute('aria-label','Точный разрез'+(collecting?' — осталось разрезов: '+(total-marks.length)+' из '+total:''));
  setSkillHidden(button,!cutUnlocked,4);
  updateCutTalentSection();
@@ -181,10 +190,10 @@ function registerMark(speed,e,from,to){
  const chord=insideSegment(to.x-dir.x*reach,to.y-dir.y*reach,to.x+dir.x*reach,to.y+dir.y*reach,e),hit=chord?.mid||to,center=arenaPoint(hit.x,hit.y);
  const el=document.createElement('div');el.className='cut-mark cut-wound';
  const mark={multiplier,intensity,angle:Math.atan2(dir.y,dir.x)*180/Math.PI,x:center.x,y:center.y,length:targetLength,targetLength,brightness:.65+.85*intensity,opacity:.5+.45*intensity,glow:8+22*intensity,enemy:enemyKey(),el,settled:false};
- el.style.cssText=`left:${mark.x}px;top:${mark.y}px;width:2px;--angle:${mark.angle}deg;--opacity:${mark.opacity};--bright:${mark.brightness};--glow:${mark.glow}px`;
+ el.style.cssText=`left:${mark.x}px;top:${mark.y}px;width:${mark.length}px;--angle:${mark.angle}deg;--opacity:${mark.opacity};--bright:${mark.brightness};--glow:${mark.glow}px`;
  $('arena').append(el);
- if(!quietFx()){el.classList.add('cut-settle');el.getBoundingClientRect();}
- el.style.width=mark.length+'px';
+ // Разрез прорисовывается от начала взмаха к концу: левый край отметки — начало, угол задан направлением взмаха.
+ if(!quietFx())el.animate([{clipPath:'inset(-80px 100% -80px -80px)'},{clipPath:'inset(-80px -80px -80px -80px)'}],{duration:MARK_DRAW_MS,easing:'ease-out'});
  marks.push(mark);
  $('message').textContent='Разрез '+marks.length+' из '+runTotal+' · сила ×'+multiplier.toLocaleString('ru-RU');
  updateCutUI();
@@ -266,39 +275,93 @@ function startFiring(){
  timers.push(setTimeout(()=>{if(current===token)finishCut();},FIRE_STEP*marks.length+FX_MS));
  updateCutUI();
 }
+// Копия от «Фантомного клинка»: параллельный разрез с другой стороны врага, на том же расстоянии от центра.
+// Разрез почти через центр сторон не имеет, поэтому копия всё равно отступает от него, чтобы не лечь поверх.
+function oppositeMark(mark){
+ const e=hitEllipse(),center=arenaPoint(e.cx,e.cy),rad=mark.angle*Math.PI/180,nx=-Math.sin(rad),ny=Math.cos(rad);
+ const offset=(mark.x-center.x)*nx+(mark.y-center.y)*ny,gap=Math.min(e.rx,e.ry)/center.zoom*.45,side=offset>0?-1:1,distance=Math.max(Math.abs(offset),gap);
+ return {...mark,x:center.x+nx*side*distance,y:center.y+ny*side*distance};
+}
 // Урон каждого разреза: обычный удар × множитель скорости × множитель перекрестий всей серии на этом враге.
 function fireMark(mark,last){
  const sameEnemy=mark.enemy===enemyKey()&&!locked&&hp>0;
- if(sameEnemy)attack(true,mark.multiplier*(runCross?crossMultiplier(mark.enemy):1),true);
- if(sameEnemy&&!quietFx())strikeFx(mark);
+ if(sameEnemy){attack(true,mark.multiplier*(runCross?crossMultiplier(mark.enemy):1),true);window.phantomApi?.echo(()=>{const copy=oppositeMark(mark);strikeFx(copy,true);phantomLine(copy);});}
+ if(sameEnemy&&!quietFx()){strikeFx(mark);worldSplit(mark);}
  if(last)fadeMultiplier();
  const el=mark.el;if(!el)return;
  el.animate([{opacity:mark.opacity},{opacity:0}],{duration:quietFx()?250:FX_MS,easing:'ease-out',fill:'forwards'}).onfinish=()=>el.remove();
 }
-const spark=(x,y,dx,dy,duration)=>{
- const el=document.createElement('span');el.className='cut-spark';el.style.left=x+'px';el.style.top=y+'px';$('arena').append(el);
+const spark=(x,y,dx,dy,duration,phantom)=>{
+ const el=document.createElement('span');el.className='cut-spark'+(phantom?' phantom':'');el.style.left=x+'px';el.style.top=y+'px';$('arena').append(el);
  el.animate([{opacity:1,transform:'translate(0,0) scale(1)'},{opacity:0,transform:`translate(${dx}px,${dy}px) scale(.3)`}],{duration,easing:'cubic-bezier(.15,.7,.4,1)',fill:'forwards'}).onfinish=()=>el.remove();
 };
-// Удар: тонкий надрез раскрывается светлой линзой и снова смыкается, от линии разлетаются белые искры (12 + множитель × 2).
+// Удар: тонкий надрез раскрывается светлой линзой и снова смыкается, от линии разлетаются белые искры (12 + множитель × 4).
 // Ширина раскрытия и сила свечения растут со скоростью взмаха.
-function strikeFx(mark){
- const fx=document.createElement('div');fx.className='cut-fx';
+function strikeFx(mark,phantom=false){
+ const fx=document.createElement('div');fx.className='cut-fx'+(phantom?' phantom':'');
  fx.style.cssText=`left:${mark.x}px;top:${mark.y}px;width:${mark.length}px;--angle:${mark.angle}deg;--bright:${mark.brightness};--glow:${mark.glow}px`;
  fx.innerHTML='<span class="cut-open-glow"></span><span class="cut-open"></span>';$('arena').append(fx);setTimeout(()=>fx.remove(),FX_MS+80);
  const [glow,open]=fx.children,width=3+6*mark.intensity,ease={duration:FX_MS,easing:'ease-out',fill:'forwards'};
  glow.animate([{opacity:0,transform:'scaleY(.4)'},{opacity:.9,transform:'scaleY(1)',offset:.3},{opacity:0,transform:'scaleY(1.6)'}],ease);
  open.animate([{transform:'scaleY(1)',opacity:1},{transform:`scaleY(${width})`,opacity:1,offset:.3},{transform:'scaleY(.2)',opacity:0}],{...ease,easing:'cubic-bezier(.3,0,.4,1)'});
- const rad=mark.angle*Math.PI/180,ux=Math.cos(rad),uy=Math.sin(rad),count=12+Math.round(mark.multiplier*2);
+ const rad=mark.angle*Math.PI/180,ux=Math.cos(rad),uy=Math.sin(rad),count=12+Math.round(mark.multiplier*4);
  for(let i=0;i<count;i++){const along=(Math.random()-.5)*mark.length*.8,side=Math.random()<.5?-1:1,spread=25+Math.random()*(40+60*mark.intensity);
-  spark(mark.x+ux*along,mark.y+uy*along,-uy*side*spread+ux*(Math.random()-.5)*30,ux*side*spread+uy*(Math.random()-.5)*30,FX_MS*(.6+Math.random()*.4));}
+  // Искры настоящего разреза затягивает в щель, искры фантомной копии разлетаются от неё.
+  if(!phantom){spark(mark.x+ux*along-uy*side*spread,mark.y+uy*along+ux*side*spread,uy*side*spread,-ux*side*spread,FX_MS*(.5+Math.random()*.35));continue;}
+  spark(mark.x+ux*along,mark.y+uy*along,-uy*side*spread+ux*(Math.random()-.5)*30,ux*side*spread+uy*(Math.random()-.5)*30,FX_MS*(.6+Math.random()*.4),phantom);}
+}
+// «Рассечённый мир»: сцена (фон и враг) на миг сдвигается вдоль линии разреза, по всему экрану проходит белая линия.
+// Половины — копии сцены под интерфейсом арены, поэтому панели и кнопки остаются на месте. Фантомные копии рисуют только линию, сцену они не сдвигают.
+let worldLayer=null,worldTimer=0;
+function clearWorldSplit(){
+ clearTimeout(worldTimer);worldLayer?.remove();worldLayer=null;$('monster').classList.remove('cut-world-hide');
+}
+function worldLine(parent,mark,far,gap,phantom=false){
+ const line=document.createElement('div');line.className='cut-world-line'+(phantom?' phantom':'');
+ line.style.cssText=`left:${mark.x-far/2}px;top:${mark.y-1.5}px;width:${far}px`;parent.append(line);
+ line.animate([{transform:`rotate(${mark.angle}deg) scaleY(.4)`,opacity:1},{transform:`rotate(${mark.angle}deg) scaleY(${(1+gap*.7).toFixed(2)})`,opacity:1,offset:.3},{transform:`rotate(${mark.angle}deg) scaleY(.2)`,opacity:0}],{duration:WORLD_MS,easing:'ease-out',fill:'forwards'});
+ if(phantom)setTimeout(()=>line.remove(),WORLD_MS+40);
+}
+// Линия фантомной копии: такая же, как у разреза, но сцена не сдвигается, поэтому линия лежит прямо на арене поверх врага.
+function phantomLine(mark){
+ const arena=$('arena'),zoom=arena.currentCSSZoom||1,box=arena.getBoundingClientRect();
+ worldLine(arena,mark,Math.hypot(box.width,box.height)/zoom*2,WORLD_GAP+WORLD_GAP_POWER*mark.intensity,true);
+}
+function worldSplit(mark){
+ clearWorldSplit();
+ const arena=$('arena'),style=getComputedStyle(arena),zoom=arena.currentCSSZoom||1,box=arena.getBoundingClientRect();
+ const w=box.width/zoom,h=box.height/zoom,far=Math.hypot(w,h)*2,rad=mark.angle*Math.PI/180,ux=Math.cos(rad),uy=Math.sin(rad),nx=-uy,ny=ux;
+ const gap=WORLD_GAP+WORLD_GAP_POWER*mark.intensity,slide=WORLD_SLIDE+WORLD_SLIDE_POWER*mark.intensity;
+ const sprite=hp>0&&!locked?enemySprite():null,withSprite=!!sprite&&sprite!==$('monster'),scene=arena.querySelector('.dungeon-scene');
+ const showScene=scene&&getComputedStyle(scene).display!=='none'&&!scene.hidden;
+ const layer=document.createElement('div');layer.className='cut-world';layer.setAttribute('aria-hidden','true');
+ for(const side of [-1,1]){
+  const half=document.createElement('div');half.className='cut-world-half';
+  const ax=mark.x-ux*far,ay=mark.y-uy*far,bx=mark.x+ux*far,by=mark.y+uy*far;
+  half.style.clipPath=`polygon(${ax}px ${ay}px,${bx}px ${by}px,${bx+nx*side*far}px ${by+ny*side*far}px,${ax+nx*side*far}px ${ay+ny*side*far}px)`;
+  for(const prop of ['backgroundImage','backgroundSize','backgroundPosition','backgroundRepeat','backgroundColor'])half.style[prop]=style[prop];
+  if(showScene)half.append(scene.cloneNode(true));
+  if(withSprite){
+   const r=sprite.getBoundingClientRect(),holder=document.createElement('div');holder.className='cut-world-sprite';
+   holder.style.cssText=`left:${(r.left-box.left)/zoom}px;top:${(r.top-box.top)/zoom}px;width:${r.width/zoom}px;height:${r.height/zoom}px`;
+   holder.append(sprite.cloneNode(true));half.append(holder);
+  }
+  layer.append(half);
+  const ox=(nx*side*gap+ux*side*slide).toFixed(2),oy=(ny*side*gap+uy*side*slide).toFixed(2);
+  half.animate([{transform:'translate(0,0)'},{transform:`translate(${ox}px,${oy}px)`,offset:.3},{transform:'translate(0,0)'}],{duration:WORLD_MS,easing:'ease-out'});
+ }
+ worldLine(layer,mark,far,gap);
+ (showScene?scene:null)?scene.after(layer):arena.prepend(layer);
+ if(withSprite)$('monster').classList.add('cut-world-hide');
+ worldLayer=layer;worldTimer=setTimeout(clearWorldSplit,WORLD_MS);
 }
 function finishCut(){
  active=false;firing=false;marks=[];timers=[];cursor.hidden=true;updateCutUI();
 }
 // Отмена: снимает отметки и делает недействительными все отложенные срабатывания.
 function cancelCut(){
- token++;timers.forEach(clearTimeout);timers=[];
- marks.forEach(mark=>mark.el?.remove());document.querySelectorAll('.cut-mark,.cut-fx,.cut-spark,.cut-ring,.cut-cross-flash').forEach(el=>el.remove());
+ token++;timers.forEach(clearTimeout);timers=[];clearWorldSplit();
+ marks.forEach(mark=>mark.el?.remove());document.querySelectorAll('.cut-mark,.cut-fx,.cut-world-line,.cut-spark,.cut-ring,.cut-cross-flash').forEach(el=>el.remove());
  multiplierFade?.cancel();multiplierFade=null;multiplierLabel.hidden=true;
  marks=[];active=false;firing=false;cursor.hidden=true;lastPoint=null;samples=[];updateCutUI();
 }
@@ -347,9 +410,9 @@ function tooltipText(anchor,text,stateText){
 function showCutInfo(anchor){
  const total=cutsTotal();
  tooltipShell(anchor,'⟋ Точный разрез');
- itemTooltip.append(tooltipRow('💧','Мана',String(CUT_MANA)),tooltipRow('⟋','Разрезов',total+' отложенных'),tooltipRow('✦','Урон','×1–×5 от скорости мыши'),tooltipRow('⚔','Срабатывание','по очереди через 0,2 с'));
+ itemTooltip.append(tooltipRow('💧','Мана',String(CUT_MANA)),tooltipRow('⟋','Разрезов',total+' отложенных'),tooltipRow('✦','Урон','×0,5–×2,5 от скорости мыши'),tooltipRow('⚔','Срабатывание','по очереди через 0,2 с'));
  if(crossRank>0)itemTooltip.append(tooltipRow('✕','Перекрестие','+'+String(CFG.cross.bonusPerCross).replace('.',',')+' к множителю серии'));
- tooltipText(anchor,'Задень врага курсором — кнопку мыши нажимать не нужно. Отметка появляется сразу при попадании и ложится по направлению взмаха; чем быстрее движение, тем длиннее и ярче разрез и выше его урон (×1 до 800 пикс./с, ×3 при 2400, ×5 от 4800). После каждого разреза выведи курсор за пределы врага. Когда оставлены все '+total+' отметок, они срабатывают одна за другой через 0,2 секунды и бьют только того врага, на котором были оставлены. Разрезы не критуют.'+(crossRank>0?' Каждое пересечение двух отметок на одном враге усиливает всю серию.':''),
+ tooltipText(anchor,'Задень врага курсором — кнопку мыши нажимать не нужно. Отметка появляется сразу при попадании и ложится по направлению взмаха; чем быстрее движение, тем длиннее и ярче разрез и выше его урон (×0,5 до 800 пикс./с, ×1,5 при 2400, ×2,5 от 4800). После каждого разреза выведи курсор за пределы врага. Когда оставлены все '+total+' отметок, они срабатывают одна за другой через 0,2 секунды и бьют только того врага, на котором были оставлены. Разрезы не критуют.'+(crossRank>0?' Каждое пересечение двух отметок на одном враге усиливает всю серию.':''),
   cutUnlocked?'Навык открыт · '+skillDockHint('cut'):skillUnlockHint());
 }
 // Таланты ветки: «Серия разрезов» (7 уровней по нарастающей цене) и «Перекрёстный разрез» (1 уровень).
